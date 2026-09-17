@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 13:26:27 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/17 15:59:09 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,13 +15,21 @@ using namespace Utils;
 
 int	main(int ac, char **av)
 {
-	if (ac == 3)
+	try 
 	{
-		std::string argv1 = av[1];
-		std::string argv2 = av[2];
-		IrcServer server( stoi(argv1), stoi(argv2) );
+		if (ac == 3)
+		{
+			IrcServer server( av[1], av[2] );
+		}
+		else
+			std::cout << RED << "Error: " << RESET
+						<< "port and password needed !" << std::endl;
 	}
-	else
-		std::cout << RED << "Error: " << RESET << "port and password needed !" << std::endl;
+	catch( std::exception & e )
+	{
+		std::cout << RED << "Error: " << RESET
+					<< e.what() << std::endl;
+	}
+
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 12:09:06 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/17 16:04:59 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,10 @@
 
 # include <iostream>
 # include <string>
+# include <exception>
 # include "Utils.hpp"
+
+using namespace Utils;
 
 class IrcServer 
 {
@@ -32,15 +35,15 @@ class IrcServer
 		IrcServer( IrcServer const& copy ); //Copy Constructor
 		IrcServer& operator=( IrcServer const& copy ); //Overloard operator=
 
-		IrcServer( int port, int password ); //Main Constructor
-		IrcServer( std::string port, std::string password ); //Main Constructor
+		IrcServer( char* const& port, char* const& password ); // Main Constructor
 
 		//Methods
+		bool CheckServerPort( std::string const& port );
 
 	private:
 		//Attributes
-		int _port;
-		int	_password;
+		unsigned short	_port;
+		std::string		_password;
 };
 
 #endif
