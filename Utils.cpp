@@ -1,27 +1,28 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   main.cpp                                           :+:      :+:    :+:   */
+/*   Utils.cpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 13:26:27 by acohaut          ###   ########.fr       */
+/*   Created: 2026/09/17 11:53:41 by acohaut           #+#    #+#             */
+/*   Updated: 2026/09/17 13:24:53 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "IrcServer.hpp"
-using namespace Utils;
+#include "Utils.hpp"
 
-int	main(int ac, char **av)
+
+/* ======================== Static Methods ======================== */
+
+namespace Utils 
 {
-	if (ac == 3)
+	int	stoi( std::string const& s )
 	{
-		std::string argv1 = av[1];
-		std::string argv2 = av[2];
-		IrcServer server( stoi(argv1), stoi(argv2) );
+		int i;
+
+		std::istringstream(s) >> i;
+	
+		return (i);
 	}
-	else
-		std::cout << RED << "Error: " << RESET << "port and password needed !" << std::endl;
-	return (0);
 }

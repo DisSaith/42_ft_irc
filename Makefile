@@ -6,7 +6,7 @@
 #    By: acohaut <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/19 15:02:18 by acohaut           #+#    #+#              #
-#    Updated: 2026/09/16 17:03:35 by acohaut          ###   ########.fr        #
+#    Updated: 2026/09/17 12:08:27 by acohaut          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -15,6 +15,8 @@ CFLAGS		= -Wall -Wextra -Werror -std=c++98
 NAME		= ircserv
 
 SRCS		= 	main.cpp \
+				IrcServer.cpp \
+				Utils.cpp \
 
 OBJS		= $(SRCS:%.cpp=objs/%.o)
 
