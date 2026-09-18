@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 12:02:27 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 13:25:01 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/18 10:38:51 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # include <iostream>
 # include <string>
 # include <sstream>
+# include <cctype>
 
 namespace Utils 
 {

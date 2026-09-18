@@ -6,12 +6,11 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 15:59:09 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/18 12:51:57 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
-using namespace Utils;
 
 int	main(int ac, char **av)
 {
