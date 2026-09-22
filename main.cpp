@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/18 12:51:57 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/22 16:14:48 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@ int	main(int ac, char **av)
 		if (ac == 3)
 		{
 			IrcServer server( av[1], av[2] );
+			server.CreateServer();
 		}
 		else
 			std::cout << RED << "Error: " << RESET

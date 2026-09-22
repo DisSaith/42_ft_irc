@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/18 11:56:14 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/22 17:51:33 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 IrcServer::~IrcServer() {} //Destructor
 
 //Constructors
-IrcServer::IrcServer() : _port(0), _password("") {}
+IrcServer::IrcServer() : _port(0), _password(""), _socket(0), _server() {}
 
 IrcServer::IrcServer( IrcServer const& copy ) : 
-	_port(copy._port), _password(copy._password) {}
+	_port(copy._port), _password(copy._password), _socket(copy._socket), _server(copy._server) {}
 
 //Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _port(0), _password("")
+	: _port(0), _password(""), _socket(0), _server()
 {
 	std::string string_port = std::string(port);
 	
@@ -41,10 +41,7 @@ IrcServer::IrcServer( char* const& port, char* const& password )
 		return ;
 	}
 
-	std::cout << GREEN << "IRC Server created !\n" << RESET
-				<< "port: " << this->_port << std::endl
-				<< "password: " << this->_password << std::endl;
-}
+	}
 
 //Overload operator=
 IrcServer& IrcServer::operator=( IrcServer const& copy )
@@ -53,6 +50,8 @@ IrcServer& IrcServer::operator=( IrcServer const& copy )
     {
 		this->_port = copy._port;
 		this->_password = copy._password;
+		this->_socket = copy._socket;
+		this->_server = copy._server;
     }
     return *this;
 }
@@ -84,4 +83,26 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		return (true);
 		
 	return (false);
+}
+
+bool IrcServer::CreateServer()
+{
+	// Config Server
+	_server.sin_addr.s_addr = INADDR_ANY;
+	_server.sin_family = AF_INET;
+	_server.sin_port = htons(_port);
+
+	// Creation of the initial Socket 
+	_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (_socket == -1)
+		throw std::runtime_error( "Failed during the creation of the server socket." );
+	if (bind(_socket, (struct sockaddr*)&_server, sizeof(_server)) == -1)
+		throw std::runtime_error( "Failed to bind the server socket." );
+	if (listen(_socket, SOMAXCONN) == -1)
+		throw std::runtime_error( "Failed of the listen() function." );
+
+	std::cout << GREEN << "IRC Server created !\n" << RESET
+			<< "port: " << this->_port << std::endl
+			<< "password: " << this->_password << std::endl;
+	return (true);
 }

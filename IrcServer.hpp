@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/17 16:04:59 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/22 16:14:22 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,15 +21,20 @@
 
 # include <iostream>
 # include <string>
-# include <exception>
-# include "Utils.hpp"
+# include <exception> //-> handling exceptions
+# include <sys/socket.h> //-> communications by sockets
+# include <errno.h> //-> errors management
+# include <unistd.h> //-> close()
+# include <arpa/inet.h> //-> conversion Home/Server
+# include <netinet/in.h> //-> for struct sockaddr_in
+# include "Utils.hpp" //-> namespace with utils functions
 
 using namespace Utils;
 
 class IrcServer 
 {
 	public:
-		//Orthodox Form
+		/* ----- Orthodox Canonical Form ----- */
 		~IrcServer(); //Destructor
 		IrcServer(); //Default Constructor
 		IrcServer( IrcServer const& copy ); //Copy Constructor
@@ -39,11 +44,14 @@ class IrcServer
 
 		//Methods
 		bool CheckServerPort( std::string const& port );
+		bool CreateServer();
 
 	private:
 		//Attributes
-		unsigned short	_port;
-		std::string		_password;
+		short			_port; // listening port (for initialing communications)
+		std::string		_password; // password used for connections server/clients
+		int				_socket;
+		sockaddr_in		_server;
 };
 
 #endif
