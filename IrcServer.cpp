@@ -6,11 +6,13 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/23 10:33:04 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/23 13:56:43 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
+#include "cstdio"
+#include "cstring"
 
 
 /* ======================== Constructors / Destructor ======================== */
@@ -18,42 +20,43 @@
 IrcServer::~IrcServer() {} //Destructor
 
 //Constructors
-IrcServer::IrcServer() : _port(0), _password(""), _socket(0), _server() {}
+IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _socketClient(0), _server() {}
 
 IrcServer::IrcServer( IrcServer const& copy ) : 
-	_port(copy._port), _password(copy._password), _socket(copy._socket), _server(copy._server) {}
+	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _socketClient(copy._socketClient), _server(copy._server) {}
 
-//Main Constructor
+	//Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _port(0), _password(""), _socket(0), _server()
+	: _port(0), _password(""), _socketServer(0), _socketClient(0), _server()
 {
 	std::string string_port = std::string(port);
-	
+
 	if ( CheckServerPort(string_port) == true )
 	{
-		this->_port = stoi(string_port);
+		this->_port = ::stoi(string_port);
 		this->_password = std::string(password);
 	}
 	else
 	{
 		std::cout << RED << "Error: " << RESET
-					<< "IRC Server port not valid." << std::endl;
+			<< "IRC Server port not valid." << std::endl;
 		return ;
 	}
 
-	}
+}
 
 //Overload operator=
 IrcServer& IrcServer::operator=( IrcServer const& copy )
 {
-    if (this != &copy)
-    {
+	if (this != &copy)
+	{
 		this->_port = copy._port;
 		this->_password = copy._password;
-		this->_socket = copy._socket;
+		this->_socketServer = copy._socketServer;
+		this->_socketClient = copy._socketClient;
 		this->_server = copy._server;
-    }
-    return *this;
+	}
+	return *this;
 }
 
 
@@ -75,7 +78,7 @@ bool IrcServer::CheckServerPort( std::string const& port )
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
 
-	converted_port = stoi(port);
+	converted_port = ::stoi(port);
 
 	if ( converted_port >= 0 && converted_port < 1024 )
 		throw std::out_of_range( "This IRC Server port needs root permission." );
@@ -83,7 +86,7 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		throw std::out_of_range( "This IRC Server port is out of range." );
 	else if ( converted_port >= 1024 && converted_port <= 65535 )
 		return (true);
-		
+
 	return (false);
 }
 
@@ -94,17 +97,45 @@ bool IrcServer::CreateServer()
 	_server.sin_family = AF_INET;
 	_server.sin_port = htons(_port);
 
-	// Creation of the initial Socket 
-	_socket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (_socket == -1)
+	// Creation of the initial Socket Server
+	_socketServer = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (_socketServer == -1)
 		throw std::runtime_error( "Failed during the creation of the server socket." );
-	if (bind(_socket, (struct sockaddr*)&_server, sizeof(_server)) == -1)
+	if (bind(_socketServer, (struct sockaddr*)&_server, sizeof(_server)) == -1)
 		throw std::runtime_error( "Failed to bind the server socket." );
-	if (listen(_socket, SOMAXCONN) == -1)
+	if (listen(_socketServer, SOMAXCONN) == -1)
 		throw std::runtime_error( "Failed of the listen() function." );
 
+	_socketClient = accept(_socketServer, NULL, NULL);
+
 	std::cout << GREEN << "IRC Server created !\n" << RESET
-			<< "port: " << this->_port << std::endl
-			<< "password: " << this->_password << std::endl;
+		<< "port: " << this->_port << std::endl
+		<< "password: " << this->_password << std::endl;
 	return (true);
+}
+
+void	IrcServer::test()
+{
+	char buffer[1024];
+
+	while (1)
+	{
+		memset(buffer, 0, sizeof(buffer));
+
+		int bytes_received = recv(_socketClient, buffer, sizeof(buffer) - 1, 0);
+
+		if (bytes_received <= 0)
+		{
+			printf("Client déconnecté.\n");
+			break;
+		}
+
+		printf("Client : %s", buffer);
+
+		if (strncmp(buffer, "exit", 4) == 0)
+		{
+			printf("Fermeture demandée.\n");
+			break;
+		}
+	}
 }

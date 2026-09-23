@@ -45,12 +45,14 @@ class IrcServer
 		//Methods
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
+		void test();
 
 	private:
 		//Attributes
 		short			_port; // listening port (for initialing communications)
 		std::string		_password; // password used for connections server/clients
-		int				_socket;
+		int			_socketServer;
+		int			_socketClient;
 		sockaddr_in		_server;
 };
 
