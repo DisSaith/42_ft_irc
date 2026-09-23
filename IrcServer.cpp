@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/22 17:51:33 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/23 10:33:04 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,7 +69,9 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		throw std::invalid_argument("This IRC Server port is invalid.");
 	for ( size_t i = 0 ; i < port.length() ; i++ )                            
 	{  
-	  if (!std::isdigit(port[i]) && port[i] != '-')
+		if (port[0] == '-')
+			throw std::invalid_argument("This IRC Server port is out of range.");
+		if (!std::isdigit(port[i]))
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
 
