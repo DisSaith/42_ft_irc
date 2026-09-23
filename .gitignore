@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# executable
+ircserv
+
 # Compiled Object files
 *.slo
 *.lo
