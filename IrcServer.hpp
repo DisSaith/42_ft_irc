@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 10:40:49 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 11:21:21 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,9 +29,12 @@
 # include <netinet/in.h> //-> for struct sockaddr_in
 # include <cstring>
 # include <cstdio>//
+# include <map> //-> for map container
 # include "Utils.hpp" //-> namespace with utils functions
+# include "Client.hpp" //-> Class Client
 
 using namespace Utils;
+
 
 class IrcServer 
 {
@@ -51,11 +54,12 @@ class IrcServer
 
 	private:
 		//Attributes
-		short			_port; // listening port (for initialing communications)
-		std::string		_password; // password used for connections server/clients
-		int			_socketServer;
-		int			_socketClient;
-		sockaddr_in		_server;
+		short				_port; // listening port (for initialing communications)
+		std::string			_password; // password used for connections server/clients
+		int				_socketServer;
+		int				_lastFd;
+		std::map<int, Client*>		_clients;
+		sockaddr_in			_server;
 };
 
 #endif

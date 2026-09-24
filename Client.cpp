@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/24 10:35:56 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 11:22:29 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,9 @@ Client&	Client::operator=(const Client& copy)
 		this->_toDisconnect = copy._toDisconnect;
 	}
 	return *this;
+}
+
+int Client::returnFd() const 
+{
+	return this->_fd;
 }

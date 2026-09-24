@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/23 15:49:59 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 11:21:50 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,10 @@ class Client
 		~Client();
 		Client(const Client& copy);
 
+		int returnFd() const;
+
         
-	Client& operator=(const Client& copy);
+		Client& operator=(const Client& copy);
 
 	private:
 		int		_fd;

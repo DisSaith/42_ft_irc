@@ -6,11 +6,12 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 10:40:03 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 11:25:36 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
+#include "Client.cpp"
 
 
 /* ======================== Constructors / Destructor ======================== */
@@ -18,14 +19,14 @@
 IrcServer::~IrcServer() {} //Destructor
 
 //Constructors
-IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _socketClient(0), _server() {}
+IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), _server() {}
 
 IrcServer::IrcServer( IrcServer const& copy ) : 
-	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _socketClient(copy._socketClient), _server(copy._server) {}
+	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _server(copy._server) {}
 
-	//Main Constructor
+//Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _port(0), _password(""), _socketServer(0), _socketClient(0), _server()
+	: _port(0), _password(""), _socketServer(0), _clients(), _server()
 {
 	std::string string_port = std::string(port);
 
@@ -51,7 +52,7 @@ IrcServer& IrcServer::operator=( IrcServer const& copy )
 		this->_port = copy._port;
 		this->_password = copy._password;
 		this->_socketServer = copy._socketServer;
-		this->_socketClient = copy._socketClient;
+		this->_clients = copy._clients;
 		this->_server = copy._server;
 	}
 	return *this;
@@ -104,7 +105,10 @@ bool IrcServer::CreateServer()
 	if (listen(_socketServer, SOMAXCONN) == -1)
 		throw std::runtime_error( "Failed of the listen() function." );
 
-	_socketClient = accept(_socketServer, NULL, NULL);
+
+	//_clients.insert(accept(_socketServer, NULL, NULL), newClient);
+	_lastFd = accept(_socketServer, NULL, NULL);
+	_clients[_lastFd] = new Client(_lastFd);
 
 	std::cout << GREEN << "IRC Server created !\n" << RESET
 		<< "port: " << this->_port << std::endl
@@ -120,7 +124,7 @@ void	IrcServer::test()
 	{
 		memset(buffer, 0, sizeof(buffer));
 
-		int bytes_received = recv(_socketClient, buffer, sizeof(buffer) - 1, 0);
+		int bytes_received = recv(_clients[_lastFd]->returnFd(), buffer, sizeof(buffer) - 1, 0);
 
 		if (bytes_received <= 0)
 		{
