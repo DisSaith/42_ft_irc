@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 12:38:14 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/24 17:39:37 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@
 IrcServer::~IrcServer() {} //Destructor
 
 //Constructors
-IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), _server() {}
+IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server() {}
 
 IrcServer::IrcServer( IrcServer const& copy ) : 
-	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _server(copy._server) {}
+	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _recv(copy._recv), _server(copy._server) {}
 
 //Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _port(0), _password(""), _socketServer(0), _clients(), _server()
+	: _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server()
 {
 	std::string string_port = std::string(port);
 
@@ -122,21 +122,62 @@ void	IrcServer::ConnectionWithClients()
 	while (1)
 	{
 		memset(buffer, 0, sizeof(buffer));
-
-		int bytes_received = recv(_clients[_lastFd]->returnFd(), buffer, sizeof(buffer) - 1, 0);
-
-		if (bytes_received <= 0)
+		try 
 		{
-			std::cout << "Client disconnected.";
-			break;
+			int bytes_received = recv(_clients[_lastFd]->returnFd(),
+										buffer,
+										sizeof(buffer) - 1,
+										0);
+
+			if (bytes_received <= 0)
+			{
+				std::cout << "Client disconnected.";
+				break;
+			}
+
+			ParsingRecv(std::string(buffer));
+			std::cout << "[Client] " << buffer;
+
+			if (strncmp(buffer, "exit", 4) == 0)
+			{
+				std::cout << "Close requested.";
+				break;
+			}
 		}
-
-		std::cout << "[Client] " << buffer;
-
-		if (strncmp(buffer, "exit", 4) == 0)
+		catch ( std::exception & e )
 		{
-			std::cout << "Close requested.";
-			break;
+			std::cout << e.what() << std::endl;
 		}
 	}
+}
+
+void IrcServer::ParsingRecv(std::string buffer)
+{
+	std::string		parsed;
+	size_t			j = 0;
+	bool			inWord = false;
+
+	if (_recv.empty() == false)
+		_recv.clear();
+	for ( size_t i = 0 ; i < buffer.length() ; i++)
+	{
+		if ( buffer[i] != ' ' && inWord == false )
+		{
+			inWord = true;
+			j = i;
+		}
+		else if ( (buffer[i] == ' ' || i == buffer.length() - 1) && inWord == true )
+		{
+			inWord = false;
+			parsed = buffer.substr(j, i - j);
+			_recv.push_back(parsed);
+		}
+	}
+	// Tests pour afficher les tokens de la list
+	/* int i = 0;
+	for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
+	{
+		std::cout << i << ": " << *it << std::endl;
+		i++;
+	}*/
 }

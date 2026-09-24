@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 12:40:35 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/24 14:19:42 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@
 # include <netinet/in.h> //-> for struct sockaddr_in
 # include <cstring> //-> used for c string utilities like memset() or strcmp()
 # include <map> //-> for map container
+# include <list> //-> for list container
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Class Client
 
@@ -50,6 +51,7 @@ class IrcServer
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
 		void ConnectionWithClients();
+		void ParsingRecv( std::string buffer );
 
 	private:
 		//Attributes
@@ -58,6 +60,7 @@ class IrcServer
 		int						_socketServer; // initial socket for clients connections
 		int						_lastFd; // temporary
 		std::map<int, Client*>	_clients; // all clients connected
+		std::list<std::string>	_recv; // current client recv
 		sockaddr_in				_server; // struct server
 };
 
