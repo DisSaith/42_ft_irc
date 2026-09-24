@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/22 16:14:48 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/24 12:36:14 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ int	main(int ac, char **av)
 		{
 			IrcServer server( av[1], av[2] );
 			server.CreateServer();
-			server.test();
+			server.ConnectionWithClients();
 		}
 		else
 			std::cout << RED << "Error: " << RESET

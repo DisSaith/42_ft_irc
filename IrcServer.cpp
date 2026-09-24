@@ -6,13 +6,12 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 11:25:36 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 12:38:14 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
 #include "Client.cpp"
-
 
 /* ======================== Constructors / Destructor ======================== */
 
@@ -106,7 +105,7 @@ bool IrcServer::CreateServer()
 		throw std::runtime_error( "Failed of the listen() function." );
 
 
-	//_clients.insert(accept(_socketServer, NULL, NULL), newClient);
+	//Temporary until we find the good way too use multiple clients
 	_lastFd = accept(_socketServer, NULL, NULL);
 	_clients[_lastFd] = new Client(_lastFd);
 
@@ -116,7 +115,7 @@ bool IrcServer::CreateServer()
 	return (true);
 }
 
-void	IrcServer::test()
+void	IrcServer::ConnectionWithClients()
 {
 	char buffer[1024];
 
@@ -128,15 +127,15 @@ void	IrcServer::test()
 
 		if (bytes_received <= 0)
 		{
-			printf("Client déconnecté.\n");
+			std::cout << "Client disconnected.";
 			break;
 		}
 
-		printf("Client : %s", buffer);
+		std::cout << "[Client] " << buffer;
 
 		if (strncmp(buffer, "exit", 4) == 0)
 		{
-			printf("Fermeture demandée.\n");
+			std::cout << "Close requested.";
 			break;
 		}
 	}

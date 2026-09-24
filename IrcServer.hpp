@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 11:21:21 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 12:40:35 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,7 @@
 # include <unistd.h> //-> close()
 # include <arpa/inet.h> //-> conversion Home/Server
 # include <netinet/in.h> //-> for struct sockaddr_in
-# include <cstring>
-# include <cstdio>//
+# include <cstring> //-> used for c string utilities like memset() or strcmp()
 # include <map> //-> for map container
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Class Client
@@ -50,16 +49,16 @@ class IrcServer
 		//Methods
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
-		void test();
+		void ConnectionWithClients();
 
 	private:
 		//Attributes
-		short				_port; // listening port (for initialing communications)
-		std::string			_password; // password used for connections server/clients
-		int				_socketServer;
-		int				_lastFd;
-		std::map<int, Client*>		_clients;
-		sockaddr_in			_server;
+		short					_port; // listening port (for initialing communications)
+		std::string				_password; // password used for connections server/clients
+		int						_socketServer; // initial socket for clients connections
+		int						_lastFd; // temporary
+		std::map<int, Client*>	_clients; // all clients connected
+		sockaddr_in				_server; // struct server
 };
 
 #endif
