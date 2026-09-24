@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/22 16:14:22 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/24 10:40:49 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,8 @@
 # include <unistd.h> //-> close()
 # include <arpa/inet.h> //-> conversion Home/Server
 # include <netinet/in.h> //-> for struct sockaddr_in
+# include <cstring>
+# include <cstdio>//
 # include "Utils.hpp" //-> namespace with utils functions
 
 using namespace Utils;

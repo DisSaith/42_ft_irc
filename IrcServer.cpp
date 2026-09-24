@@ -6,13 +6,11 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/23 13:56:43 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/24 10:40:03 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
-#include "cstdio"
-#include "cstring"
 
 
 /* ======================== Constructors / Destructor ======================== */
