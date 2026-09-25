@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 17:39:37 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/25 15:17:23 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,24 +124,32 @@ void	IrcServer::ConnectionWithClients()
 		memset(buffer, 0, sizeof(buffer));
 		try 
 		{
-			int bytes_received = recv(_clients[_lastFd]->returnFd(),
-										buffer,
-										sizeof(buffer) - 1,
-										0);
+			int bytes_received = recv(_clients[_lastFd]->getFd(),
+					buffer,
+					sizeof(buffer) - 1,
+					0);
 
 			if (bytes_received <= 0)
 			{
 				std::cout << "Client disconnected.";
 				break;
 			}
+			std::string	data(buffer);
 
-			ParsingRecv(std::string(buffer));
-			std::cout << "[Client] " << buffer;
+			_clients[_lastFd]->appendToIn(data);
 
-			if (strncmp(buffer, "exit", 4) == 0)
+			while (_clients[_lastFd]->hasCompleteCommand())
 			{
-				std::cout << "Close requested.";
-				break;
+				std::string cmd = _clients[_lastFd]->extractCommand();
+
+				std::cout << "[Client " << _lastFd << "] a envoyé : " << cmd << std::endl;
+				ParsingRecv(cmd);
+
+				if (cmd == "exit")
+				{
+					std::cout << "Close requested." << std::endl;
+					return;
+				}
 			}
 		}
 		catch ( std::exception & e )
@@ -175,9 +183,9 @@ void IrcServer::ParsingRecv(std::string buffer)
 	}
 	// Tests pour afficher les tokens de la list
 	/* int i = 0;
-	for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
-	{
-		std::cout << i << ": " << *it << std::endl;
-		i++;
-	}*/
+	   for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
+	   {
+	   std::cout << i << ": " << *it << std::endl;
+	   i++;
+	   }*/
 }

@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/24 11:21:50 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/25 15:09:18 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,21 @@ class Client
 		~Client();
 		Client(const Client& copy);
 
-		int returnFd() const;
-
-        
 		Client& operator=(const Client& copy);
+
+		int	getFd() const;
+		bool	setIsRegistered() const;
+
+		void	setPass();
+		void	setNickName(std::string const& nickName);
+		void	setUserName(std::string const& userName);
+		void	setRealName(std::string const& realName);
+
+		void		appendToIn(std::string const& data);
+		bool		hasCompleteCommand() const;
+		std::string	extractCommand();
+
+		
 
 	private:
 		int		_fd;
@@ -43,7 +54,6 @@ class Client
 		bool		_hasSetPass;
 		bool		_hasSetNick;
 		bool		_hasSetUser;
-		bool		_isRegistred;
 		bool		_isOpperator;
 		bool		_toDisconnect;
 };
