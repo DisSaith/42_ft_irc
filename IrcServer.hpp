@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/24 14:19:42 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/28 19:03:57 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,8 +30,11 @@
 # include <cstring> //-> used for c string utilities like memset() or strcmp()
 # include <map> //-> for map container
 # include <list> //-> for list container
+# include <poll.h>
+# include <vector>
+# include <fcntl.h>
 # include "Utils.hpp" //-> namespace with utils functions
-# include "Client.hpp" //-> Class Client
+# include "Client.hpp" //-> Class clients
 
 using namespace Utils;
 
@@ -58,10 +61,10 @@ class IrcServer
 		short					_port; // listening port (for initialing communications)
 		std::string				_password; // password used for connections server/clients
 		int						_socketServer; // initial socket for clients connections
-		int						_lastFd; // temporary
 		std::map<int, Client*>	_clients; // all clients connected
 		std::list<std::string>	_recv; // current client recv
 		sockaddr_in				_server; // struct server
+		std::vector<struct pollfd>		_pollFds;
 };
 
 #endif

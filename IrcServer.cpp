@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/25 15:17:23 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/28 19:04:31 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), 
 IrcServer::IrcServer( IrcServer const& copy ) : 
 	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _recv(copy._recv), _server(copy._server) {}
 
-//Main Constructor
+	//Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
 	: _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server()
 {
@@ -75,9 +75,7 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		if (!std::isdigit(port[i]))
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
-
 	converted_port = ::stoi(port);
-
 	if ( converted_port >= 0 && converted_port < 1024 )
 		throw std::out_of_range( "This IRC Server port needs root permission." );
 	else if ( converted_port < 0 || converted_port > 65535 )
@@ -103,12 +101,7 @@ bool IrcServer::CreateServer()
 		throw std::runtime_error( "Failed to bind the server socket." );
 	if (listen(_socketServer, SOMAXCONN) == -1)
 		throw std::runtime_error( "Failed of the listen() function." );
-
-
-	//Temporary until we find the good way too use multiple clients
-	_lastFd = accept(_socketServer, NULL, NULL);
-	_clients[_lastFd] = new Client(_lastFd);
-
+	fcntl(_socketServer, F_SETFL, O_NONBLOCK);
 	std::cout << GREEN << "IRC Server created !\n" << RESET
 		<< "port: " << this->_port << std::endl
 		<< "password: " << this->_password << std::endl;
@@ -117,44 +110,67 @@ bool IrcServer::CreateServer()
 
 void	IrcServer::ConnectionWithClients()
 {
-	char buffer[1024];
+	struct pollfd	serverFd;
+	serverFd.fd = _socketServer;
+	serverFd.events = POLLIN;
+	serverFd.revents = 0;
+	_pollFds.push_back(serverFd);
+
+	std::cout << "Serveur en écoute. En attente de connexions..." << std::endl;
 
 	while (1)
 	{
-		memset(buffer, 0, sizeof(buffer));
-		try 
+		if (poll(&_pollFds[0], _pollFds.size(), -1) == -1)
 		{
-			int bytes_received = recv(_clients[_lastFd]->getFd(),
-					buffer,
-					sizeof(buffer) - 1,
-					0);
-
-			if (bytes_received <= 0)
-			{
-				std::cout << "Client disconnected.";
-				break;
-			}
-			std::string	data(buffer);
-
-			_clients[_lastFd]->appendToIn(data);
-
-			while (_clients[_lastFd]->hasCompleteCommand())
-			{
-				std::string cmd = _clients[_lastFd]->extractCommand();
-
-				std::cout << "[Client " << _lastFd << "] a envoyé : " << cmd << std::endl;
-				ParsingRecv(cmd);
-
-				if (cmd == "exit")
-				{
-					std::cout << "Close requested." << std::endl;
-					return;
-				}
-			}
+			std::cerr << "Erreur critique sur poll()" << std::endl;
+			break ;
 		}
-		catch ( std::exception & e )
+		for (size_t i = 0; i < _pollFds.size(); i++)
 		{
-			std::cout << e.what() << std::endl;
+			if (_pollFds[i].revents & POLLIN)
+			{
+				if (_pollFds[i].fd == _socketServer)
+				{
+					int newClientFd = accept(_socketServer, NULL, NULL);
+					if (newClientFd == -1)
+					{
+						std::cerr << "Erreur critique sur acept()" << std::endl;
+						continue ;
+					}
+					fcntl(newClientFd, F_SETFL, O_NONBLOCK);
+					_clients[newClientFd] = new Client(newClientFd);
+					struct pollfd	clientFd;
+					clientFd.fd = newClientFd;
+					clientFd.events = POLLIN;
+					clientFd.revents = 0;
+					_pollFds.push_back(clientFd);				
+				}
+				else
+				{
+					char	buffer[1024];
+
+					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
+					if (bytesRead <= 0)
+					{
+						close(_pollFds[i].fd);
+						delete(_clients[_pollFds[i].fd]);
+						_clients.erase(_pollFds[i].fd);
+						_pollFds.erase(_pollFds.begin() + i);
+						i--;
+					}
+					else
+					{
+						std::string data(buffer, bytesRead);
+						_clients[_pollFds[i].fd]->appendToIn(data);
+						while (_clients[_pollFds[i].fd]->hasCompleteCommand())
+						{
+							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
+							std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd << std::endl;
+							ParsingRecv(cmd);
+						}
+					}
+				}	
+			}
 		}
 	}
 }
