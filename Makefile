@@ -6,7 +6,7 @@
 #    By: acohaut <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/11/19 15:02:18 by acohaut           #+#    #+#              #
-#    Updated: 2026/09/17 12:08:27 by acohaut          ###   ########.fr        #
+#    Updated: 2026/09/29 15:13:18 by acohaut          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -30,6 +30,9 @@ objs/%.o: 	%.cpp  | objs
 
 $(NAME):	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
+
+debug: CFLAGS += -DDEBUG=1
+debug: fclean all
 
 clean:
 		rm -rf $(OBJS) ./objs

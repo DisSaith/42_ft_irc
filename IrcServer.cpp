@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/28 19:04:31 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/29 15:11:31 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), 
 IrcServer::IrcServer( IrcServer const& copy ) : 
 	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _recv(copy._recv), _server(copy._server) {}
 
-	//Main Constructor
+//Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
 	: _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server()
 {
@@ -165,7 +165,8 @@ void	IrcServer::ConnectionWithClients()
 						while (_clients[_pollFds[i].fd]->hasCompleteCommand())
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
-							std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd << std::endl;
+							if (DEBUG)
+								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd << std::endl;
 							ParsingRecv(cmd);
 						}
 					}

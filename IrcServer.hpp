@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/28 19:03:57 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/29 15:11:24 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,10 @@
 #define WHITE	"\e[0;37m" //-> white color
 #define GREEN	"\e[1;32m" //-> green color
 #define YELLOW	"\e[1;33m" //-> yellow color
+
+#ifndef DEBUG
+# define DEBUG 0
+#endif
 
 # include <iostream>
 # include <string>
@@ -37,7 +41,6 @@
 # include "Client.hpp" //-> Class clients
 
 using namespace Utils;
-
 
 class IrcServer 
 {

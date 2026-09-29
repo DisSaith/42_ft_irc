@@ -6,23 +6,37 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/25 15:09:59 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/29 15:08:39 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-Client::Client(): _fd(-1),
+/* ======================== Constructors / Destructor ======================== */
+
+//Destructor
+Client::~Client()
+{
+	if (DEBUG)
+		std::cout << "Destructor called" << std::endl;
+}
+
+//Default Constructor
+Client::Client() : 
+	_fd(-1),
 	_hasSetPass(false),
 	_hasSetNick(false),
 	_hasSetUser(false),
 	_isOpperator(false),
 	_toDisconnect(false)
 {
-	std::cout << "Default constructor called" << std::endl;
+	if (DEBUG)
+		std::cout << "Default constructor called" << std::endl;
 }
 
-Client::Client(int fd): _fd(fd),
+//Main Constructor
+Client::Client(int fd) : 
+	_fd(fd),
 	_hasSetPass(false),
 	_hasSetNick(false),
 	_hasSetUser(false),
@@ -32,23 +46,23 @@ Client::Client(int fd): _fd(fd),
 	_bufferIn.reserve(1024);
 	_bufferOut.reserve(1024);
 
-	std::cout << "Fd construtor called" << std::endl;
+	if (DEBUG)
+		std::cout << "Fd construtor called" << std::endl;
 }
 
-Client::~Client()
-{
-	std::cout << "Destructor called" << std::endl;
-}
-
+//Copy Constructor
 Client::Client(const Client& copy)
 {
 	*this = copy;
-	std::cout << "Copy constructor called" << std::endl;
+	if (DEBUG)
+		std::cout << "Copy constructor called" << std::endl;
 }
 
+//Overload operator=
 Client&	Client::operator=(const Client& copy)
 {
-	std::cout << "Copy assignment operator called" << std::endl;
+	if (DEBUG)
+		std::cout << "Copy assignment operator called" << std::endl;
 	if (this != &copy)
 	{
 		this->_fd = copy._fd;
@@ -66,6 +80,8 @@ Client&	Client::operator=(const Client& copy)
 	}
 	return *this;
 }
+
+/* ======================== Getters / Setters ======================== */
 
 int Client::getFd() const 
 {
@@ -99,25 +115,34 @@ bool	Client::setIsRegistered() const
 	return (this->_hasSetPass && this->_hasSetNick && this->_hasSetUser);
 }
 
+/* ======================== Methods ======================== */
+
 void Client::appendToIn(std::string const& data)
 {
 	this->_bufferIn += data;
 }
 
+// Return true or false if there is a '\n' or not in the initial query by the user
 bool Client::hasCompleteCommand() const
 {
-	return (this->_bufferIn.find("\r\n") != std::string::npos);
+	return (this->_bufferIn.find("\n") != std::string::npos);
 }
 
+// Return the extracted command (without the \r and \n)
 std::string Client::extractCommand()
 {
-	size_t pos = this->_bufferIn.find("\r\n");
+	size_t pos = this->_bufferIn.find("\n");
 	if (pos == std::string::npos)
 		return "";
 
 	std::string command = this->_bufferIn.substr(0, pos);
 
-	this->_bufferIn.erase(0, pos + 2);
+	// Erase the extract command and the '\n' in buffer
+	this->_bufferIn.erase(0, pos + 1);
+
+	// Delate the '\r' if there is one
+	if (!command.empty() && command[command.length() - 1] == '\r')
+		command.erase(command.length() - 1);
 
 	return command;
 }
