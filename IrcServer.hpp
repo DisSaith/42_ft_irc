@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 14:40:15 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 14:46:38 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,6 +59,8 @@ class IrcServer
 		void ConnectionWithClients();
 		void TokenizerRecv( std::string const& buffer );
 		void ParsingRecv(int const& clientFd);
+		
+		/* ----- IRC Commands ----- */
 		void PASS(const int fd);
 		void NICK(const int fd);
 

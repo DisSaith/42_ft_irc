@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/30 14:38:09 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 15:00:13 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,6 +83,11 @@ Client&	Client::operator=(const Client& copy)
 
 /* ======================== Getters / Setters ======================== */
 
+std::string Client::getNickname() const
+{
+	return this->_nickname;
+}
+
 int Client::getFd() const 
 {
 	return this->_fd;
@@ -148,9 +153,6 @@ std::string Client::extractCommand()
 
 	// Erase the extract command and the '\n' in buffer
 	this->_bufferIn.erase(0, pos + 1);
-
-	if (DEBUG)
-		std::cout << "command -> " << command;
 
 	return command;
 }

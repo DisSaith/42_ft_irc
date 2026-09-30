@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 14:41:10 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 16:00:48 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -171,7 +171,7 @@ void	IrcServer::ConnectionWithClients()
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
-								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd << std::endl;
+								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd;
 							TokenizerRecv(cmd);
 							ParsingRecv(_pollFds[i].fd);
 						}
@@ -205,7 +205,7 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 		}
 	}
 
-	if (DEBUG) // display list tokens
+	/*if (DEBUG) // display list tokens
 	{
 		int i = 0;
 		std::cout << std::endl << "[List Tokens] " << std::endl;
@@ -214,13 +214,26 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 			std::cout << i << ": " << *it << std::endl;
 			i++;
 		}
-	}
+	}*/
 }
 
 void IrcServer::ParsingRecv( int const& clientFd )
 {
-	(void) clientFd;
+	(void)clientFd;
+	int i = 0;
+
+	if (_recv.front()[0] == ':')
+		_recv.pop_front(); // delate prefix if it exists
+	for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
+	{
+		if (DEBUG)
+			std::cout << i << ": " << *it << std::endl;
+		i++;
+	}
+
 }
+
+/* ======================== IRC Commands ======================== */
 
 void	IrcServer::PASS(const int fd)
 {
