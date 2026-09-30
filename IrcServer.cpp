@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/29 15:11:31 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 14:22:13 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,15 @@
 IrcServer::~IrcServer() {} //Destructor
 
 //Constructors
-IrcServer::IrcServer() : _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server() {}
+IrcServer::IrcServer() : 
+	_password(""), _clients(), _recv(), _pollFds(), _server(), _socketServer(0), _port(0) {}
 
 IrcServer::IrcServer( IrcServer const& copy ) : 
-	_port(copy._port), _password(copy._password), _socketServer(copy._socketServer), _clients(copy._clients), _recv(copy._recv), _server(copy._server) {}
+	_password(copy._password), _clients(copy._clients), _recv(copy._recv), _pollFds(copy._pollFds), _server(copy._server), _socketServer(copy._socketServer), _port(copy._port) {}
 
 //Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _port(0), _password(""), _socketServer(0), _clients(), _recv(), _server()
+	: _password(""), _clients(), _recv(), _server(), _socketServer(0), _port(0)
 {
 	std::string string_port = std::string(port);
 
@@ -48,11 +49,13 @@ IrcServer& IrcServer::operator=( IrcServer const& copy )
 {
 	if (this != &copy)
 	{
-		this->_port = copy._port;
 		this->_password = copy._password;
-		this->_socketServer = copy._socketServer;
 		this->_clients = copy._clients;
+		this->_recv = copy._recv;
+		this->_pollFds = copy._pollFds;
 		this->_server = copy._server;
+		this->_socketServer = copy._socketServer;
+		this->_port = copy._port;
 	}
 	return *this;
 }
@@ -68,10 +71,10 @@ bool IrcServer::CheckServerPort( std::string const& port )
 
 	if ( port.empty() == true )
 		throw std::invalid_argument("This IRC Server port is invalid.");
+	if (port[0] == '-')
+			throw std::invalid_argument("This IRC Server port is out of range.");
 	for ( size_t i = 0 ; i < port.length() ; i++ )                            
 	{  
-		if (port[0] == '-')
-			throw std::invalid_argument("This IRC Server port is out of range.");
 		if (!std::isdigit(port[i]))
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
@@ -147,9 +150,11 @@ void	IrcServer::ConnectionWithClients()
 				}
 				else
 				{
-					char	buffer[1024];
+					char	buffer[4096];
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
+					if (DEBUG)
+						std::cout << "bytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
 					{
 						close(_pollFds[i].fd);
@@ -160,14 +165,15 @@ void	IrcServer::ConnectionWithClients()
 					}
 					else
 					{
-						std::string data(buffer, bytesRead);
+						std::string data(buffer, 0, 510);
 						_clients[_pollFds[i].fd]->appendToIn(data);
 						while (_clients[_pollFds[i].fd]->hasCompleteCommand())
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
 								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd << std::endl;
-							ParsingRecv(cmd);
+							TokenizerRecv(cmd);
+							ParsingRecv(_pollFds[i].fd);
 						}
 					}
 				}	
@@ -176,9 +182,9 @@ void	IrcServer::ConnectionWithClients()
 	}
 }
 
-void IrcServer::ParsingRecv(std::string buffer)
+void IrcServer::TokenizerRecv(std::string const& buffer)
 {
-	std::string		parsed;
+	std::string		token;
 	size_t			j = 0;
 	bool			inWord = false;
 
@@ -186,23 +192,32 @@ void IrcServer::ParsingRecv(std::string buffer)
 		_recv.clear();
 	for ( size_t i = 0 ; i < buffer.length() ; i++)
 	{
-		if ( buffer[i] != ' ' && inWord == false )
+		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
 		{
 			inWord = true;
 			j = i;
 		}
-		else if ( (buffer[i] == ' ' || i == buffer.length() - 1) && inWord == true )
+		if ( (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
 		{
 			inWord = false;
-			parsed = buffer.substr(j, i - j);
-			_recv.push_back(parsed);
+			token = buffer.substr(j, i - j);
+			_recv.push_back(token);
 		}
 	}
-	// Tests pour afficher les tokens de la list
-	/* int i = 0;
-	   for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
-	   {
-	   std::cout << i << ": " << *it << std::endl;
-	   i++;
-	   }*/
+
+	if (DEBUG) // display list tokens
+	{
+		int i = 0;
+		std::cout << std::endl << "[List Tokens] " << std::endl;
+		for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
+		{
+			std::cout << i << ": " << *it << std::endl;
+			i++;
+		}
+	}
+}
+
+void IrcServer::ParsingRecv( int const& clientFd )
+{
+	(void) clientFd;
 }

@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/29 15:11:24 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 13:41:16 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,9 +34,9 @@
 # include <cstring> //-> used for c string utilities like memset() or strcmp()
 # include <map> //-> for map container
 # include <list> //-> for list container
-# include <poll.h>
-# include <vector>
-# include <fcntl.h>
+# include <poll.h> // poll() for multiple clients
+# include <vector> //-> for vector container
+# include <fcntl.h> //-> fcntl()
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Class clients
 
@@ -53,21 +53,22 @@ class IrcServer
 
 		IrcServer( char* const& port, char* const& password ); // Main Constructor
 
-		//Methods
+		/* ----- Methods ----- */
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
 		void ConnectionWithClients();
-		void ParsingRecv( std::string buffer );
+		void TokenizerRecv( std::string const& buffer );
+		void ParsingRecv(int const& clientFd);
 
 	private:
-		//Attributes
-		short					_port; // listening port (for initialing communications)
-		std::string				_password; // password used for connections server/clients
-		int						_socketServer; // initial socket for clients connections
-		std::map<int, Client*>	_clients; // all clients connected
-		std::list<std::string>	_recv; // current client recv
-		sockaddr_in				_server; // struct server
-		std::vector<struct pollfd>		_pollFds;
+		/* ----- Attributes ----- */
+		std::string					_password; // password used for connections server/clients
+		std::map<int, Client*>		_clients; // all clients connected
+		std::list<std::string>		_recv; // current client recv
+		std::vector<struct pollfd>	_pollFds;
+		sockaddr_in					_server; // struct server
+		int							_socketServer; // initial socket for clients connections
+		short						_port; // listening port (for initialing communications)
 };
 
 #endif

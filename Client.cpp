@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/29 15:08:39 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 14:14:23 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,12 +120,21 @@ bool	Client::setIsRegistered() const
 void Client::appendToIn(std::string const& data)
 {
 	this->_bufferIn += data;
+
+	if (DEBUG)
+		std::cout << "_bufferIn.length() = " << _bufferIn.length() << std::endl;
+
+	if (_bufferIn.length() == 510)
+		_bufferIn += "\r\n";
 }
 
 // Return true or false if there is a '\n' or not in the initial query by the user
+// Some Clients and Servers don't respect the protocol RFC 1459 for IRC so we
+// decided to accept the two cases (even if it doesn't respect the norm)
 bool Client::hasCompleteCommand() const
 {
 	return (this->_bufferIn.find("\n") != std::string::npos);
+	//return (this->_bufferIn.find("\r\n") != std::string::npos);
 }
 
 // Return the extracted command (without the \r and \n)
@@ -135,14 +144,13 @@ std::string Client::extractCommand()
 	if (pos == std::string::npos)
 		return "";
 
-	std::string command = this->_bufferIn.substr(0, pos);
+	std::string command = this->_bufferIn.substr(0, pos + 1);
 
 	// Erase the extract command and the '\n' in buffer
 	this->_bufferIn.erase(0, pos + 1);
 
-	// Delate the '\r' if there is one
-	if (!command.empty() && command[command.length() - 1] == '\r')
-		command.erase(command.length() - 1);
+	if (DEBUG)
+		std::cout << "command -> " << command;
 
 	return command;
 }
