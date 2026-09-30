@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/30 16:35:06 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 16:46:02 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,15 +83,14 @@ Client&	Client::operator=(const Client& copy)
 
 /* ======================== Getters / Setters ======================== */
 
-<<<<<<< Updated upstream
 std::string Client::getNickname() const
 {
 	return this->_nickname;
-=======
-std::string	Client::getHasSetPass() const
+}
+
+bool	Client::getHasSetPass() const
 {
 	return this->_hasSetPass;
->>>>>>> Stashed changes
 }
 
 int Client::getFd() const 
