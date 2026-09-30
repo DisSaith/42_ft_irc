@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 16:42:51 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 17:18:36 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -258,19 +258,31 @@ void	IrcServer::PASS(const int fd)
 	}
 }
 
-//void	IrcServer::NICK(const int fd)
-//{
-//	if (_clients[fd]->getHasSetPass)
-//	{
-//		if (_recv.front() == "NICK")
-//		{
-//			if (_recv.size() < 2)
-//			{
-//				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
-//				send(fd, errorMsg.c_str, errorMsg.length(), 0);
-//				return ;
-//			}
-//			for (size_t i = 0; _clients[i]->get)
-//		}
-//	}
-//}
+void	IrcServer::NICK(const int fd)
+{
+	if (_clients[fd]->getHasSetPass())
+	{
+		if (_recv.front() == "NICK")
+		{
+			if (_recv.size() < 2)
+			{
+				std::string errorMsg = ":localhost 431 * :No nickname given\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				return ;
+			}
+			std::list<std::string>::iterator it = _recv.begin();
+			it++;
+			std::map<int, Client*>::iterator mapIt;
+			for (mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
+			{
+				if (*it == mapIt->second->getNickname())
+				{
+					std::string errorMsg = ":localhost 433 * " + *it + " :Nickname is already in use\r\n";
+					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+  					return ;
+				}
+			}
+			_clients[fd]->setNickName(*it);
+		}
+	}
+}
