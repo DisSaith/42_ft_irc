@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 14:22:13 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 14:33:09 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -220,4 +220,34 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 void IrcServer::ParsingRecv( int const& clientFd )
 {
 	(void) clientFd;
+}
+
+void	IrcServer::PASS(const int fd)
+{
+	if (_recv.front() == "PASS")
+	{
+		if (_recv.size() < 2)
+		{
+			std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
+			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+			return ;
+
+		}
+		std::list<std::string>::iterator it = _recv.begin();
+		it++;
+		if (*it != _password)
+		{
+			std::string errorMsg = ":localhost 464 * :Password incorrect\r\n";
+			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+			return ;
+		}
+		_clients[fd]->setPass();
+}
+
+void	IrcServer::NICK(const int fd)
+{
+	if (_clients[fd]->_hasSetPass)
+	{
+
+	}
 }
