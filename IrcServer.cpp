@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 14:33:09 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 14:41:10 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -242,12 +242,5 @@ void	IrcServer::PASS(const int fd)
 			return ;
 		}
 		_clients[fd]->setPass();
-}
-
-void	IrcServer::NICK(const int fd)
-{
-	if (_clients[fd]->_hasSetPass)
-	{
-
 	}
 }

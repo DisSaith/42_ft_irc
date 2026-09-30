@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/30 14:31:02 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/09/30 14:38:09 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,9 +72,9 @@ Client&	Client::operator=(const Client& copy)
 		this->_nickname = copy._nickname;
 		this->_username = copy._username;
 		this->_realname = copy._realname;
-		this->_SetPass = copy._SetPass;
-		this->_SetNick = copy._SetNick;
-		this->_SetUser = copy._SetUser;
+		this->_hasSetPass = copy._hasSetPass;
+		this->_hasSetNick = copy._hasSetNick;
+		this->_hasSetUser = copy._hasSetUser;
 		this->_isOpperator = copy._isOpperator;
 		this->_toDisconnect = copy._toDisconnect;
 	}
