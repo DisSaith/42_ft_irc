@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/30 15:33:46 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 16:35:51 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,8 +32,8 @@ class Client
 
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
-		std::string	getPass() const;
-		int			getFd() const;
+		std::string	getHasSetPass() const;
+		int		getFd() const;
 		bool		setIsRegistered() const;
 		void		setPass();
 		void		setNickName(std::string const& nickName);

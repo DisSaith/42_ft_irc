@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 16:00:48 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/09/30 16:36:00 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,5 +255,22 @@ void	IrcServer::PASS(const int fd)
 			return ;
 		}
 		_clients[fd]->setPass();
+	}
+}
+
+void	IrcServer::NICK(const int fd)
+{
+	if (_clients[fd]->getHasSetPass)
+	{
+		if (_recv.front() == "NICK")
+		{
+			if (_recv.size() < 2)
+			{
+				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
+				send(fd, errorMsg.c_str, errorMsg.length(), 0);
+				return ;
+			}
+			for (size_t i = 0; _clients[i]->get)
+		}
 	}
 }
