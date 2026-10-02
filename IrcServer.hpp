@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 12:19:01 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 12:59:16 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,8 +45,9 @@ using namespace Utils;
 class IrcServer 
 {
 	public:
-		~IrcServer(); //Destructor
-		IrcServer( char* const& port, char* const& password ); // Main Constructor
+		/* ----- Main Constructor & Destructor ----- */
+		~IrcServer();
+		IrcServer( char* const& port, char* const& password );
 
 		/* ----- Methods ----- */
 		bool CheckServerPort( std::string const& port );

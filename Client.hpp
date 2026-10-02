@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/02 10:04:42 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 12:57:36 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,10 @@
 class Client
 {
 	public:
-		/* ----- Orthodox Canonical Form ----- */
+		/* ----- Main Constructor & Destructor ----- */
 		~Client();
-		Client();
 		Client(int fd);
-		Client(const Client& copy);
-		Client& operator=(const Client& copy);
-
+		
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
 		int			getFd() const;
@@ -61,6 +58,11 @@ class Client
 		bool		_hasSetUser;
 		bool		_isOpperator;
 		bool		_toDisconnect;
+
+		/* ----- Orthodox Canonical Form ----- */
+		Client();
+		Client(const Client& copy);
+		Client& operator=(const Client& copy);
 };
 
 #endif

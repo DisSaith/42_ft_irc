@@ -6,32 +6,26 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/09/30 17:43:12 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 12:58:29 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Client.hpp"
 
-/* ======================== Constructors / Destructor ======================== */
+/* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
+
+Client::Client() {}
+Client::Client(const Client& copy) { (void) copy; }
+Client&	Client::operator=(const Client& copy) { (void) copy; return *this; }
+
+
+/* ======================== Main Constructors & Destructor ======================== */
 
 //Destructor
 Client::~Client()
 {
 	if (DEBUG)
 		std::cout << "Destructor called" << std::endl;
-}
-
-//Default Constructor
-Client::Client() : 
-	_fd(-1),
-	_hasSetPass(false),
-	_hasSetNick(false),
-	_hasSetUser(false),
-	_isOpperator(false),
-	_toDisconnect(false)
-{
-	if (DEBUG)
-		std::cout << "Default constructor called" << std::endl;
 }
 
 //Main Constructor
@@ -50,36 +44,6 @@ Client::Client(int fd) :
 		std::cout << "Fd construtor called" << std::endl;
 }
 
-//Copy Constructor
-Client::Client(const Client& copy)
-{
-	*this = copy;
-	if (DEBUG)
-		std::cout << "Copy constructor called" << std::endl;
-}
-
-//Overload operator=
-Client&	Client::operator=(const Client& copy)
-{
-	if (DEBUG)
-		std::cout << "Copy assignment operator called" << std::endl;
-	if (this != &copy)
-	{
-		this->_fd = copy._fd;
-		this->_ipAddr = copy._ipAddr;
-		this->_bufferIn = copy._bufferIn;
-		this->_bufferOut = copy._bufferOut;
-		this->_nickname = copy._nickname;
-		this->_username = copy._username;
-		this->_realname = copy._realname;
-		this->_hasSetPass = copy._hasSetPass;
-		this->_hasSetNick = copy._hasSetNick;
-		this->_hasSetUser = copy._hasSetUser;
-		this->_isOpperator = copy._isOpperator;
-		this->_toDisconnect = copy._toDisconnect;
-	}
-	return *this;
-}
 
 /* ======================== Getters / Setters ======================== */
 
@@ -124,6 +88,7 @@ bool	Client::setIsRegistered() const
 {
 	return (this->_hasSetPass && this->_hasSetNick && this->_hasSetUser);
 }
+
 
 /* ======================== Methods ======================== */
 
