@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:39 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 17:27:12 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 18:52:43 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,9 @@ int	main(int ac, char **av)
 {
 	IrcServer server;
 	
+	IrcServer::GetPtrServer(&server);
+	signal( SIGINT, IrcServer::signalINT );
+
 	try 
 	{
 		if (ac == 3)

@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 17:31:58 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 19:14:57 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ IrcServer::~IrcServer() {}
 IrcServer::IrcServer() : _password(""), _port(0) {}
 
 
-/* ======================== Methods ======================== */
+/* ======================== IRC Server ======================== */
 
 void	IrcServer::InitServer( char* const& port, char* const& password )
 {
@@ -44,35 +44,7 @@ void	IrcServer::InitServer( char* const& port, char* const& password )
 	}
 }
 
-// Ports between 0 and 1023 need root permission
-// only ports between 1024 and 65 535 are allowed
-bool IrcServer::CheckServerPort( std::string const& port )
-{
-	int converted_port;
-
-	if ( port.empty() == true )
-		throw std::invalid_argument("This IRC Server port is invalid.");
-	if (port[0] == '-')
-			throw std::invalid_argument("This IRC Server port is out of range.");
-	
-	for ( size_t i = 0 ; i < port.length() ; i++ )                            
-	{  
-		if (!std::isdigit(port[i]))
-			throw std::invalid_argument("This IRC Server port is invalid.");
-	}
-	
-	converted_port = ::stoi(port);
-	if ( converted_port >= 0 && converted_port < 1024 )
-		throw std::out_of_range( "This IRC Server port needs root permission." );
-	else if ( converted_port < 0 || converted_port > 65535 )
-		throw std::out_of_range( "This IRC Server port is out of range." );
-	else if ( converted_port >= 1024 && converted_port <= 65535 )
-		return (true);
-
-	return (false);
-}
-
-bool IrcServer::CreateServer()
+void IrcServer::CreateServer()
 {
 	// Config Server
 	_server.sin_addr.s_addr = INADDR_ANY;
@@ -89,38 +61,11 @@ bool IrcServer::CreateServer()
 		throw std::runtime_error( "Failed of the listen() function." );
 	fcntl(_socketServer, F_SETFL, O_NONBLOCK);
 
-	InitSetCommands();
+	InitMapCommands();
 
 	std::cout << GREEN << "IRC Server created !\n" << RESET
 		<< "port: " << this->_port << std::endl
 		<< "password: " << this->_password << std::endl;
-	
-	return (true);
-}
-
-// Initialize Set container of IRC Server commands
-void	IrcServer::InitSetCommands()
-{
-	if (_commands.empty() == false)
-		_commands.clear();
-	
-	_commands["PASS"] = &IrcServer::PASS;
-	_commands["NICK"] = &IrcServer::NICK;
-}
-
-void IrcServer::CloseFds()
-{
-	close(_socketServer);
-
-	for ( size_t i = 0 ; i < _pollFds.size() ; i++ )
-	{
-		if (_pollFds[i].fd != _socketServer)
-			close(_pollFds[i].fd);
-		delete(_clients[_pollFds[i].fd]);
-		_clients.erase(_pollFds[i].fd);
-		_pollFds.erase(_pollFds.begin() + i);
-		i--;
-	}
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -180,7 +125,7 @@ void	IrcServer::ConnectionWithClients()
 							if (DEBUG)
 								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd;
 							TokenizerRecv(cmd);
-							if (_recv.front() == "STOP")
+							if (_recv.empty() == false && _recv.front() == "STOP")
 								return ;
 
 							ParsingRecv(_pollFds[i].fd);
@@ -191,6 +136,9 @@ void	IrcServer::ConnectionWithClients()
 		}
 	}
 }
+
+
+/* ======================== Handling Clients Messages ======================== */
 
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
@@ -224,7 +172,6 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 			std::cout << i << ": " << *it << std::endl;
 			i++;
 		}
-		std::cout << std::endl;
 	}
 }
 
@@ -247,6 +194,8 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		cmdFunction cmd = find->second;
 		(this->*cmd)(clientFd);
 	}
+	else if ( DEBUG )
+		std::cerr << RED << "Command not found: " << RESET << _recv.front() << std::endl;
 }
 
 
@@ -254,7 +203,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 
 void	IrcServer::PASS(int const& fd)
 {
-	if (_recv.front() == "PASS")
+	if (_recv.empty() == false && _recv.front() == "PASS")
 	{
 		if (_recv.size() < 2)
 		{
@@ -281,7 +230,7 @@ void	IrcServer::NICK(int const& fd)
 {
 	if (_clients[fd]->getHasSetPass() == true)
 	{
-		if (_recv.front() == "NICK")
+		if (_recv.empty() == false && _recv.front() == "NICK")
 		{
 			if (_recv.size() < 2)
 			{
@@ -291,5 +240,84 @@ void	IrcServer::NICK(int const& fd)
 			}
 			//for (size_t i = 0; _clients[i]->get)
 		}
+	}
+}
+
+
+/* ======================== Signals ======================== */
+
+void	IrcServer::signalINT( int signal )
+{
+	//IrcServer *serverptr = GetPtrServer(NULL);
+	//serverptr->CloseFds();
+
+	std::cout << WHITE << "\nSIGINT " << RESET << "intercepted (" << signal << ")\n";
+}
+
+
+/* ======================== Utils ======================== */
+
+// Get and save IrcServer pointer (for signals functions)
+IrcServer* IrcServer::GetPtrServer( IrcServer *server )
+{
+	static IrcServer *serverPtr;
+	
+	if ( server != NULL )
+		serverPtr = server;
+
+	return ( serverPtr );
+}
+
+// Ports between 0 and 1023 need root permission
+// only ports between 1024 and 65 535 are allowed
+bool IrcServer::CheckServerPort( std::string const& port )
+{
+	int converted_port;
+
+	if ( port.empty() == true )
+		throw std::invalid_argument("This IRC Server port is invalid.");
+	if (port[0] == '-')
+			throw std::invalid_argument("This IRC Server port is out of range.");
+	
+	for ( size_t i = 0 ; i < port.length() ; i++ )                            
+	{  
+		if (!std::isdigit(port[i]))
+			throw std::invalid_argument("This IRC Server port is invalid.");
+	}
+	
+	converted_port = ::stoi(port);
+	if ( converted_port >= 0 && converted_port < 1024 )
+		throw std::out_of_range( "This IRC Server port needs root permission." );
+	else if ( converted_port < 0 || converted_port > 65535 )
+		throw std::out_of_range( "This IRC Server port is out of range." );
+	else if ( converted_port >= 1024 && converted_port <= 65535 )
+		return (true);
+
+	return (false);
+}
+
+// Initialize Set container of IRC Server commands
+void	IrcServer::InitMapCommands()
+{
+	if (_commands.empty() == false)
+		_commands.clear();
+	
+	_commands["PASS"] = &IrcServer::PASS;
+	_commands["NICK"] = &IrcServer::NICK;
+}
+
+// Close all fds and delete for no leaks at the end of the program
+void IrcServer::CloseFds()
+{
+	close(_socketServer);
+
+	for ( size_t i = 0 ; i < _pollFds.size() ; i++ )
+	{
+		if (_pollFds[i].fd != _socketServer)
+			close(_pollFds[i].fd);
+		delete(_clients[_pollFds[i].fd]);
+		_clients.erase(_pollFds[i].fd);
+		_pollFds.erase(_pollFds.begin() + i);
+		i--;
 	}
 }

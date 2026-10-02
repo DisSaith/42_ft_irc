@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 17:09:04 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 19:13:59 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,8 @@
 
 #define RESET   "\033[0m" //-> reset color
 #define RED		"\e[1;31m" //-> red color
-#define WHITE	"\e[0;37m" //-> white color
+#define WHITE   "\033[1m\033[37m" //-> white and bold color
+#define BLUE    "\033[34m" //-> blue color
 #define GREEN	"\e[1;32m" //-> green color
 #define YELLOW	"\e[1;33m" //-> yellow color
 
@@ -31,12 +32,13 @@
 # include <unistd.h> //-> close()
 # include <arpa/inet.h> //-> conversion Home/Server
 # include <netinet/in.h> //-> for struct sockaddr_in
+# include <poll.h> // poll() for multiple clients
+# include <fcntl.h> //-> fcntl()
 # include <cstring> //-> used for c string utilities like memset() or strcmp()
+# include <csignal> //-> used for signal handling
 # include <map> //-> for map container
 # include <list> //-> for list container
-# include <poll.h> // poll() for multiple clients
 # include <vector> //-> for vector container
-# include <fcntl.h> //-> fcntl()
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Class clients
 
@@ -49,19 +51,27 @@ class IrcServer
 		~IrcServer();
 		IrcServer();
 
-		/* ----- Methods ----- */
-		bool CheckServerPort( std::string const& port );
-		bool CreateServer();
+		/* ----- IRC Server ----- */
 		void InitServer( char* const& port, char* const& password );
-		void InitSetCommands();
-		void CloseFds();
+		void CreateServer();
 		void ConnectionWithClients();
+		
+		/* ----- Handling Clients Messages ----- */
 		void TokenizerRecv( std::string const& buffer );
 		void ParsingRecv(int const& clientFd);
 		
 		/* ----- IRC Commands ----- */
 		void PASS(int const& fd);
 		void NICK(int const& fd);
+
+		/* ----- Signals ----- */
+		static void signalINT( int signal );
+
+		/* ----- Utils ----- */
+		static IrcServer*	GetPtrServer( IrcServer *server );
+		bool				CheckServerPort( std::string const& port );
+		void				InitMapCommands();
+		void				CloseFds();
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
