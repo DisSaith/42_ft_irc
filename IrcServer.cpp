@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 12:53:20 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 14:30:42 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -222,17 +222,18 @@ void IrcServer::ParsingRecv( int const& clientFd )
 	if (_recv.empty() == true)
 		return ;
 	if (_recv.front()[0] == ':')
-		_recv.pop_front(); // delete prefix if it exists
-	for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
 	{
-		find = _commands.find(*it);
-		if ( find != _commands.end() )
-		{
-			cmdFunction cmd = find->second;
-			(this->*cmd)(clientFd);
-		}
+		_recv.pop_front(); // delete prefix if it exists
+		if (_recv.empty() == true)
+			return ;
 	}
-
+	
+	find = _commands.find(_recv.front());
+	if ( find != _commands.end() )
+	{
+		cmdFunction cmd = find->second;
+		(this->*cmd)(clientFd);
+	}
 }
 
 /* ======================== IRC Commands ======================== */

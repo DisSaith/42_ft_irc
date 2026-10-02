@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/02 12:58:29 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 14:11:41 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ Client&	Client::operator=(const Client& copy) { (void) copy; return *this; }
 Client::~Client()
 {
 	if (DEBUG)
-		std::cout << "Destructor called" << std::endl;
+		std::cout << YELLOW << "Client " << _fd << RESET
+					<< " left server." << std::endl;
 }
 
 //Main Constructor
@@ -41,7 +42,8 @@ Client::Client(int fd) :
 	_bufferOut.reserve(1024);
 
 	if (DEBUG)
-		std::cout << "Fd construtor called" << std::endl;
+		std::cout << YELLOW << "Client " << fd << RESET
+					<< " joinded server." << std::endl;
 }
 
 
@@ -96,11 +98,14 @@ void Client::appendToIn(std::string const& data)
 {
 	this->_bufferIn += data;
 
+	if (_bufferIn.length() >= 510)
+	{
+		_bufferIn.erase(510, _bufferIn.length());
+		_bufferIn += "\r\n";
+	}
+
 	if (DEBUG)
 		std::cout << "_bufferIn.length() = " << _bufferIn.length() << std::endl;
-
-	if (_bufferIn.length() == 510)
-		_bufferIn += "\r\n";
 }
 
 // Return true or false if there is a '\n' or not in the initial query by the user
