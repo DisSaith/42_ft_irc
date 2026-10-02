@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 12:59:16 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 17:09:04 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,14 +45,16 @@ using namespace Utils;
 class IrcServer 
 {
 	public:
-		/* ----- Main Constructor & Destructor ----- */
+		/* ----- Default Constructor & Destructor ----- */
 		~IrcServer();
-		IrcServer( char* const& port, char* const& password );
+		IrcServer();
 
 		/* ----- Methods ----- */
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
+		void InitServer( char* const& port, char* const& password );
 		void InitSetCommands();
+		void CloseFds();
 		void ConnectionWithClients();
 		void TokenizerRecv( std::string const& buffer );
 		void ParsingRecv(int const& clientFd);
@@ -83,7 +85,6 @@ class IrcServer
 		short								_port;
 		
 		/* ----- Orthodox Canonical Form ----- */
-		IrcServer(); //Default Constructor
 		IrcServer( IrcServer const& copy ); //Copy Constructor
 		IrcServer& operator=( IrcServer const& copy ); //Overloard operator=
 };

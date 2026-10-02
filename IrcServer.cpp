@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 14:30:42 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 17:31:58 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,17 +15,19 @@
 
 /* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
 
-IrcServer::IrcServer() {}
 IrcServer::IrcServer( IrcServer const& copy ) { (void)copy; }
 IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *this; }
 
-/* ======================== Main Constructor & Destructor ======================== */
 
-IrcServer::~IrcServer() {} //Destructor
+/* ======================== Default Constructor & Destructor ======================== */
 
-//Main Constructor
-IrcServer::IrcServer( char* const& port, char* const& password ) 
-	: _password(""), _clients(), _recv(), _server(), _socketServer(0), _port(0)
+IrcServer::~IrcServer() {} 
+IrcServer::IrcServer() : _password(""), _port(0) {}
+
+
+/* ======================== Methods ======================== */
+
+void	IrcServer::InitServer( char* const& port, char* const& password )
 {
 	std::string string_port = std::string(port);
 
@@ -40,10 +42,7 @@ IrcServer::IrcServer( char* const& port, char* const& password )
 			<< "IRC Server port not valid." << std::endl;
 		return ;
 	}
-
 }
-
-/* ======================== Methods ======================== */
 
 // Ports between 0 and 1023 need root permission
 // only ports between 1024 and 65 535 are allowed
@@ -55,11 +54,13 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		throw std::invalid_argument("This IRC Server port is invalid.");
 	if (port[0] == '-')
 			throw std::invalid_argument("This IRC Server port is out of range.");
+	
 	for ( size_t i = 0 ; i < port.length() ; i++ )                            
 	{  
 		if (!std::isdigit(port[i]))
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
+	
 	converted_port = ::stoi(port);
 	if ( converted_port >= 0 && converted_port < 1024 )
 		throw std::out_of_range( "This IRC Server port needs root permission." );
@@ -105,6 +106,21 @@ void	IrcServer::InitSetCommands()
 	
 	_commands["PASS"] = &IrcServer::PASS;
 	_commands["NICK"] = &IrcServer::NICK;
+}
+
+void IrcServer::CloseFds()
+{
+	close(_socketServer);
+
+	for ( size_t i = 0 ; i < _pollFds.size() ; i++ )
+	{
+		if (_pollFds[i].fd != _socketServer)
+			close(_pollFds[i].fd);
+		delete(_clients[_pollFds[i].fd]);
+		_clients.erase(_pollFds[i].fd);
+		_pollFds.erase(_pollFds.begin() + i);
+		i--;
+	}
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -153,13 +169,7 @@ void	IrcServer::ConnectionWithClients()
 					if (DEBUG)
 						std::cout << "\nbytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
-					{
-						close(_pollFds[i].fd);
-						delete(_clients[_pollFds[i].fd]);
-						_clients.erase(_pollFds[i].fd);
-						_pollFds.erase(_pollFds.begin() + i);
-						i--;
-					}
+						CloseFds();
 					else
 					{
 						std::string data(buffer, bytesRead);
@@ -170,6 +180,9 @@ void	IrcServer::ConnectionWithClients()
 							if (DEBUG)
 								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd;
 							TokenizerRecv(cmd);
+							if (_recv.front() == "STOP")
+								return ;
+
 							ParsingRecv(_pollFds[i].fd);
 						}
 					}
@@ -235,6 +248,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		(this->*cmd)(clientFd);
 	}
 }
+
 
 /* ======================== IRC Commands ======================== */
 
