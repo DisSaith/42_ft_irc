@@ -6,23 +6,22 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 16:42:51 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/02 12:48:03 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "IrcServer.hpp"
 #include "Client.cpp"
 
-/* ======================== Constructors / Destructor ======================== */
+/* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
+
+IrcServer::IrcServer() {}
+IrcServer::IrcServer( IrcServer const& copy ) { (void)copy; }
+IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *this; }
+
+/* ======================== Main Constructor & Destructor ======================== */
 
 IrcServer::~IrcServer() {} //Destructor
-
-//Constructors
-IrcServer::IrcServer() : 
-	_password(""), _clients(), _recv(), _pollFds(), _server(), _socketServer(0), _port(0) {}
-
-IrcServer::IrcServer( IrcServer const& copy ) : 
-	_password(copy._password), _clients(copy._clients), _recv(copy._recv), _pollFds(copy._pollFds), _server(copy._server), _socketServer(copy._socketServer), _port(copy._port) {}
 
 //Main Constructor
 IrcServer::IrcServer( char* const& port, char* const& password ) 
@@ -43,23 +42,6 @@ IrcServer::IrcServer( char* const& port, char* const& password )
 	}
 
 }
-
-//Overload operator=
-IrcServer& IrcServer::operator=( IrcServer const& copy )
-{
-	if (this != &copy)
-	{
-		this->_password = copy._password;
-		this->_clients = copy._clients;
-		this->_recv = copy._recv;
-		this->_pollFds = copy._pollFds;
-		this->_server = copy._server;
-		this->_socketServer = copy._socketServer;
-		this->_port = copy._port;
-	}
-	return *this;
-}
-
 
 /* ======================== Methods ======================== */
 
@@ -105,10 +87,24 @@ bool IrcServer::CreateServer()
 	if (listen(_socketServer, SOMAXCONN) == -1)
 		throw std::runtime_error( "Failed of the listen() function." );
 	fcntl(_socketServer, F_SETFL, O_NONBLOCK);
+
+	InitSetCommands();
+
 	std::cout << GREEN << "IRC Server created !\n" << RESET
 		<< "port: " << this->_port << std::endl
 		<< "password: " << this->_password << std::endl;
+	
 	return (true);
+}
+
+// Initialize Set container of IRC Server commands
+void	IrcServer::InitSetCommands()
+{
+	if (_commands.empty() == false)
+		_commands.clear();
+	
+	_commands["PASS"] = &IrcServer::PASS;
+	_commands["NICK"] = &IrcServer::NICK;
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -151,10 +147,11 @@ void	IrcServer::ConnectionWithClients()
 				else
 				{
 					char	buffer[4096];
+					memset(buffer, 0, sizeof(buffer)); // cancel pb with zombie memomy
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
 					if (DEBUG)
-						std::cout << "bytesRead = " << bytesRead << std::endl;
+						std::cout << "\nbytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
 					{
 						close(_pollFds[i].fd);
@@ -165,7 +162,7 @@ void	IrcServer::ConnectionWithClients()
 					}
 					else
 					{
-						std::string data(buffer, 0, 510);
+						std::string data(buffer, bytesRead);
 						_clients[_pollFds[i].fd]->appendToIn(data);
 						while (_clients[_pollFds[i].fd]->hasCompleteCommand())
 						{
@@ -189,7 +186,7 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 	bool			inWord = false;
 
 	if (_recv.empty() == false)
-		_recv.clear();
+		_recv.clear(); // clear list before every new recv from a client
 	for ( size_t i = 0 ; i < buffer.length() ; i++)
 	{
 		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
@@ -205,37 +202,42 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 		}
 	}
 
-	/*if (DEBUG) // display list tokens
+	if (DEBUG) // display list tokens
 	{
 		int i = 0;
-		std::cout << std::endl << "[List Tokens] " << std::endl;
+		std::cout << "[List Tokens] " << std::endl;
 		for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
 		{
 			std::cout << i << ": " << *it << std::endl;
 			i++;
 		}
-	}*/
+		std::cout << std::endl;
+	}
 }
 
 void IrcServer::ParsingRecv( int const& clientFd )
 {
-	(void)clientFd;
-	int i = 0;
+	std::map<std::string, cmdFunction>::iterator find;
 
+	if (_recv.empty() == true)
+		return ;
 	if (_recv.front()[0] == ':')
-		_recv.pop_front(); // delate prefix if it exists
+		_recv.pop_front(); // delete prefix if it exists
 	for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
 	{
-		if (DEBUG)
-			std::cout << i << ": " << *it << std::endl;
-		i++;
+		find = _commands.find(*it);
+		if ( find != _commands.end() )
+		{
+			cmdFunction cmd = find->second;
+			(this->*cmd)(clientFd);
+		}
 	}
 
 }
 
 /* ======================== IRC Commands ======================== */
 
-void	IrcServer::PASS(const int fd)
+void	IrcServer::PASS(int const& fd)
 {
 	if (_recv.front() == "PASS")
 	{
@@ -254,23 +256,25 @@ void	IrcServer::PASS(const int fd)
 			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 			return ;
 		}
+		else if ( DEBUG )
+			std::cout << "PASS \"" << *it << "\" " << GREEN << "CORRECT\r\n" << RESET;
 		_clients[fd]->setPass();
 	}
 }
 
-//void	IrcServer::NICK(const int fd)
-//{
-//	if (_clients[fd]->getHasSetPass)
-//	{
-//		if (_recv.front() == "NICK")
-//		{
-//			if (_recv.size() < 2)
-//			{
-//				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
-//				send(fd, errorMsg.c_str, errorMsg.length(), 0);
-//				return ;
-//			}
-//			for (size_t i = 0; _clients[i]->get)
-//		}
-//	}
-//}
+void	IrcServer::NICK(int const& fd)
+{
+	if (_clients[fd]->getHasSetPass() == true)
+	{
+		if (_recv.front() == "NICK")
+		{
+			if (_recv.size() < 2)
+			{
+				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
+				//send(fd, errorMsg.c_str, errorMsg.length(), 0);
+				return ;
+			}
+			//for (size_t i = 0; _clients[i]->get)
+		}
+	}
+}

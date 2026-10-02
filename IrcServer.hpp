@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/30 14:46:38 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/02 12:19:01 by acohaut          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,34 +45,46 @@ using namespace Utils;
 class IrcServer 
 {
 	public:
-		/* ----- Orthodox Canonical Form ----- */
 		~IrcServer(); //Destructor
-		IrcServer(); //Default Constructor
-		IrcServer( IrcServer const& copy ); //Copy Constructor
-		IrcServer& operator=( IrcServer const& copy ); //Overloard operator=
-
 		IrcServer( char* const& port, char* const& password ); // Main Constructor
 
 		/* ----- Methods ----- */
 		bool CheckServerPort( std::string const& port );
 		bool CreateServer();
+		void InitSetCommands();
 		void ConnectionWithClients();
 		void TokenizerRecv( std::string const& buffer );
 		void ParsingRecv(int const& clientFd);
 		
 		/* ----- IRC Commands ----- */
-		void PASS(const int fd);
-		void NICK(const int fd);
+		void PASS(int const& fd);
+		void NICK(int const& fd);
+
+		// typedef for commands map container
+		typedef void (IrcServer::*cmdFunction)(int const& fd);
 
 	private:
 		/* ----- Attributes ----- */
-		std::string					_password; // password used for connections server/clients
-		std::map<int, Client*>		_clients; // all clients connected
-		std::list<std::string>		_recv; // current client recv
-		std::vector<struct pollfd>	_pollFds;
-		sockaddr_in					_server; // struct server
-		int							_socketServer; // initial socket for clients connections
-		short						_port; // listening port (for initialing communications)
+		// password used for connections server/clients
+		std::string							_password;
+		// all clients connected
+		std::map<int, Client*>				_clients;
+		// current client recv
+		std::list<std::string>				_recv;
+		// all commands of IRC server
+		std::map<std::string, cmdFunction>	_commands;
+		std::vector<struct pollfd>			_pollFds;
+		// struct server
+		sockaddr_in							_server;
+		// initial socket for clients connections
+		int									_socketServer;
+		// listening port (for initialing communications)
+		short								_port;
+		
+		/* ----- Orthodox Canonical Form ----- */
+		IrcServer(); //Default Constructor
+		IrcServer( IrcServer const& copy ); //Copy Constructor
+		IrcServer& operator=( IrcServer const& copy ); //Overloard operator=
 };
 
 #endif
