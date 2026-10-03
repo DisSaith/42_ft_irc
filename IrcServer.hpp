@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/03 15:55:41 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/03 16:48:59 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ class IrcServer
 		void PASS(int const& fd);
 		void NICK(int const& fd);
 		void USER(int const& fd);
+		void PRIVMSG(int const& fd);
 
 		/* ----- Signals ----- */
 		static void signalINT( int signal );

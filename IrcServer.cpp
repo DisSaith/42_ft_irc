@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/03 15:56:15 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/03 17:53:03 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -282,6 +282,60 @@ void	IrcServer::USER(int const& fd)
 	}
 }
 
+void	IrcServer::PRIVMSG(int const& fd)
+{
+	if (_clients[fd]->setIsRegistered())
+	{
+		if (_recv.front() == "PRIVMSG")
+		{
+			if (_recv.size() == 1)
+			{
+				std::string errorMsg = ":localhost 411 " + _clients[fd]->getNickname() + " :No recipient given (PRIVMSG)\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				return ;
+			}
+			if (_recv.size() == 2)
+			{
+				std::string errorMsg = ":localhost 412 " + _clients[fd]->getNickname() + " :No text to send\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				return ;
+			}
+			std::list<std::string>::iterator it = _recv.begin();
+			it++;
+			std::string target = *it;
+			bool targetFound = false;
+			int targetFd = -1;
+			std::map<int, Client*>::iterator mapIt;
+
+			for (mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
+			{
+				if (mapIt->second->getNickname() == target)
+				{
+					targetFound = true;
+					targetFd = mapIt->first;
+					break ;
+				}
+			}
+			if (targetFound == false)
+			{
+				std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + target + " :No such nick/channel\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				return ;
+			}
+			it++;
+			std::string	message;
+			while (it != _recv.end())
+			{
+				message += *it;
+				it++;
+				if (it != _recv.end())
+					message += " ";
+			}
+			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + target + " " + message + "\r\n";
+			send(targetFd, fullMsg.c_str(), fullMsg.length(), 0);
+		}
+	}
+}
 
 /* ======================== Signals ======================== */
 
@@ -344,6 +398,7 @@ void	IrcServer::InitMapCommands()
 	_commands["PASS"] = &IrcServer::PASS;
 	_commands["NICK"] = &IrcServer::NICK;
 	_commands["USER"] = &IrcServer::USER;
+	_commands["PRIVMSG"] = &IrcServer::PRIVMSG;
 }
 
 // Close all fds and delete for no leaks at the end of the program
