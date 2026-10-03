@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/02 14:11:41 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/03 16:17:44 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,7 +35,7 @@ Client::Client(int fd) :
 	_hasSetPass(false),
 	_hasSetNick(false),
 	_hasSetUser(false),
-	_isOpperator(false),
+	_isOperator(false),
 	_toDisconnect(false)
 {
 	_bufferIn.reserve(1024);
@@ -54,14 +54,24 @@ std::string Client::getNickname() const
 	return this->_nickname;
 }
 
+int	Client::getFd() const 
+{
+	return this->_fd;
+}
+
 bool	Client::getHasSetPass() const
 {
 	return this->_hasSetPass;
 }
 
-int Client::getFd() const 
+bool	Client::getIsOperator() const
 {
-	return this->_fd;
+	return this->_isOperator;
+}
+
+bool	Client::getToDisconnect() const
+{
+	return this->_toDisconnect;
 }
 
 void	Client::setPass()

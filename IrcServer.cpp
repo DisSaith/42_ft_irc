@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/02 19:14:57 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/03 15:56:15 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -187,7 +187,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		if (_recv.empty() == true)
 			return ;
 	}
-	
+
 	find = _commands.find(_recv.front());
 	if ( find != _commands.end() )
 	{
@@ -235,10 +235,49 @@ void	IrcServer::NICK(int const& fd)
 			if (_recv.size() < 2)
 			{
 				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
-				//send(fd, errorMsg.c_str, errorMsg.length(), 0);
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
-			//for (size_t i = 0; _clients[i]->get)
+			std::list<std::string>::iterator it = _recv.begin();
+			it++;
+			std::map<int, Client*>::iterator mapIt;
+			for (mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
+			{
+				if (*it == mapIt->second->getNickname())
+				{
+					std::string errorMsg = ":localhost 433 * " + *it + " :Nickname is already in use\r\n";
+					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+					return ;
+				}
+			}
+			_clients[fd]->setNickName(*it);
+		}
+	}
+}
+
+void	IrcServer::USER(int const& fd)
+{
+	if (_clients[fd]->getHasSetPass())
+	{
+		if (_recv.front() == "USER")
+		{
+			if (_recv.size() < 5)
+			{
+				std::string errorMsg = ":localhost 461 * USER :Not enough parameters\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				return ;	
+			}
+			std::list<std::string>::iterator it = _recv.begin();
+			it++;
+			_clients[fd]->setUserName(*it);
+			std::advance(it, 3);
+			_clients[fd]->setRealName(*it);
+			if (_clients[fd]->setIsRegistered())
+			{
+				std::string welcome = ":localhost 001 " + _clients[fd]->getNickname() + " :Welcome to the ft_irc network!\r\n";
+				send(fd, welcome.c_str(), welcome.length(), 0);
+				std::cout << "Le client " << fd << " est maintenant officiellement enregistré !" << std::endl;
+			}
 		}
 	}
 }
@@ -261,7 +300,7 @@ void	IrcServer::signalINT( int signal )
 IrcServer* IrcServer::GetPtrServer( IrcServer *server )
 {
 	static IrcServer *serverPtr;
-	
+
 	if ( server != NULL )
 		serverPtr = server;
 
@@ -277,14 +316,14 @@ bool IrcServer::CheckServerPort( std::string const& port )
 	if ( port.empty() == true )
 		throw std::invalid_argument("This IRC Server port is invalid.");
 	if (port[0] == '-')
-			throw std::invalid_argument("This IRC Server port is out of range.");
-	
+		throw std::invalid_argument("This IRC Server port is out of range.");
+
 	for ( size_t i = 0 ; i < port.length() ; i++ )                            
 	{  
 		if (!std::isdigit(port[i]))
 			throw std::invalid_argument("This IRC Server port is invalid.");
 	}
-	
+
 	converted_port = ::stoi(port);
 	if ( converted_port >= 0 && converted_port < 1024 )
 		throw std::out_of_range( "This IRC Server port needs root permission." );
@@ -301,9 +340,10 @@ void	IrcServer::InitMapCommands()
 {
 	if (_commands.empty() == false)
 		_commands.clear();
-	
+
 	_commands["PASS"] = &IrcServer::PASS;
 	_commands["NICK"] = &IrcServer::NICK;
+	_commands["USER"] = &IrcServer::USER;
 }
 
 // Close all fds and delete for no leaks at the end of the program

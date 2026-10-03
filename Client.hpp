@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/02 12:57:36 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/03 16:06:41 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,11 +31,15 @@ class Client
 		std::string	getNickname() const;
 		int			getFd() const;
 		bool		getHasSetPass() const;
+		bool		getIsOperator() const;
+		bool		getToDisconnect() const;
 		bool		setIsRegistered() const;
 		void		setPass();
 		void		setNickName(std::string const& nickName);
 		void		setUserName(std::string const& userName);
 		void		setRealName(std::string const& realName);
+		void		setIsOperator(bool status);
+		void		setIsDisconnect(bool status);
 
 		/* ----- Methods ----- */
 		std::string	extractCommand();
@@ -56,7 +60,7 @@ class Client
 		bool		_hasSetPass;
 		bool		_hasSetNick;
 		bool		_hasSetUser;
-		bool		_isOpperator;
+		bool		_isOperator;
 		bool		_toDisconnect;
 
 		/* ----- Orthodox Canonical Form ----- */
