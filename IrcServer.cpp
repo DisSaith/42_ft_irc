@@ -234,7 +234,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 			(this->*cmd)(clientFd);
 		}
 	}
-
+	CHANMSG(clientFd);
 }
 
 /* ======================== IRC Commands ======================== */
@@ -281,6 +281,7 @@ void	IrcServer::NICK(int const& fd)
 	}
 }
 
+//Wrong error messages
 void	IrcServer::JOIN(int const& fd)
 {
 	if (_recv.size() < 2)
@@ -293,10 +294,19 @@ void	IrcServer::JOIN(int const& fd)
 		std::string errorMsg = ":localhost 461 * JOIN :Too many parameters\r\n";
 		return ;
 	}
-	std::list<std::string>::iterator it = _recv.begin();
-	std::string channelName = *(++it);
-	it--;
-	if (_channels.find(channelName) == _channels.end())
+/* commented for testing
+	if (_clients[fd]->setIsRegistered() == false)
+	{
+		std::string errorMsg = "JOIN : User not registered\r\n";
+		return ;		
+	}
+*/	
+	std::list<std::string>::iterator l_it = _recv.begin();
+	std::string channelName = *(++l_it);
+	_clients[fd]->setNewChannel(channelName);
+
+	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
+	if (it == _channels.end())
 	{
 		_channels[channelName] = new Channel(channelName, _clients[fd]);
 		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".";
@@ -304,7 +314,25 @@ void	IrcServer::JOIN(int const& fd)
 	}
 	else
 	{
-		
-
+		it->second->addNewMember(_clients[fd]);
 	}
+}
+
+void	IrcServer::CHANMSG(int const& fd)
+{
+	std::string		channelName = _clients[fd]->getCurrentChannelName();
+	if (channelName.empty())
+		return ;
+
+	std::list<std::string>::iterator it = _recv.begin();
+	std::string	message;
+	while (it != _recv.end())
+	{
+		message += *it;
+		it++;
+		if (it != _recv.end())
+			message += " ";
+	}
+	std::string fullmessage = channelName + ": " + _clients[fd]->getNickname() + ": " + message + "\n";
+	_channels[channelName]->sendMessageToMembers(fullmessage, fd);
 }

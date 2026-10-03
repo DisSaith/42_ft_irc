@@ -32,7 +32,9 @@ class Channel
 
 		/* ----- Methods ----- */
 
-
+		void	sendMessageToMembers(std::string const& message, int const& sender_fd);
+		void	addNewMember(Client *newMember);
+		void	displayMembers( void );
 };
 
 #endif

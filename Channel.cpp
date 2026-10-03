@@ -32,3 +32,29 @@ Channel&	Channel::operator=( const Channel& copy )
 	}
 	return *this;
 }
+
+void	Channel::sendMessageToMembers(std::string const& message, int const& sender_fd)
+{
+	std::map<int, Client*>::const_iterator 	it;	
+	for (it = _members.begin(); it != _members.end(); ++it)
+    {
+		if (it->first != sender_fd)
+			send(it->first, message.c_str(), message.length(), 0);
+	}
+
+}
+
+void	Channel::addNewMember(Client *newMember)
+{
+	_members[newMember->getFd()] = newMember;
+	this->displayMembers();
+}
+
+void	Channel::displayMembers( void )
+{
+	std::map<int, Client*>::const_iterator it;
+	std::cout << "Members of channel " << _name << std::endl;
+    for (it = _members.begin(); it != _members.end(); ++it)
+        std::cout << "	FD: " << it->second << "	Nickname: " << it->second->getNickname() << std::endl;
+}
+

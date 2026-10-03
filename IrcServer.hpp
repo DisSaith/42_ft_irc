@@ -63,6 +63,7 @@ class IrcServer
 		void PASS(int const& fd);
 		void NICK(int const& fd);
 		void JOIN(int const& fd);
+		void CHANMSG(int const& fd);
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);

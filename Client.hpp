@@ -29,6 +29,7 @@ class Client
 		
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
+		std::string	getCurrentChannelName() const;
 		int			getFd() const;
 		bool		getHasSetPass() const;
 		bool		setIsRegistered() const;
@@ -36,6 +37,7 @@ class Client
 		void		setNickName(std::string const& nickName);
 		void		setUserName(std::string const& userName);
 		void		setRealName(std::string const& realName);
+		void		setNewChannel(std::string const& channelName);
 
 		/* ----- Methods ----- */
 		std::string	extractCommand();
@@ -50,6 +52,7 @@ class Client
 		std::string	_nickname;
 		std::string	_username;
 		std::string	_realname;
+		std::string	_currentchannelname;
 
 		int			_fd;
 		

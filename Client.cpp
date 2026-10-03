@@ -52,6 +52,11 @@ std::string Client::getNickname() const
 	return this->_nickname;
 }
 
+std::string Client::getCurrentChannelName() const
+{
+	return this->_currentchannelname;
+}
+
 bool	Client::getHasSetPass() const
 {
 	return this->_hasSetPass;
@@ -71,6 +76,11 @@ void	Client::setNickName(std::string const& nickName)
 {
 	_nickname = nickName;
 	_hasSetNick = true;
+}
+
+void	Client::setNewChannel(std::string const& channelName)
+{
+	_currentchannelname = channelName;
 }
 
 void	Client::setUserName(std::string const& userName)
