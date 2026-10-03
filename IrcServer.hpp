@@ -38,7 +38,9 @@
 # include <vector> //-> for vector container
 # include <fcntl.h> //-> fcntl()
 # include "Utils.hpp" //-> namespace with utils functions
-# include "Client.hpp" //-> Class clients
+# include "Client.hpp" //-> Client class
+# include "Operator.hpp" //-> Operator class
+# include "Channel.hpp" //-> Operator class
 
 using namespace Utils;
 
@@ -60,6 +62,7 @@ class IrcServer
 		/* ----- IRC Commands ----- */
 		void PASS(int const& fd);
 		void NICK(int const& fd);
+		void JOIN(int const& fd);
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
@@ -70,6 +73,8 @@ class IrcServer
 		std::string							_password;
 		// all clients connected
 		std::map<int, Client*>				_clients;
+		// all channels (accessible by name)
+		std::map<std::string, Channel*>				_channels;
 		// current client recv
 		std::list<std::string>				_recv;
 		// all commands of IRC server

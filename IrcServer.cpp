@@ -12,6 +12,7 @@
 
 #include "IrcServer.hpp"
 #include "Client.cpp"
+#include "Channel.cpp"
 
 /* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
 
@@ -105,6 +106,7 @@ void	IrcServer::InitSetCommands()
 	
 	_commands["PASS"] = &IrcServer::PASS;
 	_commands["NICK"] = &IrcServer::NICK;
+	_commands["JOIN"] = &IrcServer::JOIN;
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -276,5 +278,33 @@ void	IrcServer::NICK(int const& fd)
 			}
 			//for (size_t i = 0; _clients[i]->get)
 		}
+	}
+}
+
+void	IrcServer::JOIN(int const& fd)
+{
+	if (_recv.size() < 2)
+	{
+		std::string errorMsg = ":localhost 461 * JOIN :Not enough parameters\r\n";
+		return ;
+	}
+	if (_recv.size() > 2)
+	{
+		std::string errorMsg = ":localhost 461 * JOIN :Too many parameters\r\n";
+		return ;
+	}
+	std::list<std::string>::iterator it = _recv.begin();
+	std::string channelName = *(++it);
+	it--;
+	if (_channels.find(channelName) == _channels.end())
+	{
+		_channels[channelName] = new Channel(channelName, _clients[fd]);
+		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".";
+		send(fd, message.c_str(), message.length(), 0);
+	}
+	else
+	{
+		
+
 	}
 }

@@ -5,27 +5,30 @@
 # define DEBUG 1
 #endif
 
-# include "Operator.hpp"
+# include "Client.hpp"
 # include <string>
+# include <iostream>
+# include <map>
 
 class Channel
 {
     private:
-    int             _fd;
-    std::string     _name;
-    std::string     _channelKey;
-    bool            _isInviteOnly;
-    bool            _hasTopicRestrictions
-    bool            _hasChannelKey;
+    	std::string     _name;
+    	std::string     _channelKey;
+    	bool            _isInviteOnly;
+    	bool            _hasTopicRestrictions;
+    	bool            _hasChannelKey;
+		Client*			_owner;
 
+		// all clients connected, accessible by nickname
+		std::map<int, Client*> 			_members;		
 
 	public:
 		/* ----- Orthodox Canonical Form ----- */
 		~Channel();
-		Channel();
-		Channel(int fd);
+		Channel( std::string name, Client *owner );
 		Channel(const Channel& copy);
-		Channel& Channel=(const Channel& copy);
+		Channel& operator=(const Channel& copy);
 
 		/* ----- Methods ----- */
 
