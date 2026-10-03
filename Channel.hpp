@@ -21,10 +21,13 @@ class Channel
 		Client*			_owner;
 
 		// all clients connected, accessible by nickname
-		std::map<int, Client*> 			_members;		
+		std::map<int, Client*> 			_members;	
+		
+		Channel();
 
 	public:
 		/* ----- Orthodox Canonical Form ----- */
+		
 		~Channel();
 		Channel( std::string name, Client *owner );
 		Channel(const Channel& copy);

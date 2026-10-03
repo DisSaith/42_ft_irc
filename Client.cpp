@@ -25,7 +25,7 @@ Client&	Client::operator=(const Client& copy) { (void) copy; return *this; }
 Client::~Client()
 {
 	if (DEBUG)
-		std::cout << "Destructor called" << std::endl;
+		std::cout << "\033[0;31mDefault Client destructor called\033[0m" << std::endl;
 }
 
 //Main Constructor
@@ -41,7 +41,7 @@ Client::Client(int fd) :
 	_bufferOut.reserve(1024);
 
 	if (DEBUG)
-		std::cout << "Fd construtor called" << std::endl;
+		std::cout << "\033[0;32mClient constructor called\033[0m" << std::endl;
 }
 
 
