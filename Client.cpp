@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:15:14 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/02 12:58:29 by acohaut          ###   ########.fr       */
+/*   Updated: 2026/10/03 16:17:44 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ Client&	Client::operator=(const Client& copy) { (void) copy; return *this; }
 Client::~Client()
 {
 	if (DEBUG)
-		std::cout << "\033[0;31mDefault Client destructor called\033[0m" << std::endl;
+		std::cout << YELLOW << "Client " << _fd << RESET
+					<< " left server." << std::endl;
 }
 
 //Main Constructor
@@ -34,14 +35,16 @@ Client::Client(int fd) :
 	_hasSetPass(false),
 	_hasSetNick(false),
 	_hasSetUser(false),
-	_isOpperator(false),
+	_isOperator(false),
 	_toDisconnect(false)
 {
 	_bufferIn.reserve(1024);
 	_bufferOut.reserve(1024);
 
 	if (DEBUG)
-		std::cout << "\033[0;32mClient constructor called\033[0m" << std::endl;
+
+		std::cout << YELLOW << "Client " << fd << RESET
+					<< " joinded server." << std::endl;
 }
 
 
@@ -57,14 +60,24 @@ std::string Client::getCurrentChannelName() const
 	return this->_currentchannelname;
 }
 
+int	Client::getFd() const 
+{
+	return this->_fd;
+}
+
 bool	Client::getHasSetPass() const
 {
 	return this->_hasSetPass;
 }
 
-int Client::getFd() const 
+bool	Client::getIsOperator() const
 {
-	return this->_fd;
+	return this->_isOperator;
+}
+
+bool	Client::getToDisconnect() const
+{
+	return this->_toDisconnect;
 }
 
 void	Client::setPass()
@@ -106,11 +119,14 @@ void Client::appendToIn(std::string const& data)
 {
 	this->_bufferIn += data;
 
+	if (_bufferIn.length() >= 510)
+	{
+		_bufferIn.erase(510, _bufferIn.length());
+		_bufferIn += "\r\n";
+	}
+
 	if (DEBUG)
 		std::cout << "_bufferIn.length() = " << _bufferIn.length() << std::endl;
-
-	if (_bufferIn.length() == 510)
-		_bufferIn += "\r\n";
 }
 
 // Return true or false if there is a '\n' or not in the initial query by the user
