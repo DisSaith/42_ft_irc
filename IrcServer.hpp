@@ -66,7 +66,6 @@ class IrcServer
 		void PASS(int const& fd);
 		void NICK(int const& fd);
 		void JOIN(int const& fd);
-		void CHANMSG(int const& fd);
 		void USER(int const& fd);
 		void PRIVMSG(int const& fd);
 		void PART(int const& fd);
@@ -91,7 +90,7 @@ class IrcServer
 		// all clients connected
 		std::map<int, Client*>				_clients;
 		// all channels (accessible by name)
-		std::map<std::string, Channel*>				_channels;
+		std::map<std::string, Channel*>		_channels;
 		// current client recv
 		std::list<std::string>				_recv;
 		// all commands of IRC server

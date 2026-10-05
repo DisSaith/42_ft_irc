@@ -25,7 +25,7 @@ Channel::~Channel( void )
 	
 	for (it = _members.begin(); it != _members.end(); ++it)
 	{
-		it->second->setNewChannel("");
+		it->second->removeChannel(_name);
 	}
 	if (DEBUG)
 		std::cout << "\033[0;31mDefault Channel destructor called\033[0m" << std::endl;
@@ -69,7 +69,7 @@ bool	Channel::removeMember( int const& fd )
 {
 	std::string message = _members[fd]->getNickname() + " leaved the channel.\n";
 	sendMessageToMembers( message, -1 );
-	_members[fd]->setNewChannel("");
+	_members[fd]->removeChannel(_name);
 	_members.erase(fd);
 	if (DEBUG)
 		this->displayMembers();

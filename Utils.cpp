@@ -25,4 +25,26 @@ namespace Utils
 	
 		return (i);
 	}
+
+	std::list<std::string> split(std::string const& s, char const& c)
+	{
+		std::string				token;
+		std::list<std::string>	result;
+		size_t					i = s.find(c);
+		size_t					j = 0;
+
+		while (i != std::string::npos)
+		{
+			token = s.substr(j, i - j);
+			result.push_back(token);
+			j = i + 1;
+			i = s.find(c, j);
+		}
+		i = s.find('\r');
+		if (i == std::string::npos)
+			i = s.find('\n');
+		result.push_back(s.substr(j, i - j));
+
+		return (result);
+	}
 }

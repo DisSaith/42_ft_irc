@@ -19,6 +19,7 @@
 
 # include <iostream>
 # include <string>
+# include "Channel.hpp"
 
 class Client
 {
@@ -30,7 +31,7 @@ class Client
 
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
-		std::string	getCurrentChannelName() const;
+		std::map<std::string, Channel*>	getChannels() const;
 		int			getFd() const;
 		bool		getHasSetPass() const;
 		bool		getIsOperator() const;
@@ -40,7 +41,8 @@ class Client
 		void		setNickName(std::string const& nickName);
 		void		setUserName(std::string const& userName);
 		void		setRealName(std::string const& realName);
-		void		setNewChannel(std::string const& channelName);
+		void		setNewChannel(std::string const& channelName, Channel *channel);
+		void		removeChannel(std::string const& channelName);
 		void		setIsOperator(bool status);
 		void		setIsDisconnect(bool status);
 
@@ -51,21 +53,21 @@ class Client
 
 	private:
 		/* ----- Attributes ----- */
-		std::string	_ipAddr;
-		std::string	_bufferIn;
-		std::string	_bufferOut;
-		std::string	_nickname;
-		std::string	_username;
-		std::string	_realname;
-		std::string	_currentchannelname;
+		std::string							_ipAddr;
+		std::string							_bufferIn;
+		std::string							_bufferOut;
+		std::string							_nickname;
+		std::string							_username;
+		std::string							_realname;
+		std::map<std::string, Channel*>		_channels;
 
-		int			_fd;
+		int									_fd;
 		
-		bool		_hasSetPass;
-		bool		_hasSetNick;
-		bool		_hasSetUser;
-		bool		_isOperator;
-		bool		_toDisconnect;
+		bool								_hasSetPass;
+		bool								_hasSetNick;
+		bool								_hasSetUser;
+		bool								_isOperator;
+		bool								_toDisconnect;
 
 		/* ----- Orthodox Canonical Form ----- */
 		Client();

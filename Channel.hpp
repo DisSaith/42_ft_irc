@@ -5,10 +5,11 @@
 # define DEBUG 0
 #endif
 
-# include "Client.hpp"
 # include <string>
 # include <iostream>
 # include <map>
+
+class Client;
 
 class Channel
 {

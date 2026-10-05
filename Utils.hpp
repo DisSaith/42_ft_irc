@@ -17,10 +17,12 @@
 # include <string>
 # include <sstream>
 # include <cctype>
+# include <list>
 
 namespace Utils 
 {
 		int stoi( std::string const& s );
+		std::list<std::string> split(std::string const& s, char const& c);
 }
 
 #endif

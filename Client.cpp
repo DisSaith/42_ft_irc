@@ -75,9 +75,9 @@ std::string Client::getNickname() const
 	return this->_nickname;
 }
 
-std::string Client::getCurrentChannelName() const
+std::map<std::string, Channel*> Client::getChannels() const
 {
-	return this->_currentchannelname;
+	return this->_channels;
 }
 
 int	Client::getFd() const 
@@ -111,9 +111,14 @@ void	Client::setNickName(std::string const& nickName)
 	_hasSetNick = true;
 }
 
-void	Client::setNewChannel(std::string const& channelName)
+void	Client::setNewChannel(std::string const& channelName, Channel *channel)
 {
-	_currentchannelname = channelName;
+	_channels[channelName] = channel;
+}
+
+void	Client::removeChannel(std::string const& channelName)
+{
+	_channels.erase(channelName);
 }
 
 void	Client::setUserName(std::string const& userName)

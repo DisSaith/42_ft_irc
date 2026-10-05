@@ -144,25 +144,10 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
-	size_t			j = 0;
-	bool			inWord = false;
 
 	if (_recv.empty() == false)
 		_recv.clear(); // clear list before every new recv from a client
-	for ( size_t i = 0 ; i < buffer.length() ; i++)
-	{
-		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
-		{
-			inWord = true;
-			j = i;
-		}
-		if ( (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
-		{
-			inWord = false;
-			token = buffer.substr(j, i - j);
-			_recv.push_back(token);
-		}
-	}
+	_recv = split(buffer, ' ');
 
 	if (DEBUG) // display list tokens
 	{
@@ -188,7 +173,6 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		if (_recv.empty() == true)
 			return ;
 	}
-	CHANMSG(clientFd);
 	find = _commands.find(_recv.front());
 	if ( find != _commands.end() )
 	{
@@ -278,12 +262,13 @@ void	IrcServer::JOIN(int const& fd)
 	}
 	std::list<std::string>::iterator l_it = _recv.begin();
 	std::string channelName = *(++l_it);
-	_clients[fd]->setNewChannel(channelName);
+
 
 	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
 	if (it == _channels.end())
 	{
 		_channels[channelName] = new Channel(channelName, _clients[fd]);
+		_clients[fd]->setNewChannel(channelName, _channels[channelName]);
 		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".\n";
 		send(fd, message.c_str(), message.length(), 0);
 	}
@@ -293,30 +278,9 @@ void	IrcServer::JOIN(int const& fd)
 	}
 }
 
-void	IrcServer::CHANMSG(int const& fd)
-{
-	std::string		channelName = _clients[fd]->getCurrentChannelName();
-	if (channelName.empty())
-		return ;
-
-	std::list<std::string>::iterator it = _recv.begin();
-	std::string	message;
-	while (it != _recv.end())
-	{
-		message += *it;
-		it++;
-		if (it != _recv.end())
-			message += " ";
-	}
-	std::string fullmessage = channelName + ">> " + _clients[fd]->getNickname() + ": " + message + "\n";
-	_channels[channelName]->sendMessageToMembers(fullmessage, fd);
-}
-
 //if the owner leave, deletes the channel
 void	IrcServer::PART(int const& fd)
 {
-	std::string		channelName = _clients[fd]->getCurrentChannelName();
-
 	if (_recv.size() < 2)
 	{
 		std::string errorMsg = ":localhost 461 * PART :Not enough parameters\r\n";
@@ -335,7 +299,11 @@ void	IrcServer::PART(int const& fd)
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;		
 	}
-	if (channelName.empty())
+
+	std::list<std::string>::iterator l_it = _recv.begin();
+	std::string channelName = *(++l_it);
+
+	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
 	{
 		std::string errorMsg = "You need to join a channel first\r\n";
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
