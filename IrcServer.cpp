@@ -67,18 +67,6 @@ void IrcServer::CreateServer()
 	std::cout << GREEN << "IRC Server created !\n" << RESET
 		<< "port: " << this->_port << std::endl
 		<< "password: " << this->_password << std::endl;
-	return (true);
-}
-
-// Initialize Set container of IRC Server commands
-void	IrcServer::InitSetCommands()
-{
-	if (_commands.empty() == false)
-		_commands.clear();
-	
-	_commands["PASS"] = &IrcServer::PASS;
-	_commands["NICK"] = &IrcServer::NICK;
-	_commands["JOIN"] = &IrcServer::JOIN;
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -223,7 +211,6 @@ void	IrcServer::PASS(int const& fd)
 			std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
 			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 			return ;
-
 		}
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
@@ -268,36 +255,36 @@ void	IrcServer::NICK(int const& fd)
 	}
 }
 
-<<<<<<< HEAD
 //Wrong error messages
 void	IrcServer::JOIN(int const& fd)
 {
 	if (_recv.size() < 2)
 	{
 		std::string errorMsg = ":localhost 461 * JOIN :Not enough parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}
 	if (_recv.size() > 2)
 	{
 		std::string errorMsg = ":localhost 461 * JOIN :Too many parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}
-/* commented for testing
 	if (_clients[fd]->setIsRegistered() == false)
 	{
 		std::string errorMsg = "JOIN : User not registered\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;		
 	}
-*/	
 	std::list<std::string>::iterator l_it = _recv.begin();
 	std::string channelName = *(++l_it);
 	_clients[fd]->setNewChannel(channelName);
 
 	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
-	if (it == _channels.end()) (channelName.e
+	if (it == _channels.end())
 	{
 		_channels[channelName] = new Channel(channelName, _clients[fd]);
-		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".";
+		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".\n";
 		send(fd, message.c_str(), message.length(), 0);
 	}
 	else
@@ -321,7 +308,7 @@ void	IrcServer::CHANMSG(int const& fd)
 		if (it != _recv.end())
 			message += " ";
 	}
-	std::string fullmessage = channelName + ": " + _clients[fd]->getNickname() + ": " + message + "\n";
+	std::string fullmessage = channelName + ">> " + _clients[fd]->getNickname() + ": " + message + "\n";
 	_channels[channelName]->sendMessageToMembers(fullmessage, fd);
 }
 
@@ -455,7 +442,6 @@ bool IrcServer::CheckServerPort( std::string const& port )
 		throw std::out_of_range( "This IRC Server port is out of range." );
 	else if ( converted_port >= 1024 && converted_port <= 65535 )
 		return (true);
-
 	return (false);
 }
 
@@ -468,6 +454,7 @@ void	IrcServer::InitMapCommands()
 	_commands["PASS"] = &IrcServer::PASS;
 	_commands["NICK"] = &IrcServer::NICK;
 	_commands["USER"] = &IrcServer::USER;
+	_commands["JOIN"] = &IrcServer::JOIN;
 	_commands["PRIVMSG"] = &IrcServer::PRIVMSG;
 }
 
