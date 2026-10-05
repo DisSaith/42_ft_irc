@@ -26,7 +26,7 @@ Channel::~Channel( void )
 }
 
 //Overload operator=
-Channel&	Channel::operator=( const Channel& copy )
+Channel&	Channel::operator=( Channel const& copy )
 {
 	if (DEBUG)
 		std::cout << "\033[0;32mChannel copy assignment operator called\033[0m" << std::endl;
@@ -49,7 +49,6 @@ void	Channel::sendMessageToMembers(std::string const& message, int const& sender
 		if (it->first != sender_fd)
 			send(it->first, message.c_str(), message.length(), 0);
 	}
-
 }
 
 void	Channel::addNewMember(Client *newMember)
@@ -63,6 +62,6 @@ void	Channel::displayMembers( void )
 	std::map<int, Client*>::const_iterator it;
 	std::cout << "Members of channel " << _name << std::endl;
     for (it = _members.begin(); it != _members.end(); ++it)
-        std::cout << "	FD: " << it->second << "	Nickname: " << it->second->getNickname() << std::endl;
+        std::cout << "	FD: " << it->first << "	Nickname: " << it->second->getNickname() << std::endl;
 }
 
