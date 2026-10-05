@@ -47,6 +47,26 @@ Client::Client(int fd) :
 					<< " joinded server." << std::endl;
 }
 
+//Parametric constructor, mainly used for debug
+Client::Client(int fd, std::string nickname, std::string username, std::string realname) : 
+	_nickname(nickname),
+	_username(username),
+	_realname(realname),
+	_fd(fd),
+	_hasSetPass(true),
+	_hasSetNick(true),
+	_hasSetUser(true),
+	_isOperator(false),
+	_toDisconnect(false)
+{
+	_bufferIn.reserve(1024);
+	_bufferOut.reserve(1024);
+
+	if (DEBUG)
+
+		std::cout << YELLOW << "Client " << fd << RESET
+					<< " joinded server." << std::endl;
+}
 
 /* ======================== Getters / Setters ======================== */
 

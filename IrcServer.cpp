@@ -312,6 +312,77 @@ void	IrcServer::CHANMSG(int const& fd)
 	_channels[channelName]->sendMessageToMembers(fullmessage, fd);
 }
 
+//if the owner leave, deletes the channel
+void	IrcServer::PART(int const& fd)
+{
+	std::string		channelName = _clients[fd]->getCurrentChannelName();
+
+	if (_recv.size() < 2)
+	{
+		std::string errorMsg = ":localhost 461 * PART :Not enough parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_recv.size() > 2)
+	{
+		std::string errorMsg = ":localhost 461 * PART :Too many parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_clients[fd]->setIsRegistered() == false)
+	{
+		std::string errorMsg = "PART : User not registered\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;		
+	}
+	if (channelName.empty())
+	{
+		std::string errorMsg = "You need to join a channel first\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_channels[channelName]->removeMember(fd))
+	{
+		delete _channels[channelName];
+		_channels.erase(channelName);
+	}
+}
+
+void	IrcServer::NAMES(int const& fd)
+{
+	if (_recv.size() < 2)
+	{
+		std::string errorMsg = ":localhost 461 * NAMES :Not enough parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_recv.size() > 2)
+	{
+		std::string errorMsg = ":localhost 461 * NAMES :Too many parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_clients[fd]->setIsRegistered() == false)
+	{
+		std::string errorMsg = "NAMES : User not registered\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+
+	std::list<std::string>::iterator l_it = _recv.begin();
+	std::string channelName = *(++l_it);
+	std::map<std::string, Channel*>::iterator mapIt = _channels.find(channelName);
+
+	if (mapIt == _channels.end())
+	{
+		std::string errorMsg = "NAMES : No channel found with this name\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	_channels[channelName]->displayMembers(fd);
+	
+}
+
 void	IrcServer::USER(int const& fd)
 {
 	if (_clients[fd]->getHasSetPass())
@@ -456,6 +527,8 @@ void	IrcServer::InitMapCommands()
 	_commands["USER"] = &IrcServer::USER;
 	_commands["JOIN"] = &IrcServer::JOIN;
 	_commands["PRIVMSG"] = &IrcServer::PRIVMSG;
+	_commands["PART"] = &IrcServer::PART;
+	_commands["NAMES"] = &IrcServer::NAMES;
 }
 
 // Close all fds and delete for no leaks at the end of the program

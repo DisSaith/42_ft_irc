@@ -26,7 +26,8 @@ class Client
 		/* ----- Main Constructor & Destructor ----- */
 		~Client();
 		Client(int fd);
-		
+		Client(int fd, std::string nickname, std::string username, std::string realname);
+
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
 		std::string	getCurrentChannelName() const;
@@ -42,7 +43,7 @@ class Client
 		void		setNewChannel(std::string const& channelName);
 		void		setIsOperator(bool status);
 		void		setIsDisconnect(bool status);
-		
+
 		/* ----- Methods ----- */
 		std::string	extractCommand();
 		bool		hasCompleteCommand() const;

@@ -69,6 +69,8 @@ class IrcServer
 		void CHANMSG(int const& fd);
 		void USER(int const& fd);
 		void PRIVMSG(int const& fd);
+		void PART(int const& fd);
+		void NAMES(int const& fd);
 
 		/* ----- Signals ----- */
 		static void signalINT( int signal );

@@ -21,6 +21,12 @@ Channel::Channel( Channel const& copy )
 
 Channel::~Channel( void )
 {
+	std::map<int, Client*>::const_iterator it;
+	
+	for (it = _members.begin(); it != _members.end(); ++it)
+	{
+		it->second->setNewChannel("");
+	}
 	if (DEBUG)
 		std::cout << "\033[0;31mDefault Channel destructor called\033[0m" << std::endl;
 }
@@ -41,7 +47,7 @@ Channel&	Channel::operator=( Channel const& copy )
 	return *this;
 }
 
-void	Channel::sendMessageToMembers(std::string const& message, int const& sender_fd)
+void	Channel::sendMessageToMembers( std::string const& message, int const& sender_fd )
 {
 	std::map<int, Client*>::const_iterator 	it;	
 	for (it = _members.begin(); it != _members.end(); ++it)
@@ -51,10 +57,25 @@ void	Channel::sendMessageToMembers(std::string const& message, int const& sender
 	}
 }
 
-void	Channel::addNewMember(Client *newMember)
+void	Channel::addNewMember( Client *newMember )
 {
 	_members[newMember->getFd()] = newMember;
-	this->displayMembers();
+	if (DEBUG)
+		this->displayMembers();
+}
+
+//return true if the owner is removed, false otherwise
+bool	Channel::removeMember( int const& fd )
+{
+	std::string message = _members[fd]->getNickname() + " leaved the channel.\n";
+	sendMessageToMembers( message, -1 );
+	_members[fd]->setNewChannel("");
+	_members.erase(fd);
+	if (DEBUG)
+		this->displayMembers();
+	if (fd == _owner->getFd())
+		return true;
+	return false;
 }
 
 void	Channel::displayMembers( void )
@@ -62,6 +83,21 @@ void	Channel::displayMembers( void )
 	std::map<int, Client*>::const_iterator it;
 	std::cout << "Members of channel " << _name << std::endl;
     for (it = _members.begin(); it != _members.end(); ++it)
-        std::cout << "	FD: " << it->first << "	Nickname: " << it->second->getNickname() << std::endl;
+        std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
+void	Channel::displayMembers( int const& fd )
+{
+	std::map<int, Client*>::const_iterator it;
+	std::ostringstream oss;
+
+	std::string message = "Members of channel " + _name + "\n";
+	send(fd, message.c_str(), message.length(), 0);
+
+    for (it = _members.begin(); it != _members.end(); ++it)
+	{
+        oss << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
+		message = oss.str();
+		send(fd, message.c_str(), message.length(), 0);
+	}
+}
