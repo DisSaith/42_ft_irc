@@ -248,7 +248,7 @@ void	IrcServer::JOIN(int const& fd)
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}
-	if (_recv.size() > 2)
+	if (_recv.size() > 3)
 	{
 		std::string errorMsg = ":localhost 461 * JOIN :Too many parameters\r\n";
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
@@ -260,21 +260,31 @@ void	IrcServer::JOIN(int const& fd)
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;		
 	}
+
+	std::string message;
 	std::list<std::string>::iterator l_it = _recv.begin();
-	std::string channelName = *(++l_it);
+	std::list<std::string> channelNames = split(*(++l_it), ',');
+	if (_recv.size() == 3)
+		std::list<std::string> channelPasswords = split(*(++l_it), ',');
 
-
-	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
-	if (it == _channels.end())
+	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
 	{
-		_channels[channelName] = new Channel(channelName, _clients[fd]);
-		_clients[fd]->setNewChannel(channelName, _channels[channelName]);
-		std::string message = _clients[fd]->getNickname() + " has created the channel " + channelName + ".\n";
-		send(fd, message.c_str(), message.length(), 0);
-	}
-	else
-	{
-		it->second->addNewMember(_clients[fd]);
+		std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
+		if (chan_it == _channels.end())
+		{
+			_channels[*it] = new Channel(*it, _clients[fd]);
+			_clients[fd]->setNewChannel(*it, _channels[*it]);
+			message = _clients[fd]->getNickname() + " has created the channel " + *it + ".\n";
+			send(fd, message.c_str(), message.length(), 0);
+		}
+		else
+		{
+			chan_it->second->addNewMember(_clients[fd]);
+			message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
+			chan_it->second->sendMessageToMembers(message, fd);
+			message = "You joined the channel " + *it + ".\n";
+			send(fd, message.c_str(), message.length(), 0);
+		}
 	}
 }
 
@@ -318,12 +328,6 @@ void	IrcServer::PART(int const& fd)
 
 void	IrcServer::NAMES(int const& fd)
 {
-	if (_recv.size() < 2)
-	{
-		std::string errorMsg = ":localhost 461 * NAMES :Not enough parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
 	if (_recv.size() > 2)
 	{
 		std::string errorMsg = ":localhost 461 * NAMES :Too many parameters\r\n";
@@ -336,19 +340,29 @@ void	IrcServer::NAMES(int const& fd)
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}
-
-	std::list<std::string>::iterator l_it = _recv.begin();
-	std::string channelName = *(++l_it);
-	std::map<std::string, Channel*>::iterator mapIt = _channels.find(channelName);
-
-	if (mapIt == _channels.end())
+	std::list<std::string> channelNames;
+	if (_recv.size() == 1)
 	{
-		std::string errorMsg = "NAMES : No channel found with this name\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
+		for (std::map<std::string, Channel*>::iterator mapIt = _channels.begin(); mapIt != _channels.end(); mapIt++)
+			channelNames.push_back(mapIt->first);
 	}
-	_channels[channelName]->displayMembers(fd);
-	
+	else
+	{
+		std::list<std::string>::iterator l_it = _recv.begin();
+		channelNames = split(*(++l_it), ',');
+	}
+
+	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
+	{
+		std::map<std::string, Channel*>::iterator mapIt = _channels.find(*it);
+		if (mapIt == _channels.end())
+		{
+			std::string errorMsg = "NAMES : No channel found with this name: " + *it + "\r\n";
+			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		}
+		else
+			_channels[*it]->displayMembers(fd);
+	}
 }
 
 void	IrcServer::USER(int const& fd)
