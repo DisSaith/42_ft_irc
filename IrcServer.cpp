@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/06 14:53:32 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 16:58:07 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -407,7 +407,7 @@ void	IrcServer::USER(int const& fd)
 				std::string welcome = ":localhost 001 " + _clients[fd]->getNickname() + " :Welcome to the ft_irc network!\r\n";
 				send(fd, welcome.c_str(), welcome.length(), 0);
 				std::cout << "Le client " << fd << " est maintenant officiellement enregistré !" << std::endl;
-			}
+			} 
 		}
 	}
 }
