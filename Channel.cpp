@@ -7,7 +7,8 @@ Channel::Channel( void )
 
 Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false)
 {
-	_members[owner->getFd()] = owner;
+	addNewMember(owner);
+	addNewOperator(owner);
 	if (DEBUG)
 		std::cout << "\033[0;32mChannel parametric constructor called\033[0m" << std::endl;
 }
@@ -77,6 +78,22 @@ bool	Channel::removeMember( int const& fd )
 	return false;
 }
 
+void	Channel::addNewOperator( Client *newOperator )
+{
+	_operators[newOperator->getFd()] = newOperator;
+	if (DEBUG)
+		this->displayMembers();
+}
+
+//return true if the owner is removed, false otherwise
+void	Channel::removeOperator( int const& fd )
+{
+	_operators.erase(fd);
+	if (DEBUG)
+		this->displayOperators();
+}
+
+
 void	Channel::displayMembers( void )
 {
 	std::map<int, Client*>::const_iterator it;
@@ -85,18 +102,31 @@ void	Channel::displayMembers( void )
         std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
+void	Channel::displayOperators( void )
+{
+	std::map<int, Client*>::const_iterator it;
+	std::cout << "Operators of channel " << _name << std::endl;
+    for (it = _operators.begin(); it != _operators.end(); ++it)
+        std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
+}
+
 void	Channel::displayMembers( int const& fd )
 {
 	std::map<int, Client*>::const_iterator it;
 	std::ostringstream oss;
+	std::string name;
 
 	std::string message = "Members of channel " + _name + "\n";
 	send(fd, message.c_str(), message.length(), 0);
 
     for (it = _members.begin(); it != _members.end(); ++it)
 	{
+		name = "";
+		if (_operators.find(it->first) != _operators.end())
+			name = name + "@";
+		name = name + it->second->getNickname();
 		oss.str("");
-        oss << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
+        oss << "\tFD: " << it->first << "\tNickname: " << name << std::endl;
 		message = oss.str();
 		send(fd, message.c_str(), message.length(), 0);
 	}

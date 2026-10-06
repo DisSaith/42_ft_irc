@@ -45,6 +45,9 @@ class Channel
 		void					sendMessageToMembers(std::string const& message, int const& sender_fd);
 		void					addNewMember(Client *newMember);
 		bool					removeMember( int const& fd );
+		void					addNewOperator(Client *newMember);
+		void					removeOperator( int const& fd );
+		void					displayOperators( void );
 		void					displayMembers( void );
 		void					displayMembers( int const& fd );
 

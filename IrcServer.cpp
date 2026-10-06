@@ -289,6 +289,12 @@ void	IrcServer::JOIN(int const& fd)
 		}
 		else
 		{
+			if (_channels[*it]->hasMember(fd))
+			{
+				message = "You already are in the channel " + *it + ".\n";
+				send(fd, message.c_str(), message.length(), 0);
+				continue ;
+			}
 			chan_it->second->addNewMember(_clients[fd]);
 			message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
 			chan_it->second->sendMessageToMembers(message, fd);
@@ -329,8 +335,10 @@ void	IrcServer::PART(int const& fd)
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}
-	std::string message = _clients[fd]->getNickname() + " leaved the channel.\n";
+	std::string message = _clients[fd]->getNickname() + " leaved the channel " + channelName + ".\n";
 	_channels[channelName]->sendMessageToMembers( message, fd );
+	message = "You leaved the channel " + channelName + ".\n";
+	send(fd, message.c_str(), message.length(), 0);
 	if (_channels[channelName]->removeMember(fd))
 	{
 		delete _channels[channelName];
