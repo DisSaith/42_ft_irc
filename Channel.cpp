@@ -78,6 +78,11 @@ bool	Channel::removeMember( int const& fd )
 	return false;
 }
 
+Client* Channel::getOwner() const
+{
+    return this->_owner;
+}
+
 void	Channel::displayMembers( void )
 {
 	std::map<int, Client*>::const_iterator it;
@@ -100,4 +105,14 @@ void	Channel::displayMembers( int const& fd )
 		message = oss.str();
 		send(fd, message.c_str(), message.length(), 0);
 	}
+}
+
+bool Channel::hasMember(int fd) const
+{
+	return (_members.find(fd) != _members.end());
+}
+
+std::map<int, Client*> Channel::getMembers() const
+{
+	return this->_members;
 }

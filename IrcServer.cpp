@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/03 17:53:03 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 14:53:32 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,10 @@ void	IrcServer::ConnectionWithClients()
 					if (DEBUG)
 						std::cout << "\nbytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
-						CloseFds();
+					{
+						RemoveClient(_pollFds[i].fd);
+						i--;
+					}
 					else
 					{
 						std::string data(buffer, bytesRead);
@@ -130,6 +133,13 @@ void	IrcServer::ConnectionWithClients()
 								return ;
 
 							ParsingRecv(_pollFds[i].fd);
+							if (_clients.find(_pollFds[i].fd) != _clients.end() && _clients[_pollFds[i].fd]->getToDisconnect() == true)
+								break;
+						}
+						if (_clients.find(_pollFds[i].fd) != _clients.end() && _clients[_pollFds[i].fd]->getToDisconnect() == true)
+						{
+							RemoveClient(_pollFds[i].fd);
+							i--;
 						}
 					}
 				}	
@@ -188,7 +198,6 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		if (_recv.empty() == true)
 			return ;
 	}
-	CHANMSG(clientFd);
 	find = _commands.find(_recv.front());
 	if ( find != _commands.end() )
 	{
@@ -291,25 +300,6 @@ void	IrcServer::JOIN(int const& fd)
 	{
 		it->second->addNewMember(_clients[fd]);
 	}
-}
-
-void	IrcServer::CHANMSG(int const& fd)
-{
-	std::string		channelName = _clients[fd]->getCurrentChannelName();
-	if (channelName.empty())
-		return ;
-
-	std::list<std::string>::iterator it = _recv.begin();
-	std::string	message;
-	while (it != _recv.end())
-	{
-		message += *it;
-		it++;
-		if (it != _recv.end())
-			message += " ";
-	}
-	std::string fullmessage = channelName + ">> " + _clients[fd]->getNickname() + ": " + message + "\n";
-	_channels[channelName]->sendMessageToMembers(fullmessage, fd);
 }
 
 //if the owner leave, deletes the channel
@@ -428,9 +418,39 @@ void	IrcServer::PRIVMSG(int const& fd)
 				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
+			
 			std::list<std::string>::iterator it = _recv.begin();
 			it++;
 			std::string target = *it;
+			it++; 
+			
+			std::string	message;
+			while (it != _recv.end())
+			{
+				message += *it;
+				it++;
+				if (it != _recv.end())
+					message += " ";
+			}
+			
+			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + target + " " + message + "\r\n";
+
+			if (target[0] == '#' || target[0] == '&')
+			{
+				std::map<std::string, Channel*>::iterator chanIt = _channels.find(target);
+				
+				if (chanIt != _channels.end())
+				{
+					chanIt->second->sendMessageToMembers(fullMsg, fd);
+				}
+				else
+				{
+					std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + target + " :No such nick/channel\r\n";
+					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+				}
+				return ;
+			}
+
 			bool targetFound = false;
 			int targetFd = -1;
 			std::map<int, Client*>::iterator mapIt;
@@ -450,19 +470,86 @@ void	IrcServer::PRIVMSG(int const& fd)
 				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
-			it++;
-			std::string	message;
-			while (it != _recv.end())
-			{
-				message += *it;
-				it++;
-				if (it != _recv.end())
-					message += " ";
-			}
-			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + target + " " + message + "\r\n";
 			send(targetFd, fullMsg.c_str(), fullMsg.length(), 0);
 		}
 	}
+}
+
+void    IrcServer::QUIT(int const& fd)
+{
+	if (_recv.front() == "QUIT")
+	{
+		std::string quitMsg = "Client Quit";
+		if (_recv.size() > 1)
+		{
+			std::list<std::string>::iterator it = _recv.begin();
+			it++;
+			quitMsg = "";
+			while (it != _recv.end())
+			{
+				quitMsg += *it;
+				it++;
+				if (it != _recv.end())
+					quitMsg += " ";
+			}
+			if (!quitMsg.empty() && quitMsg[0] == ':')
+				quitMsg.erase(0, 1);
+		}
+		std::string fullMsg = ":" + _clients[fd]->getNickname() + " QUIT :" + quitMsg + "\r\n";
+		std::set<int> clientsToNotify;
+		std::map<std::string, Channel*>::iterator chanIt;
+		for (chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+		{
+			if (chanIt->second->hasMember(fd))
+			{
+				std::map<int, Client*> members = chanIt->second->getMembers();
+				std::map<int, Client*>::iterator memIt;
+
+				for (memIt = members.begin(); memIt != members.end(); ++memIt)
+				{
+					if (memIt->first != fd)
+						clientsToNotify.insert(memIt->first);
+				}
+				chanIt->second->removeMember(fd);
+			}
+		}
+		std::set<int>::iterator setIt;
+		for (setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)
+		{
+			send(*setIt, fullMsg.c_str(), fullMsg.length(), 0);
+		}
+		std::cout << YELLOW << "Client " << _clients[fd]->getNickname() << " a quitté le serveur." << RESET << std::endl;
+		_clients[fd]->setIsDisconnect(true);
+	}
+}
+
+void IrcServer::RemoveClient(int fd)
+{
+	std::map<std::string, Channel*>::iterator chanIt;
+	for (chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+	{
+		if (chanIt->second->hasMember(fd))
+			chanIt->second->removeMember(fd);
+	}
+
+	for (size_t i = 0; i < _pollFds.size(); i++)
+	{
+		if (_pollFds[i].fd == fd)
+		{
+			_pollFds.erase(_pollFds.begin() + i);
+			break;
+		}
+	}
+
+	close(fd);
+	if (_clients.find(fd) != _clients.end())
+	{
+		delete _clients[fd];
+		_clients.erase(fd);
+	}
+
+	if (DEBUG)
+		std::cout << YELLOW << "Ressources du client " << fd << " libérées proprement." << RESET << std::endl;
 }
 
 /* ======================== Signals ======================== */
@@ -529,6 +616,7 @@ void	IrcServer::InitMapCommands()
 	_commands["PRIVMSG"] = &IrcServer::PRIVMSG;
 	_commands["PART"] = &IrcServer::PART;
 	_commands["NAMES"] = &IrcServer::NAMES;
+	_commands["QUIT"] = &IrcServer::QUIT;
 }
 
 // Close all fds and delete for no leaks at the end of the program

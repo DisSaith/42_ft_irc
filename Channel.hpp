@@ -18,7 +18,7 @@ class Channel
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
     	bool            _hasChannelKey;
-		Client*			_owner;
+	Client*			_owner;
 
 		// all clients connected, accessible by nickname
 		std::map<int, Client*> 			_members;	
@@ -40,6 +40,9 @@ class Channel
 		bool	removeMember( int const& fd );
 		void	displayMembers( void );
 		void	displayMembers( int const& fd );
+		Client*			getOwner() const;
+		bool			hasMember(int fd) const;
+		std::map<int, Client*>	getMembers() const;
 };
 
 #endif
