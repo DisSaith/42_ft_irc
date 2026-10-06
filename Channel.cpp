@@ -116,26 +116,41 @@ void	Channel::displayOperators( void )
         std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
-void	Channel::displayMembers( int const& fd )
+void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames)
 {
 	std::map<int, Client*>::const_iterator it;
-	std::ostringstream oss;
+	std::string message;
 	std::string name;
 
-	std::string message = "Members of channel " + _name + "\n";
-	send(fd, message.c_str(), message.length(), 0);
-
+	message = _name + " :";
     for (it = _members.begin(); it != _members.end(); ++it)
 	{
 		name = "";
 		if (_operators.find(it->first) != _operators.end())
 			name = name + "@";
 		name = name + it->second->getNickname();
-		oss.str("");
-        oss << "\tFD: " << it->first << "\tNickname: " << name << std::endl;
-		message = oss.str();
+		message = message + name;
+		if (++it != _members.end())
+        	message = message + " ";
+		--it;
+	}
+	message = message + "\n";
+	send(fd, message.c_str(), message.length(), 0);
+	if (displayEndOfNames)
+	{
+		message = _name + " :End of /NAMES list\n";
 		send(fd, message.c_str(), message.length(), 0);
 	}
+}
+
+void	Channel::displayTopic( int const& fd )
+{
+	std::string message = _name + " :";
+	if (_topic.empty())
+		message = message + "No topic is set\n";
+	else
+		message = message + _topic;
+	send(fd, message.c_str(), message.length(), 0);
 }
 
 bool Channel::hasMember(int fd) const
