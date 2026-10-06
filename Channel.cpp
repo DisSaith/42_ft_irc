@@ -5,7 +5,7 @@ Channel::Channel( void )
 		std::cout << "\033[0;31mDefault Channel constructor called\033[0m" << std::endl;
 }
 
-Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false),  _owner(owner)
+Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false)
 {
 	_members[owner->getFd()] = owner;
 	if (DEBUG)
@@ -43,6 +43,7 @@ Channel&	Channel::operator=( Channel const& copy )
         _hasTopicRestrictions = copy._hasTopicRestrictions;
         _hasChannelKey = copy._hasChannelKey;
 		_members = copy._members;
+		_operators = copy._operators;
 	}
 	return *this;
 }
@@ -73,7 +74,7 @@ bool	Channel::removeMember( int const& fd )
 	_members.erase(fd);
 	if (DEBUG)
 		this->displayMembers();
-	if (fd == _owner->getFd())
+	if (_members.empty())
 		return true;
 	return false;
 }
@@ -96,6 +97,7 @@ void	Channel::displayMembers( int const& fd )
 
     for (it = _members.begin(); it != _members.end(); ++it)
 	{
+		oss.str("");
         oss << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 		message = oss.str();
 		send(fd, message.c_str(), message.length(), 0);

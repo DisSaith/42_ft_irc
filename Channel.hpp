@@ -19,10 +19,11 @@ class Channel
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
     	bool            _hasChannelKey;
-		Client*			_owner;
 
 		// all clients connected, accessible by nickname
 		std::map<int, Client*> 			_members;	
+		// all channel operators
+		std::map<int, Client*> 			_operators;
 		
 		Channel();
 

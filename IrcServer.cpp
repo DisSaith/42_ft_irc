@@ -315,7 +315,7 @@ void	IrcServer::PART(int const& fd)
 
 	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
 	{
-		std::string errorMsg = "You need to join a channel first\r\n";
+		std::string errorMsg = "You need to join this channel first\r\n";
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		return ;
 	}

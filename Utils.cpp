@@ -44,7 +44,6 @@ namespace Utils
 		if (i == std::string::npos)
 			i = s.find('\n');
 		result.push_back(s.substr(j, i - j));
-
 		return (result);
 	}
 }
