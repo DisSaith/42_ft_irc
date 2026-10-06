@@ -35,13 +35,19 @@ class Channel
 		Channel(const Channel& copy);
 		Channel& operator=(const Channel& copy);
 
+		/* ----- Accessors ----- */
+
+		bool					hasMember(int fd) const;
+		std::map<int, Client*>	getMembers() const;
+
 		/* ----- Methods ----- */
 
-		void	sendMessageToMembers(std::string const& message, int const& sender_fd);
-		void	addNewMember(Client *newMember);
-		bool	removeMember( int const& fd );
-		void	displayMembers( void );
-		void	displayMembers( int const& fd );
+		void					sendMessageToMembers(std::string const& message, int const& sender_fd);
+		void					addNewMember(Client *newMember);
+		bool					removeMember( int const& fd );
+		void					displayMembers( void );
+		void					displayMembers( int const& fd );
+
 };
 
 #endif

@@ -68,8 +68,6 @@ void	Channel::addNewMember( Client *newMember )
 //return true if the owner is removed, false otherwise
 bool	Channel::removeMember( int const& fd )
 {
-	std::string message = _members[fd]->getNickname() + " leaved the channel.\n";
-	sendMessageToMembers( message, -1 );
 	_members[fd]->removeChannel(_name);
 	_members.erase(fd);
 	if (DEBUG)
@@ -102,4 +100,14 @@ void	Channel::displayMembers( int const& fd )
 		message = oss.str();
 		send(fd, message.c_str(), message.length(), 0);
 	}
+}
+
+bool Channel::hasMember(int fd) const
+{
+	return (_members.find(fd) != _members.end());
+}
+
+std::map<int, Client*> Channel::getMembers() const
+{
+	return this->_members;
 }

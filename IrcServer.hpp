@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/03 16:48:59 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 14:53:49 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,7 @@
 # include <map> //-> for map container
 # include <list> //-> for list container
 # include <vector> //-> for vector container
+# include <set> //-> for set container
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Client class
 # include "Operator.hpp" //-> Operator class
@@ -70,6 +71,7 @@ class IrcServer
 		void PRIVMSG(int const& fd);
 		void PART(int const& fd);
 		void NAMES(int const& fd);
+		void QUIT(int const& fd);
 
 		/* ----- Signals ----- */
 		static void signalINT( int signal );
@@ -79,6 +81,7 @@ class IrcServer
 		bool				CheckServerPort( std::string const& port );
 		void				InitMapCommands();
 		void				CloseFds();
+		void				RemoveClient(int fd);
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
