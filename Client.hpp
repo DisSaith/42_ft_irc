@@ -6,7 +6,7 @@
 /*   By: nofelten <nofelten@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/23 14:19:04 by nofelten          #+#    #+#             */
-/*   Updated: 2026/10/03 16:06:41 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:21:18 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,7 @@ class Client
 		std::map<std::string, Channel*>	getChannels() const;
 		int			getFd() const;
 		bool		getHasSetPass() const;
-		bool		getIsOperator() const;
+		bool		getIsServerOperator() const;
 		bool		getToDisconnect() const;
 		bool		setIsRegistered() const;
 		void		setPass();

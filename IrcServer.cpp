@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/06 16:58:07 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:25:36 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -629,7 +629,7 @@ void	IrcServer::InitMapCommands()
 	_commands["PART"] = &IrcServer::PART;
 	_commands["NAMES"] = &IrcServer::NAMES;
 	_commands["QUIT"] = &IrcServer::QUIT;
-	_commands["MODE"] = &IrcServer::MODE;
+//	_commands["MODE"] = &IrcServer::MODE;
 }
 
 // Close all fds and delete for no leaks at the end of the program
@@ -646,4 +646,11 @@ void IrcServer::CloseFds()
 		_pollFds.erase(_pollFds.begin() + i);
 		i--;
 	}
+}
+
+bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
+{
+	if (_clients[fd]->getIsServerOperator() || _channels[channelName]->getIsChannelOperator(fd))
+		return true;
+	return false;
 }

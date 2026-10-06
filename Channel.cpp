@@ -93,7 +93,7 @@ void	Channel::removeOperator( int const& fd )
 		this->displayOperators();
 }
 
-void	Channel::isChannelOperator( int const& fd )
+bool	Channel::getIsChannelOperator( int const& fd )
 {
 	if (_operators.find(fd) != _operators.end())
 		return (true);

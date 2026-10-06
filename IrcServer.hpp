@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/06 14:53:49 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/06 18:23:03 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ class IrcServer
 
 		/* ----- Utils ----- */
 		static IrcServer*	GetPtrServer( IrcServer *server );
+		bool				isAnyOperator(int const& fd, std::string const& channelName);
 		bool				CheckServerPort( std::string const& port );
 		void				InitMapCommands();
 		void				CloseFds();
