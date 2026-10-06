@@ -39,6 +39,7 @@ class Channel
 
 		bool					hasMember(int fd) const;
 		std::map<int, Client*>	getMembers() const;
+		void					getIsChannelOperator( int const& fd )
 
 		/* ----- Methods ----- */
 
