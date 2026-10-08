@@ -15,6 +15,7 @@ class Channel
 {
     private:
     	std::string     _name;
+		std::string		_topic;
     	std::string     _channelKey;
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
@@ -58,7 +59,8 @@ class Channel
 		void					removeOperator( int const& fd );
 		void					displayOperators( void );
 		void					displayMembers( void );
-		void					displayMembers( int const& fd );
+		void					displayMembers( int const& fd, bool const& displayEndOfNames );
+		void					displayTopic( int const& fd );
 
 };
 
