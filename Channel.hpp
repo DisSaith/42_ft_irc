@@ -15,7 +15,7 @@ class Channel
 {
     private:
     	std::string     _name;
-	std::string	_topic;
+		std::string	_topic;
     	std::string     _channelKey;
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;

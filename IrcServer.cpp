@@ -136,7 +136,7 @@ void	IrcServer::ConnectionWithClients()
 							}
 							catch ( IrcException const& e )
 							{
-								std::string message = buildMessage(e.getCode(), e.getTarget(), e.getText(), e.getFd());
+								std::string message = buildMessage(e.getCode(), e.getTarget(), e.getText());
 								send(e.getFd(), message.c_str(), message.length(), 0);
 							}
 							if (_clients.find(_pollFds[i].fd) != _clients.end() && _clients[_pollFds[i].fd]->getToDisconnect() == true)
@@ -154,7 +154,7 @@ void	IrcServer::ConnectionWithClients()
 	}
 }
 
-std::string		IrcServer::buildMessage( int code, std::string target, std::string text, int fd )
+std::string		IrcServer::buildMessage( int code, std::string target, std::string text )
 {
 	std::string message = ":localhost ";
 
