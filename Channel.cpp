@@ -147,3 +147,23 @@ std::map<int, Client*> Channel::getMembers() const
 {
 	return this->_members;
 }
+
+bool	Channel::getHasChannelKey() const
+{
+	return this->_hasChannelKey;
+}
+
+std::string	Channel::getChannelKey() const
+{
+	return this->_channelKey;
+}
+
+void	Channel::setHasChannelKey(bool status)
+{
+	this->_hasChannelKey = status;
+}
+
+void	Channel::setChannelKey(std::string key)
+{
+	this->_channelKey = key;
+}

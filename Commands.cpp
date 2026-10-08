@@ -232,12 +232,12 @@ void	IrcServer::PRIVMSG(int const& fd)
 				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
-			
+
 			std::list<std::string>::iterator it = _recv.begin();
 			it++;
-			std::string target = *it;
+			std::string chanTarget = *it;
 			it++; 
-			
+
 			std::string	message;
 			while (it != _recv.end())
 			{
@@ -246,20 +246,20 @@ void	IrcServer::PRIVMSG(int const& fd)
 				if (it != _recv.end())
 					message += " ";
 			}
-			
-			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + target + " " + message + "\r\n";
 
-			if (target[0] == '#' || target[0] == '&')
+			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " " + message + "\r\n";
+
+			if (chanTarget[0] == '#' || chanTarget[0] == '&')
 			{
-				std::map<std::string, Channel*>::iterator chanIt = _channels.find(target);
-				
+				std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+
 				if (chanIt != _channels.end())
 				{
 					chanIt->second->sendMessageToMembers(fullMsg, fd);
 				}
 				else
 				{
-					std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + target + " :No such nick/channel\r\n";
+					std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
 					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				}
 				return ;
@@ -271,7 +271,7 @@ void	IrcServer::PRIVMSG(int const& fd)
 
 			for (mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
 			{
-				if (mapIt->second->getNickname() == target)
+				if (mapIt->second->getNickname() == chanTarget)
 				{
 					targetFound = true;
 					targetFd = mapIt->first;
@@ -280,7 +280,7 @@ void	IrcServer::PRIVMSG(int const& fd)
 			}
 			if (targetFound == false)
 			{
-				std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + target + " :No such nick/channel\r\n";
+				std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
 				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
@@ -334,5 +334,148 @@ void    IrcServer::QUIT(int const& fd)
 		}
 		std::cout << YELLOW << "Client " << _clients[fd]->getNickname() << " a quitté le serveur." << RESET << std::endl;
 		_clients[fd]->setIsDisconnect(true);
+	}
+}
+
+void	IrcServer::MODE(int const& fd)
+{
+	if (_clients[fd]->setIsRegistered() == false)
+	{
+		std::string errorMsg = ":localhost 451 " + _clients[fd]->getNickname() + " :You have not registered\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (_recv.size() < 2)
+	{
+		std::string errorMsg = ":localhost 461 " + _clients[fd]->getNickname() + " MODE :Not enough parameters\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	std::list<std::string>::iterator it = _recv.begin();
+	it++;
+	std::string chanTarget = *it;
+	if (chanTarget[0] == '#' || chanTarget[0] == '&')
+	{
+		std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+		if (chanIt == _channels.end())
+		{
+			std::string errorMsg = ":localhost 403 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such channel\r\n";
+			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+			return ;
+		}
+		Channel* channel = chanIt->second;
+		if (_recv.size() == 2)
+		{
+			std::string currentModes = "+";
+			if (channel->getHasChannelKey())
+				currentModes += "k";
+			std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + "\r\n";
+			send(fd, modeMsg.c_str(), modeMsg.length(), 0);
+			return ;
+		}
+		if (!isAnyOperator(fd, chanTarget))
+		{
+			std::string errorMsg = ":localhost 482 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not channel operator\r\n";
+			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+			return ;
+		}
+		it++;
+		std::string flags = *it;
+		it++;
+		bool adding = true;
+		std::string messageMode;
+		std::string messageArgs;
+		for (size_t i = 0; i < flags.length(); ++i)
+		{
+			char c = flags[i];
+			if (c == '+')
+			{
+				adding = true;
+				messageMode += "+";
+			}
+			else if (c == '-')
+			{
+				adding = false;
+				messageMode += "-";
+			}
+			else if (c == 'o')
+			{
+				if (it != _recv.end())
+				{
+					std::string targetNick = *it;
+					it++;	
+					int targetFd = -1;
+					std::map<int, Client*>::iterator clientIt;
+					for (clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt)
+					{
+						if (clientIt->second->getNickname() == targetNick)
+						{
+							targetFd = clientIt->first;
+							break ;
+						}
+					}
+					if (targetFd != -1 && channel->hasMember(targetFd))
+					{
+						if (adding)
+							channel->addNewOperator(_clients[targetFd]);
+						else
+							channel->removeOperator(targetFd);
+						messageMode += "o";
+						messageArgs += " " + targetNick;
+					}
+				}
+			}
+			else if (c == 'k')
+			{
+				if (adding)
+				{
+					if (it != _recv.end())
+					{
+						std::string newKey = *it;
+						it++;
+						channel->setHasChannelKey(true);
+						channel->setChannelKey(newKey);
+						messageMode += "k";
+						messageArgs += " " + newKey;
+					}
+				}
+				else
+				{
+					if (it != _recv.end())
+					{
+						std::string providedKey = *it;
+						it++;
+						if (providedKey == channel->getChannelKey())
+						{
+							channel->setHasChannelKey(false);
+							channel->setChannelKey("");
+
+							messageMode += "k";
+							messageArgs += " " + providedKey;
+						}
+					}
+				}
+			}
+/*			else if (c == 'l')
+			{
+				if (adding)
+				{
+					if (it != _recv.end())
+					{
+						
+					}
+				}
+			}*/
+			else
+			{
+				std::string errorMsg = ":localhost 472 " + _clients[fd]->getNickname() + " " + c + " :is unknown mode char to me\r\n";
+				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+			}
+		}
+		if (messageMode.empty() == false && messageMode != "+" && messageMode != "-")
+		{
+			std::string fullMsg = ":" + _clients[fd]->getNickname() + " MODE " + chanTarget + " " + messageMode + messageArgs + "\r\n";
+			channel->sendMessageToMembers(fullMsg, -1);
+		}
 	}
 }

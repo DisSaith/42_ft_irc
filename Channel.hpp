@@ -40,6 +40,14 @@ class Channel
 		bool					hasMember(int fd) const;
 		std::map<int, Client*>	getMembers() const;
 		bool					getIsChannelOperator( int const& fd );
+		bool					getHasChannelKey() const;
+		std::string				getChannelKey() const;
+
+		/* ----- Setters ----- */
+
+		void					setHasChannelKey(bool status);
+		void					setChannelKey(std::string key);
+
 
 		/* ----- Methods ----- */
 

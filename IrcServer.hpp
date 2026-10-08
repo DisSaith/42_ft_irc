@@ -6,7 +6,7 @@
 /*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/06 18:23:03 by nofelten         ###   ########.fr       */
+/*   Updated: 2026/10/08 11:06:24 by nofelten         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,6 +73,7 @@ class IrcServer
 		void NAMES(int const& fd);
 		void QUIT(int const& fd);
 		void KICK(int const& fd);
+		void MODE(int const& fd);
 
 		/* ----- Signals ----- */
 		static void signalINT( int signal );
