@@ -20,7 +20,7 @@ class Channel
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
     	bool            _hasChannelKey;
-	size_t		_userLimit;
+	unsigned int		_userLimit;
 
 		// all clients connected, accessible by nickname
 		std::map<int, Client*> 			_members;	

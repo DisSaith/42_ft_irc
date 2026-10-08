@@ -496,7 +496,7 @@ void	IrcServer::MODE(int const& fd)
 				{
 					if (it != _recv.end())
 					{
-						size_t	limit;
+						unsigned int	limit;
 						std::stringstream ss(*it);
 						ss >> limit;
 						channel->setUserLimit(limit);
@@ -508,7 +508,7 @@ void	IrcServer::MODE(int const& fd)
 				else
 				{
 					if (it != _recv.end())
-						channel->setUserLimit(SIZE_MAX);
+						channel->setUserLimit(UINT_MAX);
 				}
 			}
 			else
