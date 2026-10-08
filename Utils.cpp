@@ -35,6 +35,13 @@ namespace Utils
 		return ( s_ );
 	}
 
+	bool isMaskChar( char const& c)
+	{
+		if (c == '#' || c == '&')
+			return true;
+		return false;
+	}
+
 	std::list<std::string> split(std::string const& s, char const& c)
 	{
 		std::string				token;

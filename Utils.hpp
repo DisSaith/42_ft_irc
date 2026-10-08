@@ -24,6 +24,7 @@ namespace Utils
 		int stoi( std::string const& s );
 		std::string	itos( int const& value );
 		std::list<std::string> split(std::string const& s, char const& c);
+		bool isMaskChar( char const& c);
 }
 
 #endif

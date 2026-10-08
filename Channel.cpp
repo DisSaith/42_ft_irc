@@ -5,12 +5,15 @@ Channel::Channel( void )
 		std::cout << "\033[0;31mDefault Channel constructor called\033[0m" << std::endl;
 }
 
-Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false)
+Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false), _userLimit(UINT_MAX)
 {
 	addNewMember(owner);
 	addNewOperator(owner);
 	if (DEBUG)
+	{
 		std::cout << "\033[0;32mChannel parametric constructor called\033[0m" << std::endl;
+		std::cout << "Channel user limit: " << _userLimit << std::endl;
+	}
 }
 
 Channel::Channel( Channel const& copy )
@@ -163,6 +166,11 @@ std::map<int, Client*> Channel::getMembers() const
 	return this->_members;
 }
 
+bool	Channel::getIsInviteOnly() const
+{
+	return this->_isInviteOnly;
+}
+
 bool	Channel::getHasChannelKey() const
 {
 	return this->_hasChannelKey;
@@ -173,7 +181,7 @@ std::string	Channel::getChannelKey() const
 	return this->_channelKey;
 }
 
-size_t	Channel::getUserLimit() const
+unsigned int	Channel::getUserLimit() const
 {
 	return this->_userLimit;
 }
@@ -181,14 +189,20 @@ size_t	Channel::getUserLimit() const
 void	Channel::setHasChannelKey(bool status)
 {
 	this->_hasChannelKey = status;
+	if (DEBUG)
+		std::cout << _name << "channel key bool set: " << _hasChannelKey << std::endl;
 }
 
 void	Channel::setChannelKey(std::string key)
 {
 	this->_channelKey = key;
+	if (DEBUG)
+		std::cout << _name << "channel key set: " << _channelKey << std::endl;
 }
 
-void	Channel::setUserLimit(size_t limit)
+void	Channel::setUserLimit(unsigned int limit)
 {
 	this->_userLimit = limit;
+	if (DEBUG)
+		std::cout << _name << "user limit set: " << _userLimit << std::endl;
 }

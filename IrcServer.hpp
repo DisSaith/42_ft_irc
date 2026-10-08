@@ -34,6 +34,7 @@
 # include <netinet/in.h> //-> for struct sockaddr_in
 # include <poll.h> // poll() for multiple clients
 # include <fcntl.h> //-> fcntl()
+# include <climits> //-> used for int and uint limits
 # include <cstring> //-> used for c string utilities like memset() or strcmp()
 # include <csignal> //-> used for signal handling
 # include <map> //-> for map container
@@ -86,6 +87,7 @@ class IrcServer
 		void				InitMapCommands();
 		void				CloseFds();
 		void				RemoveClient(int fd);
+		std::string			buildMessage( int code, std::string target, std::string text, int fd );
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);

@@ -2,12 +2,9 @@ void	IrcServer::PASS(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "PASS")
 	{
+		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 2)
-		{
-			std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
-			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-			return ;
-		}
+			throw IrcException(461, "PASS", ":Not enough parameters", fd);
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
 		if (*it != _password)
@@ -28,12 +25,9 @@ void	IrcServer::NICK(int const& fd)
 	{
 		if (_recv.empty() == false && _recv.front() == "NICK")
 		{
+			//ERR_NEEDMOREPARAMS
 			if (_recv.size() < 2)
-			{
-				std::string errorMsg = ":localhost 461 * PASS :Not enough parameters\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;
-			}
+				throw IrcException(461, "NICK", ":Not enough parameters", fd);
 			std::list<std::string>::iterator it = _recv.begin();
 			it++;
 			std::map<int, Client*>::iterator mapIt;
@@ -54,82 +48,85 @@ void	IrcServer::NICK(int const& fd)
 //Wrong error messages
 void	IrcServer::JOIN(int const& fd)
 {
-	if (_recv.size() < 2)
-	{
-		throw IrcException(461, "JOIN", ":Not enough parameters", fd);
-	}
 	if (_clients[fd]->setIsRegistered() == false)
-	{
-		std::string errorMsg = "JOIN : User not registered\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;		
-	}
-
+		throw IrcException(-1, "JOIN", ":User not registered", fd);
+	//ERR_NEEDMOREPARAMS
+	if (_recv.size() < 2)
+		throw IrcException(461, "JOIN", ":Not enough parameters", fd);
 	std::string message;
 	std::list<std::string>::iterator l_it = _recv.begin();
 	std::list<std::string> channelNames = split(*(++l_it), ',');
+	
+	std::list<std::string> channelPasswords;
 	if (_recv.size() == 3)
-		std::list<std::string> channelPasswords = split(*(++l_it), ',');
+		channelPasswords = split(*(++l_it), ',');
+	std::list<std::string>::iterator pass_it = channelPasswords.begin();
 
 	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
 	{
-		std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
-		if (chan_it == _channels.end())
+		try
 		{
-			_channels[*it] = new Channel(*it, _clients[fd]);
-			_clients[fd]->setNewChannel(*it, _channels[*it]);
-			message = _clients[fd]->getNickname() + " has created the channel " + *it + ".\n";
-			send(fd, message.c_str(), message.length(), 0);
-		}
-		else
-		{
-			if (_channels[*it]->hasMember(fd))
+			std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
+			
+			if ((*it).empty() == false && isMaskChar((*it)[0]) == false)
+				throw IrcException(476, *it, ":Bad Channel Mask", fd);
+			if (chan_it == _channels.end())
 			{
-				message = "You are already on the channel " + *it + ".\n";
+				_channels[*it] = new Channel(*it, _clients[fd]);
+				_clients[fd]->setNewChannel(*it, _channels[*it]);
+				message = _clients[fd]->getNickname() + " has created the channel " + *it + ".\n";
 				send(fd, message.c_str(), message.length(), 0);
-				continue ;
 			}
-			chan_it->second->addNewMember(_clients[fd]);
-			message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
-			chan_it->second->sendMessageToMembers(message, fd);
-			message = "You joined the channel " + *it + ".\n";
-			send(fd, message.c_str(), message.length(), 0);
-            _channels[*it]->displayTopic(fd);
-            _channels[*it]->displayMembers(fd, false);
+			else
+			{
+				if (_channels[*it]->hasMember(fd))
+					throw IrcException(-1, *it, ":User already on channel", fd);
+				//ERR_INVITEONLYCHAN
+				if (_channels[*it]->getIsInviteOnly())
+					throw IrcException(473, *it, ":Cannot join channel (+i)", fd);
+				//ERR_BADCHANNELKEY: missing key
+				if (pass_it == channelPasswords.end() && _channels[*it]->getHasChannelKey())
+					throw IrcException(475, *it, ":Cannot join channel (+k)", fd);
+				//ERR_BADCHANNELKEY
+				if (pass_it != channelPasswords.end() && _channels[*it]->getHasChannelKey() && (*pass_it).compare(_channels[*it]->getChannelKey()) != 0)
+					throw IrcException(475, *it, ":Cannot join channel (+k)", fd);
+				if (chan_it->second->getMembers().size() >= chan_it->second->getUserLimit())
+					throw IrcException(471, *it, ":Cannot join channel (+l)", fd);
+
+				chan_it->second->addNewMember(_clients[fd]);
+				message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
+				chan_it->second->sendMessageToMembers(message, fd);
+				message = "You joined the channel " + *it + ".\n";
+				send(fd, message.c_str(), message.length(), 0);
+   		        _channels[*it]->displayTopic(fd);
+   	        	_channels[*it]->displayMembers(fd, false);
+			}
 		}
+		catch ( IrcException const& e )
+		{
+			std::string message = buildMessage(e.getCode(), e.getTarget(), e.getText(), e.getFd());
+			send(e.getFd(), message.c_str(), message.length(), 0);
+		}
+		if (pass_it != channelPasswords.end())
+			pass_it++;
 	}
 }
 
 void	IrcServer::PART(int const& fd)
 {
-	if (_recv.size() < 2)
-	{
-		std::string errorMsg = ":localhost 461 * PART :Not enough parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
-	if (_recv.size() > 2)
-	{
-		std::string errorMsg = ":localhost 461 * PART :Too many parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
 	if (_clients[fd]->setIsRegistered() == false)
-	{
-		std::string errorMsg = "PART : User not registered\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;		
-	}
+		throw IrcException(-1, "PART", ":User not registered", fd);	
+	//ERR_NEEDMOREPARAMS
+	if (_recv.size() < 2)
+		throw IrcException(461, "PART", ":Not enough parameters", fd);
 
 	std::list<std::string>::iterator l_it = _recv.begin();
 	std::string channelName = *(++l_it);
 
+	//ERR_NOTONCHANNEL
 	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
-	{
-		std::string errorMsg = "You need to join this channel first\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(461, "PART", ":Not enough parameters", fd);
+
 	std::string message = _clients[fd]->getNickname() + " leaved the channel " + channelName + ".\n";
 	_channels[channelName]->sendMessageToMembers( message, fd );
 	message = "You leaved the channel " + channelName + ".\n";
@@ -143,67 +140,33 @@ void	IrcServer::PART(int const& fd)
 
 void	IrcServer::KICK(int const& fd)
 {
-	if (_recv.size() < 2)
-	{
-		std::string errorMsg = ":localhost 461 * PART :Not enough parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
-	if (_recv.size() > 4)
-	{
-		std::string errorMsg = ":localhost 461 * PART :Too many parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
 	if (_clients[fd]->setIsRegistered() == false)
-	{
-		std::string errorMsg = "PART : User not registered\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;		
-	}
-
-	std::list<std::string>::iterator l_it = _recv.begin();
-	std::string channelName = *(++l_it);
-
-	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
-	{
-		std::string errorMsg = "You need to join this channel first\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
-	std::string message = _clients[fd]->getNickname() + " leaved the channel " + channelName + ".\n";
-	_channels[channelName]->sendMessageToMembers( message, fd );
-	message = "You leaved the channel " + channelName + ".\n";
-	send(fd, message.c_str(), message.length(), 0);
-	if (_channels[channelName]->removeMember(fd))
-	{
-		delete _channels[channelName];
-		_channels.erase(channelName);
-	}
+		throw IrcException(-1, "KICK", ":User not registered", fd);	
+	//ERR_NEEDMOREPARAMS
+	if (_recv.size() < 2)
+		throw IrcException(461, "KICK", ":Not enough parameters", fd);
+	//ERR_CHANOPRIVSNEEDED
+/*	if (!isAnyOperator(fd, chanTarget))
+		throw IrcException(482, "KICK", ":You're not channel operator", fd);
+*/
 }
 
 void	IrcServer::NAMES(int const& fd)
 {
-	if (_recv.size() > 2)
-	{
-		std::string errorMsg = ":localhost 461 * NAMES :Too many parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+	bool notAll;
+
 	if (_clients[fd]->setIsRegistered() == false)
-	{
-		std::string errorMsg = "NAMES : User not registered\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(-1, "NAMES", ":User not registered", fd);	
 	std::list<std::string> channelNames;
 	if (_recv.size() == 1)
 	{
+		notAll = false;
 		for (std::map<std::string, Channel*>::iterator mapIt = _channels.begin(); mapIt != _channels.end(); mapIt++)
 			channelNames.push_back(mapIt->first);
 	}
 	else
 	{
+		notAll = true;
 		std::list<std::string>::iterator l_it = _recv.begin();
 		channelNames = split(*(++l_it), ',');
 	}
@@ -217,7 +180,12 @@ void	IrcServer::NAMES(int const& fd)
 			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 		}
 		else
-			_channels[*it]->displayMembers(fd, true);
+			_channels[*it]->displayMembers(fd, notAll);
+	}
+	if (notAll == false)
+	{
+		std::string errorMsg = " :End of /NAMES list\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 	}
 }
 
@@ -227,12 +195,9 @@ void	IrcServer::USER(int const& fd)
 	{
 		if (_recv.front() == "USER")
 		{
+			//ERR_NEEDMOREPARAMS
 			if (_recv.size() < 5)
-			{
-				std::string errorMsg = ":localhost 461 * USER :Not enough parameters\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;	
-			}
+				throw IrcException(461, "USER", ":Not enough parameters", fd);
 			std::list<std::string>::iterator it = _recv.begin();
 			it++;
 			_clients[fd]->setUserName(*it);
@@ -374,17 +339,10 @@ void    IrcServer::QUIT(int const& fd)
 void	IrcServer::MODE(int const& fd)
 {
 	if (_clients[fd]->setIsRegistered() == false)
-	{
-		std::string errorMsg = ":localhost 451 " + _clients[fd]->getNickname() + " :You have not registered\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(-1, "MODE", ":User not registered", fd);
+	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
-	{
-		std::string errorMsg = ":localhost 461 " + _clients[fd]->getNickname() + " MODE :Not enough parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(461, "MODE", ":Not enough parameters", fd);
 	std::list<std::string>::iterator it = _recv.begin();
 	it++;
 	std::string chanTarget = *it;

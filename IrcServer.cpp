@@ -136,10 +136,7 @@ void	IrcServer::ConnectionWithClients()
 							}
 							catch ( IrcException const& e )
 							{
-								std::string message = ":localhost " + itos(e.getCode()) + " " + _clients[e.getFd()]->getNickname() + " ";
-								if (e.getTarget().empty() == false)
-									message += e.getTarget() + " ";
-								message += e.getText() + "\r\n";
+								std::string message = buildMessage(e.getCode(), e.getTarget(), e.getText(), e.getFd());
 								send(e.getFd(), message.c_str(), message.length(), 0);
 							}
 							if (_clients.find(_pollFds[i].fd) != _clients.end() && _clients[_pollFds[i].fd]->getToDisconnect() == true)
@@ -157,6 +154,22 @@ void	IrcServer::ConnectionWithClients()
 	}
 }
 
+std::string		IrcServer::buildMessage( int code, std::string target, std::string text, int fd )
+{
+	std::string message = ":localhost ";
+
+	if (code >= 0)
+		message += itos(code) + " ";
+	if (_clients[fd]->getNickname().empty())
+		message += "* ";
+	else
+		message += _clients[fd]->getNickname() + " ";
+	if (target.empty() == false)
+		message += target + " ";
+	message += text + "\r\n";
+
+	return message;
+}
 
 /* ======================== Handling Clients Messages ======================== */
 

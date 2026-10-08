@@ -20,7 +20,7 @@ class Channel
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
     	bool            _hasChannelKey;
-	unsigned int		_userLimit;
+		unsigned int		_userLimit;
 
 		// all clients connected, accessible by nickname
 		std::map<int, Client*> 			_members;	
@@ -44,13 +44,14 @@ class Channel
 		bool					getIsChannelOperator( int const& fd );
 		bool					getHasChannelKey() const;
 		std::string				getChannelKey() const;
-		size_t					getUserLimit() const;
+		unsigned int					getUserLimit() const;
+		bool					getIsInviteOnly() const;
 
 		/* ----- Setters ----- */
 
 		void					setHasChannelKey(bool status);
 		void					setChannelKey(std::string key);
-		void					setUserLimit(size_t limit);
+		void					setUserLimit(unsigned int limit);
 
 		/* ----- Methods ----- */
 
