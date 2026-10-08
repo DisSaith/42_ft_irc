@@ -125,7 +125,7 @@ void	IrcServer::PART(int const& fd)
 
 	//ERR_NOTONCHANNEL
 	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
-		throw IrcException(461, "PART", ":Not enough parameters", fd);
+		throw IrcException(461, "PART", ":You're not on that channel", fd);
 
 	std::string message = _clients[fd]->getNickname() + " leaved the channel " + channelName + ".\n";
 	_channels[channelName]->sendMessageToMembers( message, fd );
@@ -145,10 +145,17 @@ void	IrcServer::KICK(int const& fd)
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
 		throw IrcException(461, "KICK", ":Not enough parameters", fd);
+
+	std::list<std::string>::iterator it = _recv.begin();
+	std::string channelName = *(++it);
+
 	//ERR_CHANOPRIVSNEEDED
-/*	if (!isAnyOperator(fd, chanTarget))
+	if (!isAnyOperator(fd, channelName))
 		throw IrcException(482, "KICK", ":You're not channel operator", fd);
-*/
+	//ERR_NOTONCHANNEL
+	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
+		throw IrcException(461, "KICK", ":You're not on that channel", fd);
+
 }
 
 void	IrcServer::NAMES(int const& fd)
