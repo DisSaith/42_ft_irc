@@ -56,15 +56,7 @@ void	IrcServer::JOIN(int const& fd)
 {
 	if (_recv.size() < 2)
 	{
-		std::string errorMsg = ":localhost 461 * JOIN :Not enough parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
-	if (_recv.size() > 3)
-	{
-		std::string errorMsg = ":localhost 461 * JOIN :Too many parameters\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
+		throw IrcException(461, "JOIN", ":Not enough parameters", fd);
 	}
 	if (_clients[fd]->setIsRegistered() == false)
 	{

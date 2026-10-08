@@ -13,16 +13,16 @@
 #ifndef IRCSERVER_HPP
 # define IRCSERVER_HPP
 
-#define RESET   "\033[0m" //-> reset color
-#define RED		"\e[1;31m" //-> red color
-#define WHITE   "\033[1m\033[37m" //-> white and bold color
-#define BLUE    "\033[34m" //-> blue color
-#define GREEN	"\e[1;32m" //-> green color
-#define YELLOW	"\e[1;33m" //-> yellow color
+# define RESET   "\033[0m" //-> reset color
+# define RED		"\e[1;31m" //-> red color
+# define WHITE   "\033[1m\033[37m" //-> white and bold color
+# define BLUE    "\033[34m" //-> blue color
+# define GREEN	"\e[1;32m" //-> green color
+# define YELLOW	"\e[1;33m" //-> yellow color
 
-#ifndef DEBUG
-# define DEBUG 0
-#endif
+# ifndef DEBUG
+#  define DEBUG 0
+# endif
 
 # include <iostream>
 # include <string>
@@ -44,6 +44,7 @@
 # include "Client.hpp" //-> Client class
 # include "Operator.hpp" //-> Operator class
 # include "Channel.hpp" //-> Operator class
+# include "Exceptions.hpp"
 
 using namespace Utils;
 

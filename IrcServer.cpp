@@ -130,10 +130,18 @@ void	IrcServer::ConnectionWithClients()
 							if (DEBUG)
 								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd;
 							TokenizerRecv(cmd);
-							if (_recv.empty() == false && _recv.front() == "STOP")
-								return ;
-
-							ParsingRecv(_pollFds[i].fd);
+							try
+							{
+								ParsingRecv(_pollFds[i].fd);
+							}
+							catch ( IrcException const& e )
+							{
+								std::string message = ":localhost " + itos(e.getCode()) + " " + _clients[e.getFd()]->getNickname() + " ";
+								if (e.getTarget().empty() == false)
+									message += e.getTarget() + " ";
+								message += e.getText() + "\r\n";
+								send(e.getFd(), message.c_str(), message.length(), 0);
+							}
 							if (_clients.find(_pollFds[i].fd) != _clients.end() && _clients[_pollFds[i].fd]->getToDisconnect() == true)
 								break;
 						}
@@ -289,6 +297,7 @@ void	IrcServer::InitMapCommands()
 	_commands["NAMES"] = &IrcServer::NAMES;
 	_commands["QUIT"] = &IrcServer::QUIT;
 	_commands["MODE"] = &IrcServer::MODE;
+	_commands["KICK"] = &IrcServer::KICK;
 }
 
 // Close all fds and delete for no leaks at the end of the program

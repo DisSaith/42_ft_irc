@@ -26,6 +26,15 @@ namespace Utils
 		return (i);
 	}
 
+	std::string		itos( int const& value )
+	{
+		std::string			s_;
+		std::stringstream	ss;
+		ss << value;
+		ss >> s_;
+		return ( s_ );
+	}
+
 	std::list<std::string> split(std::string const& s, char const& c)
 	{
 		std::string				token;
