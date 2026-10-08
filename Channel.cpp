@@ -173,6 +173,11 @@ std::string	Channel::getChannelKey() const
 	return this->_channelKey;
 }
 
+size_t	Channel::getUserLimit() const
+{
+	return this->_userLimit;
+}
+
 void	Channel::setHasChannelKey(bool status)
 {
 	this->_hasChannelKey = status;
@@ -181,4 +186,9 @@ void	Channel::setHasChannelKey(bool status)
 void	Channel::setChannelKey(std::string key)
 {
 	this->_channelKey = key;
+}
+
+void	Channel::setUserLimit(size_t limit)
+{
+	this->_userLimit = limit;
 }

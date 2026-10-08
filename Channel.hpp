@@ -15,11 +15,12 @@ class Channel
 {
     private:
     	std::string     _name;
-		std::string		_topic;
+	std::string	_topic;
     	std::string     _channelKey;
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
     	bool            _hasChannelKey;
+	size_t		_userLimit;
 
 		// all clients connected, accessible by nickname
 		std::map<int, Client*> 			_members;	
@@ -39,16 +40,17 @@ class Channel
 		/* ----- Accessors ----- */
 
 		bool					hasMember(int fd) const;
-		std::map<int, Client*>	getMembers() const;
+		std::map<int, Client*>			getMembers() const;
 		bool					getIsChannelOperator( int const& fd );
 		bool					getHasChannelKey() const;
 		std::string				getChannelKey() const;
+		size_t					getUserLimit() const;
 
 		/* ----- Setters ----- */
 
 		void					setHasChannelKey(bool status);
 		void					setChannelKey(std::string key);
-
+		void					setUserLimit(size_t limit);
 
 		/* ----- Methods ----- */
 

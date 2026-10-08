@@ -490,16 +490,27 @@ void	IrcServer::MODE(int const& fd)
 					}
 				}
 			}
-/*			else if (c == 'l')
+			else if (c == 'l')
 			{
 				if (adding)
 				{
 					if (it != _recv.end())
 					{
-						
+						size_t	limit;
+						std::stringstream ss(*it);
+						ss >> limit;
+						channel->setUserLimit(limit);
+						messageMode += "l";
+						messageArgs += " " + *it;
+						it++;
 					}
 				}
-			}*/
+				else
+				{
+					if (it != _recv.end())
+						channel->setUserLimit(SIZE_MAX);
+				}
+			}
 			else
 			{
 				std::string errorMsg = ":localhost 472 " + _clients[fd]->getNickname() + " " + c + " :is unknown mode char to me\r\n";
