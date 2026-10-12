@@ -46,12 +46,15 @@ class Channel
 		std::string				getChannelKey() const;
 		unsigned int					getUserLimit() const;
 		bool					getIsInviteOnly() const;
+		bool					getHasTopicRestrictions() const;
 
 		/* ----- Setters ----- */
 
 		void					setHasChannelKey(bool status);
 		void					setChannelKey(std::string key);
 		void					setUserLimit(unsigned int limit);
+		void					setIsInviteOnly(bool status);
+		void					setHasTopicRestrictions(bool status);
 
 		/* ----- Methods ----- */
 

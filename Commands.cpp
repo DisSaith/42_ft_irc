@@ -56,7 +56,7 @@ void	IrcServer::JOIN(int const& fd)
 	std::string message;
 	std::list<std::string>::iterator l_it = _recv.begin();
 	std::list<std::string> channelNames = split(*(++l_it), ',');
-	
+
 	std::list<std::string> channelPasswords;
 	if (_recv.size() == 3)
 		channelPasswords = split(*(++l_it), ',');
@@ -67,7 +67,7 @@ void	IrcServer::JOIN(int const& fd)
 		try
 		{
 			std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
-			
+
 			if ((*it).empty() == false && isMaskChar((*it)[0]) == false)
 				throw IrcException(476, *it, ":Bad Channel Mask", fd);
 			if (chan_it == _channels.end())
@@ -98,8 +98,8 @@ void	IrcServer::JOIN(int const& fd)
 				chan_it->second->sendMessageToMembers(message, fd);
 				message = "You joined the channel " + *it + ".\n";
 				send(fd, message.c_str(), message.length(), 0);
-   		        _channels[*it]->displayTopic(fd);
-   	        	_channels[*it]->displayMembers(fd, false);
+				_channels[*it]->displayTopic(fd);
+				_channels[*it]->displayMembers(fd, false);
 			}
 		}
 		catch ( IrcException const& e )
@@ -155,7 +155,6 @@ void	IrcServer::KICK(int const& fd)
 	//ERR_NOTONCHANNEL
 	if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
 		throw IrcException(461, "KICK", ":You're not on that channel", fd);
-
 }
 
 void	IrcServer::NAMES(int const& fd)
@@ -366,9 +365,26 @@ void	IrcServer::MODE(int const& fd)
 		if (_recv.size() == 2)
 		{
 			std::string currentModes = "+";
+			std::string currentArgs = "";
+			if (channel->getIsInviteOnly())
+				currentModes += "i";
+			if (channel->getHasTopicRestrictions())
+				currentModes += "t";
 			if (channel->getHasChannelKey())
+			{
 				currentModes += "k";
-			std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + "\r\n";
+				currentArgs += " " + channel->getChannelKey();
+			}
+			if (channel->getUserLimit() != UINT_MAX)
+			{
+				currentModes += "l";
+				std::stringstream ss;
+				ss << channel->getUserLimit();
+				currentArgs += " " + ss.str();
+			}
+			if (currentModes == "+") currentModes = "";
+
+			std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + currentArgs + "\r\n";
 			send(fd, modeMsg.c_str(), modeMsg.length(), 0);
 			return ;
 		}
@@ -461,20 +477,48 @@ void	IrcServer::MODE(int const& fd)
 				{
 					if (it != _recv.end())
 					{
-						unsigned int	limit;
+						long limit;
 						std::stringstream ss(*it);
 						ss >> limit;
-						channel->setUserLimit(limit);
-						messageMode += "l";
-						messageArgs += " " + *it;
+
+						if (!ss.fail() && limit > 0 && limit <= UINT_MAX)
+						{
+							channel->setUserLimit(static_cast<unsigned int>(limit));
+							messageMode += "l";
+							messageArgs += " " + *it;
+						}
 						it++;
 					}
 				}
 				else
 				{
-					if (it != _recv.end())
-						channel->setUserLimit(UINT_MAX);
+					channel->setUserLimit(UINT_MAX);
+					messageMode += "l";
 				}
+			}
+			else if (c == 'i')
+			{
+				if (adding)
+				{
+					channel->setIsInviteOnly(true);
+				}
+				else
+				{
+					channel->setIsInviteOnly(false);
+				}
+				messageMode += "i";
+			}
+			else if (c == 't')
+			{
+				if (adding)
+				{
+					channel->setHasTopicRestrictions(true);
+				}
+				else
+				{
+					channel->setHasTopicRestrictions(false);
+				}
+				messageMode += "t";
 			}
 			else
 			{

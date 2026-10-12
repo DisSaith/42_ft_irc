@@ -206,3 +206,22 @@ void	Channel::setUserLimit(unsigned int limit)
 	if (DEBUG)
 		std::cout << _name << "user limit set: " << _userLimit << std::endl;
 }
+
+bool Channel::getHasTopicRestrictions() const
+{
+	return this->_hasTopicRestrictions;
+}
+
+void Channel::setIsInviteOnly(bool status)
+{
+	this->_isInviteOnly = status;
+	if (DEBUG)
+		std::cout << _name << " invite only bool set: " << _isInviteOnly << std::endl;
+}
+
+void Channel::setHasTopicRestrictions(bool status)
+{
+	this->_hasTopicRestrictions = status;
+	if (DEBUG)
+		std::cout << _name << " topic restrictions bool set: " << _hasTopicRestrictions << std::endl;
+}
