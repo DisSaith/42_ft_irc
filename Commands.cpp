@@ -35,7 +35,7 @@ void	IrcServer::JOIN(int const& fd)
 				if (_channels[*it]->hasMember(fd))
 					throw IrcException(-1, *it, ":User already on channel", fd);
 				//ERR_INVITEONLYCHAN
-				if (_channels[*it]->getIsInviteOnly())
+				if (_channels[*it]->getIsInviteOnly() && _clients[fd]->getIsInvited(*it) == false)
 					throw IrcException(473, *it, ":Cannot join channel (+i)", fd);
 				//ERR_BADCHANNELKEY: missing key
 				if (pass_it == channelPasswords.end() && _channels[*it]->getHasChannelKey())
@@ -45,7 +45,9 @@ void	IrcServer::JOIN(int const& fd)
 					throw IrcException(475, *it, ":Cannot join channel (+k)", fd);
 				if (chan_it->second->getMembers().size() >= chan_it->second->getUserLimit())
 					throw IrcException(471, *it, ":Cannot join channel (+l)", fd);
-
+				
+				if (_clients[fd]->getIsInvited(*it))
+					_clients[fd]->removeInvite(*it);
 				chan_it->second->addNewMember(_clients[fd]);
 				message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
 				chan_it->second->sendMessageToMembers(message, fd);

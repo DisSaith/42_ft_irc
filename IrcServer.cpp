@@ -300,6 +300,7 @@ void	IrcServer::InitMapCommands()
 	_commands["MODE"] = &IrcServer::MODE;
 	_commands["KICK"] = &IrcServer::KICK;
 	_commands["TOPIC"] = &IrcServer::TOPIC;
+	_commands["INVITE"] = &IrcServer::INVITE;
 }
 
 // Close all fds and delete for no leaks at the end of the program

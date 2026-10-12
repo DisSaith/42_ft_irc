@@ -106,7 +106,9 @@ void	Client::setNewChannel(std::string const& channelName, Channel *channel)
 
 void	Client::removeChannel(std::string const& channelName)
 {
-	_channels.erase(channelName);
+	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
+	if (it != _channels.end())
+		_channels.erase(channelName);
 }
 
 void	Client::setUserName(std::string const& userName)

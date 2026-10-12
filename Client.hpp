@@ -8,6 +8,7 @@
 # include <iostream>
 # include <string>
 # include "Channel.hpp"
+# include <algorithm>
 
 class Client
 {
