@@ -22,6 +22,9 @@ $(NAME):	$(OBJS)
 debug: CFLAGS += -DDEBUG=1
 debug: fclean all
 
+bot: SRCS += Bot.cpp
+bot: fclean all
+
 clean:
 		rm -rf $(OBJS) ./objs
 

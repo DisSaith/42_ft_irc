@@ -270,9 +270,7 @@ void	IrcServer::PRIVMSG(int const& fd)
 
 			bool targetFound = false;
 			int targetFd = -1;
-			std::map<int, Client*>::iterator mapIt;
-
-			for (mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
+			for (std::map<int, Client*>::iterator mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
 			{
 				if (mapIt->second->getNickname() == chanTarget)
 				{
@@ -314,8 +312,7 @@ void    IrcServer::QUIT(int const& fd)
 		}
 		std::string fullMsg = ":" + _clients[fd]->getNickname() + " QUIT :" + quitMsg + "\r\n";
 		std::set<int> clientsToNotify;
-		std::map<std::string, Channel*>::iterator chanIt;
-		for (chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+		for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
 		{
 			if (chanIt->second->hasMember(fd))
 			{
