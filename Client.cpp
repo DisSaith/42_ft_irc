@@ -174,3 +174,22 @@ std::string Client::extractCommand()
 
 	return command;
 }
+
+void    Client::addInvite(std::string const& channelName)
+{
+        if (!getIsInvited(channelName))
+                _invitedChannels.push_back(channelName); // On ajoute le nom au vecteur de strings
+}
+
+bool    Client::getIsInvited(std::string const& channelName) const
+{
+        return (std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName) != _invitedChannels.end());
+}
+
+void    Client::removeInvite(std::string const& channelName)
+{
+        std::vector<std::string>::iterator it = std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName);
+
+        if (it != _invitedChannels.end())
+                _invitedChannels.erase(it);
+}

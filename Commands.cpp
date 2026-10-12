@@ -518,3 +518,65 @@ void	IrcServer::MODE( int const& fd )
 		}
 	}
 }
+
+void	IrcServer::INVITE(int const& fd)
+{
+	if (_clients[fd]->setIsRegistered() == false)
+		throw IrcException(-1, "INVITE", ":User not registered", fd);
+	if (_recv.size() < 3)
+		throw IrcException(461, "INVITE", ":Not enough parameters", fd);
+	std::list<std::string>::iterator it = _recv.begin();
+	it++;
+	std::string targetNick = *it;
+	it++;
+	std::string chanTarget = *it;
+	std::map<int, Client*>::iterator nickIt;
+	bool targetFound = false;
+	int targetFd = -1;
+	for (nickIt = _clients.begin(); nickIt != _clients.end(); ++nickIt)
+	{
+		if (nickIt->second->getNickname() == targetNick)
+		{
+			targetFound = true;
+			targetFd = nickIt->first;
+			break ;
+		}
+	}
+	if (targetFound == false)
+	{
+		std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + targetNick + " :No such nick\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+	if (chanIt == _channels.end())
+	{
+		std::string errorMsg = ":localhost 403 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such channel\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	Channel* channel = chanIt->second;
+	if (!channel->hasMember(fd))
+	{
+		std::string errorMsg = ":localhost 442 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not on that channel\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (channel->hasMember(targetFd))
+	{
+		std::string errorMsg = ":localhost 443 " + _clients[fd]->getNickname() + " " + targetNick + " " + chanTarget + " :is already on channel\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	if (channel->getIsInviteOnly() && !isAnyOperator(fd, chanTarget))
+	{
+		std::string errorMsg = ":localhost 482 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not channel operator\r\n";
+		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		return ;
+	}
+	_clients[targetFd]->addInvite(chanTarget);
+	std::string message = ":localhost 341 " + _clients[fd]->getNickname() + " " + targetNick + " " + chanTarget + "\r\n";
+	send(fd, message.c_str(), message.length(), 0);
+	std::string inviteMsg = ":" + _clients[fd]->getNickname() + " INVITE " + targetNick + " " + chanTarget + "\r\n";
+	send(targetFd, inviteMsg.c_str(), inviteMsg.length(), 0);
+}

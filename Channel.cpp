@@ -209,7 +209,7 @@ void	Channel::setUserLimit( unsigned int const& limit )
 		std::cout << _name << "user limit set: " << _userLimit << std::endl;
 }
 
-bool Channel::getHasTopicRestrictions() const
+bool	Channel::getHasTopicRestrictions() const
 {
 	return this->_hasTopicRestrictions;
 }

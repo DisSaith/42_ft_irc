@@ -24,6 +24,7 @@ class Client
 		bool		getHasSetPass() const;
 		bool		getIsServerOperator() const;
 		bool		getToDisconnect() const;
+		bool		getIsInvited(std::string const& channelName) const;
 		bool		setIsRegistered() const;
 		void		setPass();
 		void		setNickName(std::string const& nickName);
@@ -38,6 +39,10 @@ class Client
 		std::string	extractCommand();
 		bool		hasCompleteCommand() const;
 		void		appendToIn(std::string const& data);
+		void		addInvite(std::string const& channelName);
+		void		removeInvite(std::string const& channelName);
+
+// Dans les attributs privés :
 
 	private:
 		/* ----- Attributes ----- */
@@ -47,7 +52,8 @@ class Client
 		std::string							_nickname;
 		std::string							_username;
 		std::string							_realname;
-		std::map<std::string, Channel*>		_channels;
+		std::map<std::string, Channel*>					_channels;
+		std::vector<std::string>					_invitedChannels;
 
 		int									_fd;
 		
