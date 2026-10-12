@@ -172,7 +172,6 @@ void	IrcServer::KICK(int const& operator_fd)
 	if (_clients.find(kicked_fd) == _clients.end())
 		throw IrcException(401, "KICK", ":No such nick/channel", operator_fd);
 
-
 	std::string message = _clients[kicked_fd]->getNickname() + " has been kicked from " + channelName + " because of :" + comment +  ".\n";
 	_channels[channelName]->sendMessageToMembers( message, kicked_fd );
 	if (_clients[operator_fd]->getChannels().find(channelName) == _clients[operator_fd]->getChannels().end())
@@ -221,6 +220,47 @@ void	IrcServer::NAMES(int const& fd)
 	{
 		std::string errorMsg = " :End of /NAMES list\n";
 		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+	}
+}
+
+void	IrcServer::TOPIC(int const& fd)
+{
+	if (_clients[fd]->setIsRegistered() == false)
+		throw IrcException(-1, "TOPIC", ":User not registered", fd);	
+	//ERR_NEEDMOREPARAMS
+	if (_recv.size() < 2)
+		throw IrcException(461, "TOPIC", ":Not enough parameters", fd);
+
+	std::string	message;
+	std::list<std::string>::iterator recv_it = _recv.begin();
+	std::string channelName = *(++recv_it);
+	++recv_it;
+	std::string topic;
+	for (; recv_it != _recv.end(); recv_it++)
+	{
+		topic += *recv_it;
+		if (recv_it != _recv.end())
+			topic += " ";
+	}
+
+	//ERR_NOSUCHCHANNEL
+	if (_channels.find(channelName) == _channels.end())
+		throw IrcException(403, "TOPIC", ":No such channel", fd);
+
+	if (_recv.size() == 2)
+	{
+		if (_channels[channelName]->getTopic().empty())
+			topic = "No topic is set";
+		else
+			topic = _channels[channelName]->getTopic();
+		message = channelName + " :" + topic + ".\n";
+		send(fd, message.c_str(), message.length(), 0);
+	}
+	else
+	{
+		if (_channels[channelName]->getHasTopicRestrictions() == true)
+			throw IrcException(-1, "TOPIC", ":channel has topic restrictions", fd);
+		_channels[channelName]->setTopic(topic);
 	}
 }
 

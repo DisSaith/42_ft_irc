@@ -76,7 +76,8 @@ class IrcServer
 		void QUIT(int const& fd);
 		void KICK(int const& fd);
 		void MODE(int const& fd);
-
+		void TOPIC(int const& fd);
+		
 		/* ----- Signals ----- */
 		static void signalINT( int signal );
 

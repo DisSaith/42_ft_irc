@@ -15,7 +15,7 @@ class Channel
 {
     private:
     	std::string     _name;
-		std::string	_topic;
+		std::string		_topic;
     	std::string     _channelKey;
     	bool            _isInviteOnly;
     	bool            _hasTopicRestrictions;
@@ -47,14 +47,16 @@ class Channel
 		unsigned int					getUserLimit() const;
 		bool					getIsInviteOnly() const;
 		bool					getHasTopicRestrictions() const;
+		std::string				getTopic() const;
 
 		/* ----- Setters ----- */
 
 		void					setHasChannelKey(bool status);
 		void					setChannelKey(std::string key);
-		void					setUserLimit(unsigned int limit);
+		void					setUserLimit(unsigned int const& limit);
 		void					setIsInviteOnly(bool status);
 		void					setHasTopicRestrictions(bool status);
+		void					setTopic( std::string const& newTopic);
 
 		/* ----- Methods ----- */
 

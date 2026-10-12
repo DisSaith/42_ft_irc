@@ -311,6 +311,7 @@ void	IrcServer::InitMapCommands()
 	_commands["QUIT"] = &IrcServer::QUIT;
 	_commands["MODE"] = &IrcServer::MODE;
 	_commands["KICK"] = &IrcServer::KICK;
+	_commands["TOPIC"] = &IrcServer::TOPIC;
 }
 
 // Close all fds and delete for no leaks at the end of the program

@@ -186,6 +186,11 @@ unsigned int	Channel::getUserLimit() const
 	return this->_userLimit;
 }
 
+std::string		Channel::getTopic() const
+{
+	return this->_topic;
+}
+
 void	Channel::setHasChannelKey(bool status)
 {
 	this->_hasChannelKey = status;
@@ -200,7 +205,7 @@ void	Channel::setChannelKey(std::string key)
 		std::cout << _name << "channel key set: " << _channelKey << std::endl;
 }
 
-void	Channel::setUserLimit(unsigned int limit)
+void	Channel::setUserLimit(unsigned int const& limit)
 {
 	this->_userLimit = limit;
 	if (DEBUG)
@@ -224,4 +229,9 @@ void Channel::setHasTopicRestrictions(bool status)
 	this->_hasTopicRestrictions = status;
 	if (DEBUG)
 		std::cout << _name << " topic restrictions bool set: " << _hasTopicRestrictions << std::endl;
+}
+
+void Channel::setTopic( std::string const& newTopic)
+{
+	_topic = newTopic;
 }
