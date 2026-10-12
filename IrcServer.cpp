@@ -335,3 +335,15 @@ bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
 		return true;
 	return false;
 }
+
+//Search for the fd corresponding to a Nickname
+int IrcServer::getFdfromNickname( std::string nickname )
+{
+	std::map<int, Client*>::iterator clients_it;
+	for (clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
+	{
+		if (clients_it->second->getNickname() == nickname)
+			return (clients_it->first);
+	}
+	return (-1);
+}

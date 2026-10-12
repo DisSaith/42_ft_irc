@@ -88,6 +88,7 @@ class IrcServer
 		void				CloseFds();
 		void				RemoveClient(int fd);
 		std::string			buildMessage( int code, std::string target, std::string text, int fd );
+		int					getFdfromNickname( std::string nickname );
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
