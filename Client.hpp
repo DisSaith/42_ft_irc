@@ -26,7 +26,7 @@ class Client
 	public:
 		/* ----- Main Constructor & Destructor ----- */
 		~Client();
-		Client(int fd);
+		explicit Client(int fd);
 		Client(int fd, std::string nickname, std::string username, std::string realname);
 
 		/* ----- Getters / Setters ----- */

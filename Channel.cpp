@@ -5,7 +5,7 @@ Channel::Channel( void )
 		std::cout << "\033[0;31mDefault Channel constructor called\033[0m" << std::endl;
 }
 
-Channel::Channel( std::string name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false), _userLimit(UINT_MAX)
+Channel::Channel( std::string const& name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false), _userLimit(UINT_MAX)
 {
 	addNewMember(owner);
 	addNewOperator(owner);
@@ -25,9 +25,9 @@ Channel::Channel( Channel const& copy )
 
 Channel::~Channel( void )
 {
-	std::map<int, Client*>::const_iterator it;
 	
-	for (it = _members.begin(); it != _members.end(); ++it)
+	
+	for (std::map<int, Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
 	{
 		it->second->removeChannel(_name);
 	}
@@ -54,8 +54,8 @@ Channel&	Channel::operator=( Channel const& copy )
 
 void	Channel::sendMessageToMembers( std::string const& message, int const& sender_fd )
 {
-	std::map<int, Client*>::const_iterator 	it;	
-	for (it = _members.begin(); it != _members.end(); ++it)
+	
+	for (std::map<int, Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
     {
 		if (it->first != sender_fd)
 			send(it->first, message.c_str(), message.length(), 0);
@@ -99,34 +99,31 @@ void	Channel::removeOperator( int const& fd )
 bool	Channel::getIsChannelOperator( int const& fd )
 {
 	if (_operators.find(fd) != _operators.end())
-		return (true);
-	return (false);
+		return true;
+	return false;
 }
 
 void	Channel::displayMembers( void )
 {
-	std::map<int, Client*>::const_iterator it;
 	std::cout << "Members of channel " << _name << std::endl;
-    for (it = _members.begin(); it != _members.end(); ++it)
+    for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it)
         std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
 void	Channel::displayOperators( void )
 {
-	std::map<int, Client*>::const_iterator it;
 	std::cout << "Operators of channel " << _name << std::endl;
-    for (it = _operators.begin(); it != _operators.end(); ++it)
+    for (std::map<int, Client*>::const_iterator it = _operators.begin(); it != _operators.end(); ++it)
         std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
-void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames)
+void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames )
 {
-	std::map<int, Client*>::const_iterator it;
 	std::string message;
 	std::string name;
 
 	message = _name + " :";
-    for (it = _members.begin(); it != _members.end(); ++it)
+    for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it)
 	{
 		name = "";
 		if (_operators.find(it->first) != _operators.end())
@@ -146,7 +143,7 @@ void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames)
 	}
 }
 
-void	Channel::displayTopic( int const& fd )
+void	Channel::displayTopic( int const& fd ) const
 {
 	std::string message = _name + " :";
 	if (_topic.empty())
@@ -156,7 +153,7 @@ void	Channel::displayTopic( int const& fd )
 	send(fd, message.c_str(), message.length(), 0);
 }
 
-bool Channel::hasMember(int fd) const
+bool Channel::hasMember( int fd ) const
 {
 	return (_members.find(fd) != _members.end());
 }
@@ -191,21 +188,21 @@ std::string		Channel::getTopic() const
 	return this->_topic;
 }
 
-void	Channel::setHasChannelKey(bool status)
+void	Channel::setHasChannelKey( bool status )
 {
 	this->_hasChannelKey = status;
 	if (DEBUG)
 		std::cout << _name << "channel key bool set: " << _hasChannelKey << std::endl;
 }
 
-void	Channel::setChannelKey(std::string key)
+void	Channel::setChannelKey( std::string const& key )
 {
 	this->_channelKey = key;
 	if (DEBUG)
 		std::cout << _name << "channel key set: " << _channelKey << std::endl;
 }
 
-void	Channel::setUserLimit(unsigned int const& limit)
+void	Channel::setUserLimit( unsigned int const& limit )
 {
 	this->_userLimit = limit;
 	if (DEBUG)
@@ -217,21 +214,21 @@ bool Channel::getHasTopicRestrictions() const
 	return this->_hasTopicRestrictions;
 }
 
-void Channel::setIsInviteOnly(bool status)
+void Channel::setIsInviteOnly( bool status )
 {
 	this->_isInviteOnly = status;
 	if (DEBUG)
 		std::cout << _name << " invite only bool set: " << _isInviteOnly << std::endl;
 }
 
-void Channel::setHasTopicRestrictions(bool status)
+void Channel::setHasTopicRestrictions( bool status )
 {
 	this->_hasTopicRestrictions = status;
 	if (DEBUG)
 		std::cout << _name << " topic restrictions bool set: " << _hasTopicRestrictions << std::endl;
 }
 
-void Channel::setTopic( std::string const& newTopic)
+void Channel::setTopic( std::string const& newTopic )
 {
 	_topic = newTopic;
 }

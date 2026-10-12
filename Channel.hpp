@@ -33,7 +33,7 @@ class Channel
 		/* ----- Orthodox Canonical Form ----- */
 		
 		~Channel();
-		Channel( std::string name, Client *owner );
+		Channel( std::string const& name, Client *owner );
 		Channel(const Channel& copy);
 		Channel& operator=(const Channel& copy);
 
@@ -52,7 +52,7 @@ class Channel
 		/* ----- Setters ----- */
 
 		void					setHasChannelKey(bool status);
-		void					setChannelKey(std::string key);
+		void					setChannelKey(std::string const& key);
 		void					setUserLimit(unsigned int const& limit);
 		void					setIsInviteOnly(bool status);
 		void					setHasTopicRestrictions(bool status);
@@ -68,7 +68,7 @@ class Channel
 		void					displayOperators( void );
 		void					displayMembers( void );
 		void					displayMembers( int const& fd, bool const& displayEndOfNames );
-		void					displayTopic( int const& fd );
+		void					displayTopic( int const& fd ) const;
 
 };
 
