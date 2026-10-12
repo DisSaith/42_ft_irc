@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   IrcServer.hpp                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/16 17:05:34 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/08 11:06:24 by nofelten         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #ifndef IRCSERVER_HPP
 # define IRCSERVER_HPP
 
@@ -43,8 +31,7 @@
 # include <set> //-> for set container
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Client class
-# include "Operator.hpp" //-> Operator class
-# include "Channel.hpp" //-> Operator class
+# include "Channel.hpp" //-> Channel class
 # include "Exceptions.hpp"
 
 using namespace Utils;

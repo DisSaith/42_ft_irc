@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   Utils.cpp                                          :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/17 11:53:41 by acohaut           #+#    #+#             */
-/*   Updated: 2026/09/18 10:46:59 by acohaut          ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "Utils.hpp"
 
 
@@ -23,7 +11,16 @@ namespace Utils
 
 		std::istringstream(s) >> i;
 	
-		return (i);
+		return i;
+	}
+
+	long	stol( std::string const& s )
+	{
+		long	i;
+
+		std::istringstream(s) >> i;
+	
+		return i;
 	}
 
 	std::string		itos( int const& value )
@@ -32,7 +29,7 @@ namespace Utils
 		std::stringstream	ss;
 		ss << value;
 		ss >> s_;
-		return ( s_ );
+		return s_;
 	}
 
 	bool isMaskChar( char const& c)
@@ -60,6 +57,6 @@ namespace Utils
 		if (i == std::string::npos)
 			i = s.find('\n');
 		result.push_back(s.substr(j, i - j));
-		return (result);
+		return result;
 	}
 }

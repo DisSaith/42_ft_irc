@@ -1,25 +1,13 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   IrcServer.cpp                                      :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: acohaut <acohaut@learner.42.tech>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/09/17 11:03:07 by acohaut           #+#    #+#             */
-/*   Updated: 2026/10/08 11:05:57 by nofelten         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include "IrcServer.hpp"
 #include "Client.cpp"
 #include "Channel.cpp"
 #include "Commands.cpp"
+#include "Registration.cpp"
 
 /* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
 
 IrcServer::IrcServer( IrcServer const& copy ) { (void)copy; }
 IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *this; }
-
 
 /* ======================== Default Constructor & Destructor ======================== */
 
