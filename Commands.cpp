@@ -162,8 +162,7 @@ void	IrcServer::NAMES(int const& fd)
 
 	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
 	{
-		std::map<std::string, Channel*>::iterator mapIt = _channels.find(*it);
-		if (mapIt == _channels.end())
+		if (it == channelNames.end())
 		{
 			std::string errorMsg = *it + " :End of /NAMES list\n";
 			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
@@ -173,8 +172,27 @@ void	IrcServer::NAMES(int const& fd)
 	}
 	if (notAll == false)
 	{
+		std::string message;
+		std::string name;
+
+		message = "* :";
+    	for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+		{
+			if (it->second->getChannels().empty())
+			{
+				name = "";
+				if (it->second->getIsServerOperator())
+					name = name + "@";
+				name = name + it->second->getNickname();
+				message = message + name;
+				if (++it != _clients.end())
+    	   		 	message = message + " ";
+				--it;
+			}
+		}
+		message = message + "\n";
 		std::string errorMsg = " :End of /NAMES list\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+		send(fd, message.c_str(), message.length(), 0);
 	}
 }
 
