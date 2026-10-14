@@ -20,7 +20,7 @@ class Client
 
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
-		std::map<std::string, Channel*>	getChannels() const;
+		std::map<std::string, Channel*> const&	getChannels();
 		int			getFd() const;
 		bool		getHasSetPass() const;
 		bool		getIsServerOperator() const;
@@ -42,6 +42,7 @@ class Client
 		void		appendToIn(std::string const& data);
 		void		addInvite(std::string const& channelName);
 		void		removeInvite(std::string const& channelName);
+		void		displayClient( void );
 
 // Dans les attributs privés :
 
@@ -53,8 +54,8 @@ class Client
 		std::string							_nickname;
 		std::string							_username;
 		std::string							_realname;
-		std::map<std::string, Channel*>					_channels;
-		std::vector<std::string>					_invitedChannels;
+		std::map<std::string, Channel*>		_channels;
+		std::vector<std::string>			_invitedChannels;
 
 		int									_fd;
 		

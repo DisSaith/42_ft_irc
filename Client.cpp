@@ -63,7 +63,7 @@ std::string Client::getNickname() const
 	return this->_nickname;
 }
 
-std::map<std::string, Channel*> Client::getChannels() const
+std::map<std::string, Channel*> const& Client::getChannels()
 {
 	return this->_channels;
 }
@@ -97,11 +97,15 @@ void	Client::setNickName(std::string const& nickName)
 {
 	_nickname = nickName;
 	_hasSetNick = true;
+	if (DEBUG)
+		displayClient();
 }
 
 void	Client::setNewChannel(std::string const& channelName, Channel *channel)
 {
 	_channels[channelName] = channel;
+	if (DEBUG)
+		displayClient();
 }
 
 void	Client::removeChannel(std::string const& channelName)
@@ -109,6 +113,8 @@ void	Client::removeChannel(std::string const& channelName)
 	std::map<std::string, Channel*>::iterator it = _channels.find(channelName);
 	if (it != _channels.end())
 		_channels.erase(channelName);
+	if (DEBUG)
+		displayClient();
 }
 
 void	Client::setUserName(std::string const& userName)
@@ -138,6 +144,26 @@ void Client::setIsOperator(bool status)
 }
 
 /* ======================== Methods ======================== */
+
+void Client::displayClient( void )
+{
+	std::string	message = "\n---CLIENT " + _nickname + "---\n";
+
+	message += "USERNAME :" + _username + "\n";
+	message += "REALNAME :" + _realname + "\n";
+	message += "FD       :" + ::itos(_fd) + "\n";
+	message += "Registered  : " + ::itos(static_cast<int>(setIsRegistered())) + "\n";
+	message += "Server Operator  : " + ::itos(static_cast<int>(_isOperator)) + "\n";
+	message += "Channels : ";
+	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
+		message += it->first + " ";
+	message += "\nInvites : ";
+	for (std::vector<std::string>::iterator it = _invitedChannels.begin(); it != _invitedChannels.end(); it++)
+		message += *it + " ";	
+	std::cout << message << std::endl;
+
+
+}
 
 void Client::appendToIn(std::string const& data)
 {
