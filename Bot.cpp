@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
+#include <fstream>
 #include "Utils.hpp"
 
 bool	sendData(int sock, const std::string& msg)
@@ -64,6 +65,11 @@ int main(int argc, char* argv[])
 	sendData(sock, "NICK " + bot_name + "\r\n");
 	sendData(sock, "USER " + bot_name + " 0 * :" + bot_name + " C++\r\n");
 	char buffer[4096];
+	std::ofstream ofs("log", std::ios::trunc);
+	if (!ofs.is_open())
+	{
+		std::cerr << "Warning: Unable to open log file." << std::endl;
+	}
 	while (true)
 	{
 		int bytes_received = recv(sock, buffer, sizeof(buffer) - 1, 0);
@@ -87,7 +93,14 @@ int main(int argc, char* argv[])
 			break ;
 		}
 		if (data.find(" 001 ") != std::string::npos)
+		{
 			std::cout << "Authentication successful! Name validated." << std::endl;
+		}
+		if (ofs.is_open())
+		{
+			ofs << data;
+			ofs.flush();
+		}
 	}
 	close(sock);
 	return 0;
