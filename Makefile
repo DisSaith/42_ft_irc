@@ -29,13 +29,13 @@ $(NAME_BOT):	$(OBJ_BOT)
 debug: CFLAGS += -DDEBUG=1
 debug: fclean all $(NAME_BOT)
 
-bonus:	fclean all $(NAME_BOT)
+bonus:	all $(NAME_BOT)
 
 clean:
 		rm -rf $(OBJS) ./objs
 
 fclean:		clean
-		rm -f $(NAME) $(NAME_BOT)
+		rm -f $(NAME) $(NAME_BOT) log
 
 re:		fclean all
 

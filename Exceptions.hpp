@@ -23,4 +23,18 @@ class IrcException : public std::exception
         int         _fd;
 };
 
+class BotException : public std::exception
+{
+	public:
+		BotException( std::string const& text ): _text(text) {}
+
+		virtual ~BotException() throw() {}
+
+        std::string const&  getText() const     { return _text; }
+
+	private:
+		std::string	_text;
+
+};
+
 #endif

@@ -1,11 +1,7 @@
-#include <sys/socket.h>
-#include <arpa/inet.h>
+#include "IrcServer.hpp"
 #include <netdb.h>
-#include <unistd.h>
-#include <string>
-#include <iostream>
 #include <fstream>
-#include "Utils.hpp"
+#include <ctime>
 
 bool	sendData(int sock, const std::string& msg)
 {
@@ -24,6 +20,37 @@ bool	sendData(int sock, const std::string& msg)
 	return true;
 }
 
+std::list<std::string> readDictionnary()
+{
+	std::string current_line;
+	std::list<std::string> output;
+	std::ifstream inFile("dictionnary");
+
+	while (getline (inFile, current_line)) 
+  		output.push_back(current_line);
+	inFile.close();
+
+	if (output.empty())
+		std::cerr << YELLOW << "Warning: " << RESET << " Empty dictionnary" << std::endl;
+
+	return output;
+}
+
+bool checkMessage(std::list<std::string> message, std::list<std::string> dictionnary, char* buffer)
+{
+	bool found = false;
+	
+	for (std::list<std::string>::iterator message_it = message.begin(); message_it != message.end(); message_it++)
+	{
+		if (std::find(dictionnary.begin(), dictionnary.end(), *message_it) != dictionnary.end())
+		{
+			found = true;
+			std::cout << RED << "Bad Language: " << RESET << buffer;
+		}
+	}
+	return found;
+}
+
 int main(int argc, char* argv[])
 {
 	if (argc != 5)
@@ -31,11 +58,14 @@ int main(int argc, char* argv[])
 		std::cerr << "Usage: " << argv[0] << " <IP> <PORT> <PASSWORD> <BOT NAME>" << std::endl;
 		return 1;
 	}
+	
+	time_t now;
 	std::string	ip = argv[1];
 	int			port = Utils::stoi(argv[2]);
 	std::string	password = argv[3];
 	std::string	bot_name = argv[4];
 	int			sock = socket(AF_INET, SOCK_STREAM, 0);
+	
 	if (sock == -1)
 	{
 		std::cerr << "Socket error" << std::endl;
@@ -59,17 +89,16 @@ int main(int argc, char* argv[])
 	}
 	std::cout << "Connected to server. Authenticating..." << std::endl;
 	if (!password.empty())
-	{
 		sendData(sock, "PASS " + password + "\r\n");
-	}
 	sendData(sock, "NICK " + bot_name + "\r\n");
 	sendData(sock, "USER " + bot_name + " 0 * :" + bot_name + " C++\r\n");
+
 	char buffer[4096];
+	std::list<std::string> dictionnary = readDictionnary();
 	std::ofstream ofs("log", std::ios::trunc);
 	if (!ofs.is_open())
-	{
 		std::cerr << "Warning: Unable to open log file." << std::endl;
-	}
+	
 	while (true)
 	{
 		int bytes_received = recv(sock, buffer, sizeof(buffer) - 1, 0);
@@ -79,26 +108,36 @@ int main(int argc, char* argv[])
 			break;
 		}
 		buffer[bytes_received] = '\0';
-		std::string data(buffer);
-		std::cout << data;
-		if (data.find(" 464 ") != std::string::npos)
+		std::list<std::string> data = Utils::split(buffer, ' ');
+		std::cout << buffer;
+
+		if (checkMessage(data, dictionnary, buffer))
+		{
+			std::string BadUserName = data.front();
+			BadUserName.erase(0, 1);
+			sendData(sock, "PRIVMSG " + BadUserName + " WARNING BAD LANGUAGE" + "\r\n");
+		}
+		if (std::find(data.begin(), data.end(), "464") != data.end())
 		{
 			std::cerr << "\n[FATAL ERROR] Incorrect password (464)." << std::endl;
 			break ;
 		}
-		if (data.find(" 433 ") != std::string::npos)
+		if (std::find(data.begin(), data.end(), "433") != data.end())
 		{
 			std::cerr << "\n[FATAL ERROR] Bot name '" << bot_name << "' is already in use on this server." << std::endl;
 			std::cerr << "Please restart the program with a different name." << std::endl;
 			break ;
 		}
-		if (data.find(" 001 ") != std::string::npos)
-		{
+		if (std::find(data.begin(), data.end(), "001") != data.end())
 			std::cout << "Authentication successful! Name validated." << std::endl;
-		}
 		if (ofs.is_open())
 		{
-			ofs << data;
+			time(&now);
+			std::string timestamp = ctime(&now);
+			//ctime add a \n at the end that I remove
+			if (timestamp.empty() == false && timestamp[timestamp.length() - 1] == '\n')
+				timestamp.erase(timestamp.length() - 1);
+			ofs << "[" << timestamp << "]: "<< buffer;
 			ofs.flush();
 		}
 	}
