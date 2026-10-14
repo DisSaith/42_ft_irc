@@ -66,7 +66,7 @@ void	Channel::addNewMember( Client *newMember )
 {
 	_members[newMember->getFd()] = newMember;
 	if (DEBUG)
-		this->displayMembers();
+		displayChannel();
 }
 
 //return true if the owner is removed, false otherwise
@@ -85,7 +85,7 @@ void	Channel::addNewOperator( Client *newOperator )
 {
 	_operators[newOperator->getFd()] = newOperator;
 	if (DEBUG)
-		this->displayMembers();
+		this->displayOperators();
 }
 
 //return true if the owner is removed, false otherwise
@@ -101,6 +101,13 @@ bool	Channel::getIsChannelOperator( int const& fd )
 	if (_operators.find(fd) != _operators.end())
 		return true;
 	return false;
+}
+
+void	Channel::displayChannel( void )
+{
+	displayMode();
+	displayOperators();
+	displayMembers();
 }
 
 void	Channel::displayMembers( void )
@@ -143,6 +150,16 @@ void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames )
 	}
 }
 
+void	Channel::displayTopic( void ) const
+{
+	std::string message = _name + " :";
+	if (_topic.empty())
+		message = message + "No topic is set\n";
+	else
+		message = message + _topic;
+	std::cout << message << std::endl;
+}
+
 void	Channel::displayTopic( int const& fd ) const
 {
 	std::string message = _name + " :";
@@ -151,6 +168,20 @@ void	Channel::displayTopic( int const& fd ) const
 	else
 		message = message + _topic;
 	send(fd, message.c_str(), message.length(), 0);
+}
+
+void	Channel::displayMode ( void ) const
+{
+	std::string	message = "\n---CHANNEL " + _name + "---\n";
+
+	message += "TOPIC      :" + _topic + "\n";
+	message += "USER LIMIT :" + ::itos(_userLimit) + "\n";
+	message += "KEY        :" + _channelKey + "\n";
+	message += "Mode (+k)  : " + ::itos(static_cast<int>(_hasChannelKey)) + "\n";
+	message += "Mode (+t)  : " + ::itos(static_cast<int>(_hasTopicRestrictions)) + "\n";
+	message += "Mode (+i)  : " + ::itos(static_cast<int>(_isInviteOnly)) + "\n";
+
+	std::cout << message;
 }
 
 bool Channel::hasMember( int fd ) const
@@ -192,21 +223,21 @@ void	Channel::setHasChannelKey( bool status )
 {
 	this->_hasChannelKey = status;
 	if (DEBUG)
-		std::cout << _name << "channel key bool set: " << _hasChannelKey << std::endl;
+		displayMode();
 }
 
 void	Channel::setChannelKey( std::string const& key )
 {
 	this->_channelKey = key;
 	if (DEBUG)
-		std::cout << _name << "channel key set: " << _channelKey << std::endl;
+		displayMode();
 }
 
 void	Channel::setUserLimit( unsigned int const& limit )
 {
 	this->_userLimit = limit;
 	if (DEBUG)
-		std::cout << _name << "user limit set: " << _userLimit << std::endl;
+		displayMode();
 }
 
 bool	Channel::getHasTopicRestrictions() const
@@ -218,17 +249,19 @@ void Channel::setIsInviteOnly( bool status )
 {
 	this->_isInviteOnly = status;
 	if (DEBUG)
-		std::cout << _name << " invite only bool set: " << _isInviteOnly << std::endl;
+		displayMode();
 }
 
 void Channel::setHasTopicRestrictions( bool status )
 {
 	this->_hasTopicRestrictions = status;
 	if (DEBUG)
-		std::cout << _name << " topic restrictions bool set: " << _hasTopicRestrictions << std::endl;
+		displayMode();
 }
 
 void Channel::setTopic( std::string const& newTopic )
 {
 	_topic = newTopic;
+	if (DEBUG)
+		displayMode();
 }

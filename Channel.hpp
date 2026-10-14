@@ -34,12 +34,12 @@ class Channel
 		
 		~Channel();
 		Channel( std::string const& name, Client *owner );
-		Channel(const Channel& copy);
-		Channel& operator=(const Channel& copy);
+		Channel( const Channel& copy );
+		Channel& operator=( const Channel& copy );
 
 		/* ----- Accessors ----- */
 
-		bool					hasMember(int fd) const;
+		bool					hasMember( int fd ) const;
 		std::map<int, Client*>	getMembers() const;
 		bool					getIsChannelOperator( int const& fd );
 		bool					getHasChannelKey() const;
@@ -51,23 +51,26 @@ class Channel
 
 		/* ----- Setters ----- */
 
-		void					setHasChannelKey(bool status);
-		void					setChannelKey(std::string const& key);
-		void					setUserLimit(unsigned int const& limit);
-		void					setIsInviteOnly(bool status);
-		void					setHasTopicRestrictions(bool status);
-		void					setTopic( std::string const& newTopic);
+		void					setHasChannelKey( bool status );
+		void					setChannelKey( std::string const& key );
+		void					setUserLimit( unsigned int const& limit );
+		void					setIsInviteOnly( bool status );
+		void					setHasTopicRestrictions( bool status );
+		void					setTopic( std::string const& newTopic );
 
 		/* ----- Methods ----- */
 
-		void					sendMessageToMembers(std::string const& message, int const& sender_fd);
-		void					addNewMember(Client *newMember);
+		void					sendMessageToMembers( std::string const& message, int const& sender_fd );
+		void					addNewMember( Client *newMember );
 		bool					removeMember( int const& fd );
-		void					addNewOperator(Client *newMember);
+		void					addNewOperator( Client *newMember );
 		void					removeOperator( int const& fd );
+		void					displayChannel( void );
 		void					displayOperators( void );
+		void					displayMode( void ) const;
 		void					displayMembers( void );
 		void					displayMembers( int const& fd, bool const& displayEndOfNames );
+		void					displayTopic( void ) const;
 		void					displayTopic( int const& fd ) const;
 
 };

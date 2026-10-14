@@ -1,12 +1,16 @@
 CC			= c++
 CFLAGS		= -Wall -Wextra -Werror -std=c++98 -g
 NAME		= ircserv
-
+NAME_BOT	= ircbot
 SRCS		= 	main.cpp \
 				IrcServer.cpp \
 				Utils.cpp \
 
+SRC_BOT	= 	Bot.cpp Utils.cpp
+
 OBJS		= $(SRCS:%.cpp=objs/%.o)
+
+OBJ_BOT		= $(SRC_BOT:%.cpp=objs/%.o)
 
 all:		$(NAME)
 
@@ -19,17 +23,19 @@ objs/%.o: 	%.cpp  | objs
 $(NAME):	$(OBJS)
 		$(CC) $(CFLAGS) $(OBJS) -o $(NAME)
 
-debug: CFLAGS += -DDEBUG=1
-debug: fclean all
+$(NAME_BOT):	$(OBJ_BOT)
+		$(CC) $(CFLAGS) $(OBJ_BOT) -o $(NAME_BOT)
 
-bot: SRCS += Bot.cpp
-bot: fclean all
+debug: CFLAGS += -DDEBUG=1
+debug: fclean all $(NAME_BOT)
+
+bonus:	fclean all $(NAME_BOT)
 
 clean:
 		rm -rf $(OBJS) ./objs
 
 fclean:		clean
-		rm -f $(NAME)
+		rm -f $(NAME) $(NAME_BOT)
 
 re:		fclean all
 

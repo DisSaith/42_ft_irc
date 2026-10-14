@@ -4,13 +4,7 @@
 #include <unistd.h>
 #include <string>
 #include <iostream>
-
-#include <sys/socket.h>
-#include <arpa/inet.h>
-#include <netdb.h>
-#include <unistd.h>
-#include <string>
-#include <iostream>
+#include "Utils.hpp"
 
 bool	sendData(int sock, const std::string& msg)
 {
@@ -37,10 +31,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 	std::string	ip = argv[1];
-	int		port = std::stoi(argv[2]);
+	int			port = Utils::stoi(argv[2]);
 	std::string	password = argv[3];
 	std::string	bot_name = argv[4];
-	int		sock = socket(AF_INET, SOCK_STREAM, 0);
+	int			sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock == -1)
 	{
 		std::cerr << "Socket error" << std::endl;
