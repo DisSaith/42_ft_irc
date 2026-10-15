@@ -28,8 +28,25 @@ Skills learning / improvement :
 ## Instructions  
 ***Usage***  
 1) Run make to compile the source files using the provided Makefile.
-2) Execute the server by running ./ircserv "port" "password".
-3) Connect to the server using your reference IRC client. You can also test the connection manually using nc 127.0.0.1 "port"
+2) Execute the server by running :
+```bash
+   ./ircserv <port> <password>.
+```
+3) Connect to the server using your reference IRC client. You can also test the connection manually using :
+```bash
+   nc 127.0.0.1 <port>
+```
+4) Then follow these instructions :
+```bash
+  PASS <password of the server>
+  NICK <your nickname>
+  USER <username> <hostname> <servername> <realname>
+```
+5) Examples of possible commands :
+```bash
+  JOIN <channel name>
+  PRIVMSG <user nickname> <message>
+```
 
 ***Check leaks***   
 valgrind --leak-check=full --show-leak-kinds=all ./ircserv "port" "password"     
