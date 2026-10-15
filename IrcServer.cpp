@@ -11,8 +11,13 @@ IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *t
 
 /* ======================== Default Constructor & Destructor ======================== */
 
-IrcServer::~IrcServer() {} 
-IrcServer::IrcServer() : _password(""), _port(0) {}
+IrcServer::~IrcServer() 
+{
+	if (DEBUG)
+		std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
+}
+
+IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false) {}
 
 
 /* ======================== IRC Server ======================== */
@@ -66,13 +71,14 @@ void	IrcServer::ConnectionWithClients()
 	serverFd.revents = 0;
 	_pollFds.push_back(serverFd);
 
-	std::cout << "Serveur en écoute. En attente de connexions..." << std::endl;
+	std::cout << BLUE << "Server listening." << RESET << " Waiting for connections.." << std::endl;
 
 	while (1)
 	{
 		if (poll(&_pollFds[0], _pollFds.size(), -1) == -1)
 		{
-			std::cerr << "Erreur critique sur poll()" << std::endl;
+			if (!_signalHandled)
+				std::cerr << "Critical error from poll()" << std::endl;
 			break ;
 		}
 		for (size_t i = 0; i < _pollFds.size(); i++)
@@ -84,7 +90,7 @@ void	IrcServer::ConnectionWithClients()
 					int newClientFd = accept(_socketServer, NULL, NULL);
 					if (newClientFd == -1)
 					{
-						std::cerr << "Erreur critique sur acept()" << std::endl;
+						std::cerr << "Critical error from acept()" << std::endl;
 						continue ;
 					}
 					fcntl(newClientFd, F_SETFL, O_NONBLOCK);
@@ -116,7 +122,7 @@ void	IrcServer::ConnectionWithClients()
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
-								std::cout << "[Client " << _pollFds[i].fd << "] a envoyé : " << cmd;
+								std::cout << "[Client " << _pollFds[i].fd << "] send : " << cmd;
 							TokenizerRecv(cmd);
 							try
 							{
@@ -142,22 +148,6 @@ void	IrcServer::ConnectionWithClients()
 	}
 }
 
-std::string		IrcServer::buildMessage( int code, std::string target, std::string text, int fd )
-{
-	std::string message = ":localhost ";
-
-	if (code >= 0)
-		message += itos(code) + " ";
-	if (_clients[fd]->getNickname().empty())
-		message += "* ";
-	else
-		message += _clients[fd]->getNickname() + " ";
-	if (target.empty() == false)
-		message += target + " ";
-	message += text + "\r\n";
-
-	return message;
-}
 
 /* ======================== Handling Clients Messages ======================== */
 
@@ -262,19 +252,19 @@ void IrcServer::RemoveClient(int fd)
 	}
 
 	if (DEBUG)
-		std::cout << YELLOW << "Ressources du client " << fd << " libérées proprement." << RESET << std::endl;
+		std::cout << WHITE << "All resources from client " << fd << " are free correctly." << RESET << std::endl;
 }
 
 /* ======================== Signals ======================== */
 
-void	IrcServer::signalINT( int signal )
+void	IrcServer::signalHandler( int signal )
 {
-	//IrcServer *serverptr = GetPtrServer(NULL);
-	//serverptr->CloseFds();
-	//serverptr->DeleteChannels();
+	IrcServer *serverptr = GetPtrServer(NULL);
 	
+	serverptr->SetSignalHandled(true);
+
 	if (DEBUG)
-		std::cout << WHITE << "\nSIGINT " << RESET << "intercepted (" << signal << ")\n";
+		std::cout << WHITE << "\nSignal " << RED << signal << WHITE << " intercepted\n" << RESET;
 }
 
 
@@ -289,6 +279,42 @@ IrcServer* IrcServer::GetPtrServer( IrcServer *server )
 		serverPtr = server;
 
 	return ( serverPtr );
+}
+
+std::string		IrcServer::buildMessage( int code, std::string target, std::string text, int fd )
+{
+	std::string message = ":localhost ";
+
+	if (code >= 0)
+		message += itos(code) + " ";
+	if (_clients[fd]->getNickname().empty())
+		message += "* ";
+	else
+		message += _clients[fd]->getNickname() + " ";
+	if (target.empty() == false)
+		message += target + " ";
+	message += text + "\r\n";
+
+	return message;
+}
+
+//Search for the fd corresponding to a Nickname
+int IrcServer::getFdfromNickname( std::string nickname )
+{
+	std::map<int, Client*>::iterator clients_it;
+	for (clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
+	{
+		if (clients_it->second->getNickname() == nickname)
+			return (clients_it->first);
+	}
+	return (-1);
+}
+
+bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
+{
+	if (_clients[fd]->getIsServerOperator() || _channels[channelName]->getIsChannelOperator(fd))
+		return true;
+	return false;
 }
 
 // Ports between 0 and 1023 need root permission
@@ -318,7 +344,7 @@ bool IrcServer::CheckServerPort( std::string const& port )
 	return (false);
 }
 
-// Initialize Set container of IRC Server commands
+// Initialize map container of IRC Server commands
 void	IrcServer::InitMapCommands()
 {
 	if (_commands.empty() == false)
@@ -336,6 +362,12 @@ void	IrcServer::InitMapCommands()
 	_commands["KICK"] = &IrcServer::KICK;
 	_commands["TOPIC"] = &IrcServer::TOPIC;
 	_commands["INVITE"] = &IrcServer::INVITE;
+}
+
+//Setter
+void	IrcServer::SetSignalHandled( bool set )
+{
+	this->_signalHandled = set;
 }
 
 // Close all fds and delete for no leaks at the end of the program
@@ -363,23 +395,4 @@ void IrcServer::DeleteChannels()
 		delete(it->second);
 		++it;
 	}
-}
-
-bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
-{
-	if (_clients[fd]->getIsServerOperator() || _channels[channelName]->getIsChannelOperator(fd))
-		return true;
-	return false;
-}
-
-//Search for the fd corresponding to a Nickname
-int IrcServer::getFdfromNickname( std::string nickname )
-{
-	std::map<int, Client*>::iterator clients_it;
-	for (clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
-	{
-		if (clients_it->second->getNickname() == nickname)
-			return (clients_it->first);
-	}
-	return (-1);
 }

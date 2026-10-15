@@ -7,7 +7,8 @@ int	main(int ac, char **av)
 	IrcServer server;
 	
 	IrcServer::GetPtrServer(&server);
-	signal( SIGINT, IrcServer::signalINT );
+	signal( SIGINT, IrcServer::signalHandler );
+	signal( SIGQUIT, IrcServer::signalHandler );
 
 	try 
 	{

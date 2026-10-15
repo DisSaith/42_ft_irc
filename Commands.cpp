@@ -353,7 +353,6 @@ void    IrcServer::QUIT(int const& fd)
 		{
 			send(*setIt, fullMsg.c_str(), fullMsg.length(), 0);
 		}
-		std::cout << YELLOW << "Client " << _clients[fd]->getNickname() << " a quitté le serveur." << RESET << std::endl;
 		_clients[fd]->setIsDisconnect(true);
 	}
 }

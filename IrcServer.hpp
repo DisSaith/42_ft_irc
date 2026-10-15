@@ -67,18 +67,19 @@ class IrcServer
 		void INVITE(int const& fd);
 
 		/* ----- Signals ----- */
-		static void signalINT( int signal );
+		static void signalHandler( int signal );
 
 		/* ----- Utils ----- */
 		static IrcServer*	GetPtrServer( IrcServer *server );
+		std::string			buildMessage( int code, std::string target, std::string text, int fd );
+		int					getFdfromNickname( std::string nickname );
 		bool				isAnyOperator(int const& fd, std::string const& channelName);
 		bool				CheckServerPort( std::string const& port );
 		void				InitMapCommands();
+		void				SetSignalHandled( bool set ); //setter
 		void				CloseFds();
 		void				DeleteChannels();
 		void				RemoveClient(int fd);
-		std::string			buildMessage( int code, std::string target, std::string text, int fd );
-		int					getFdfromNickname( std::string nickname );
 
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
@@ -102,6 +103,7 @@ class IrcServer
 		int									_socketServer;
 		// listening port (for initialing communications)
 		short								_port;
+		bool								_signalHandled;
 		
 		/* ----- Orthodox Canonical Form ----- */
 		IrcServer( IrcServer const& copy ); //Copy Constructor
