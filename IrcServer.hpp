@@ -75,6 +75,7 @@ class IrcServer
 		bool				CheckServerPort( std::string const& port );
 		void				InitMapCommands();
 		void				CloseFds();
+		void				DeleteChannels();
 		void				RemoveClient(int fd);
 		std::string			buildMessage( int code, std::string target, std::string text, int fd );
 		int					getFdfromNickname( std::string nickname );

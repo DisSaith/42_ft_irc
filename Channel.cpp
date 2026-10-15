@@ -1,4 +1,5 @@
 #include "Channel.hpp"
+
 Channel::Channel( void )
 {
 	if (DEBUG)
@@ -264,4 +265,10 @@ void Channel::setTopic( std::string const& newTopic )
 	_topic = newTopic;
 	if (DEBUG)
 		displayMode();
+}
+
+void Channel::freeChannels()
+{
+	for (std::map<int, Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
+		it->second->removeChannel(_name);
 }

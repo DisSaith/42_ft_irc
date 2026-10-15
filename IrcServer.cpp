@@ -271,8 +271,10 @@ void	IrcServer::signalINT( int signal )
 {
 	//IrcServer *serverptr = GetPtrServer(NULL);
 	//serverptr->CloseFds();
-
-	std::cout << WHITE << "\nSIGINT " << RESET << "intercepted (" << signal << ")\n";
+	//serverptr->DeleteChannels();
+	
+	if (DEBUG)
+		std::cout << WHITE << "\nSIGINT " << RESET << "intercepted (" << signal << ")\n";
 }
 
 
@@ -349,6 +351,17 @@ void IrcServer::CloseFds()
 		_clients.erase(_pollFds[i].fd);
 		_pollFds.erase(_pollFds.begin() + i);
 		i--;
+	}
+}
+
+void IrcServer::DeleteChannels()
+{
+	std::map<std::string, Channel*>::iterator it = _channels.begin();
+
+	while ( it != _channels.end() )
+	{
+		delete(it->second);
+		++it;
 	}
 }
 

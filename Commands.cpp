@@ -1,3 +1,4 @@
+
 //Wrong error messages
 void	IrcServer::JOIN(int const& fd)
 {

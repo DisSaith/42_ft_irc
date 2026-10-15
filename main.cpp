@@ -30,6 +30,7 @@ int	main(int ac, char **av)
 			<< e.what() << std::endl;
 	}
 	
+	server.DeleteChannels();
 	server.CloseFds();
 	return 0;
 }
