@@ -154,23 +154,6 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
-
-	if (_recv.empty() == false)
-		_recv.clear(); // clear list before every new recv from a client
-	_recv = split(buffer, ' ');
-
-	if (DEBUG) // display list tokens
-	{
-		int i = 0;
-		std::cout << "[List Tokens] " << std::endl;
-		for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
-		{
-			std::cout << i << ": " << *it << std::endl;
-			i++;
-		}
-	}
-/*
-	std::string		token;
 	size_t			j = 0;
 	bool			inWord = false;
 
@@ -201,7 +184,7 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 			i++;
 		}
 		std::cout << std::endl;
-	}*/
+	}
 }
 
 void IrcServer::ParsingRecv( int const& clientFd )
