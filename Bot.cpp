@@ -39,7 +39,7 @@ std::list<std::string> readDictionnary()
 bool checkMessage(std::list<std::string> message, std::list<std::string> dictionnary, char* buffer)
 {
 	bool found = false;
-	
+
 	for (std::list<std::string>::iterator message_it = message.begin(); message_it != message.end(); message_it++)
 	{
 		if (std::find(dictionnary.begin(), dictionnary.end(), *message_it) != dictionnary.end())
@@ -63,10 +63,11 @@ int main(int argc, char* argv[])
 	std::string	ip = argv[1];
 	int			port = Utils::stoi(argv[2]);
 	std::string	password = argv[3];
-	std::string	bot_name = argv[4];
-	int			maxNbWarnings = Utils::stoi(argv[2]);
+	std::string	botName = argv[4];
+	int			maxNbWarnings = Utils::stoi(argv[5]);
 	int			sock = socket(AF_INET, SOCK_STREAM, 0);
 	std::map<std::string, int>		_usersWarnings;
+	std::string lastInviteNickname;
 	
 	if (sock == -1)
 	{
@@ -92,15 +93,15 @@ int main(int argc, char* argv[])
 	std::cout << "Connected to server. Authenticating..." << std::endl;
 	if (!password.empty())
 		sendData(sock, "PASS " + password + "\r\n");
-	sendData(sock, "NICK " + bot_name + "\r\n");
-	sendData(sock, "USER " + bot_name + " 0 * :" + bot_name + " C++\r\n");
+	sendData(sock, "NICK " + botName + "\r\n");
+	sendData(sock, "USER " + botName + " 0 * :" + botName + " C++\r\n");
 
 	char buffer[4096];
 	std::list<std::string> dictionnary = readDictionnary();
 	std::ofstream ofs("log", std::ios::trunc);
 	if (!ofs.is_open())
 		std::cerr << "Warning: Unable to open log file." << std::endl;
-	
+	sendData(sock, "OPER " + botName + "\r\n");
 	while (true)
 	{
 		int bytes_received = recv(sock, buffer, sizeof(buffer) - 1, 0);
@@ -113,16 +114,27 @@ int main(int argc, char* argv[])
 		std::list<std::string> data = Utils::split(buffer, ' ');
 		std::cout << buffer;
 
-		if (checkMessage(data, dictionnary, buffer))
+		std::list<std::string>::iterator data_it = std::find(data.begin(), data.end(), "PRIVMSG");
+		if (data_it != data.end())
 		{
-			std::string BadUserName = data.front();
-			BadUserName.erase(0, 1);
-			sendData(sock, "PRIVMSG " + BadUserName + " WARNING BAD LANGUAGE" + "\r\n");
-			_usersWarnings[BadUserName]++;
-			if (_usersWarnings[BadUserName] > maxNbWarnings)
-				sendData(sock, "KICK #chan " + BadUserName + " :Bad Language" + "\r\n");
+			data_it++;
+			if (((*(data_it))[0] == '&' || (*(data_it))[0] == '#') && checkMessage(data, dictionnary, buffer))
+			{
+				std::string BadUserName = data.front();		
+
+				BadUserName.erase(0, 1);
+				sendData(sock, "PRIVMSG " + BadUserName + " WARNING BAD LANGUAGE" + "\r\n");
+				_usersWarnings[BadUserName]++;
+				std::cout << BadUserName << " is at warning number " << _usersWarnings[BadUserName] << "/" << maxNbWarnings << "." << std::endl;
+				if (_usersWarnings[BadUserName] > maxNbWarnings)
+					sendData(sock, "KICK " + *(data_it) + " " + BadUserName + "Bad Language" + "\r\n");
+			}
 		}
-		
+
+
+
+
+
 		if (std::find(data.begin(), data.end(), "464") != data.end())
 		{
 			std::cerr << "\n[FATAL ERROR] Incorrect password (464)." << std::endl;
@@ -130,15 +142,21 @@ int main(int argc, char* argv[])
 		}
 		if (std::find(data.begin(), data.end(), "433") != data.end())
 		{
-			std::cerr << "\n[FATAL ERROR] Bot name '" << bot_name << "' is already in use on this server." << std::endl;
+			std::cerr << "\n[FATAL ERROR] Bot name '" << botName << "' is already in use on this server." << std::endl;
 			std::cerr << "Please restart the program with a different name." << std::endl;
 			break ;
 		}
 		if (std::find(data.begin(), data.end(), "001") != data.end())
 			std::cout << "Authentication successful! Name validated." << std::endl;
-		if (std::find(data.begin(), data.end(), " INVITE ") != data.end())
-
-		
+		if (std::find(data.begin(), data.end(), "INVITE") != data.end())
+		{
+			std::vector<std::string> vdata(data.begin(), data.end());
+			lastInviteNickname = vdata[0];
+			lastInviteNickname.erase(0, 1);
+			sendData(sock, "JOIN " + vdata[3] + "\r\n");
+		}
+		if (std::find(data.begin(), data.end(), ":Cannot join channel") != data.end())
+			sendData(sock, "PRIVMSG " + lastInviteNickname + " Cannot join channel" + "\r\n");
 		if (ofs.is_open())
 		{
 			time(&now);

@@ -65,6 +65,7 @@ class IrcServer
 		void MODE(int const& fd);
 		void TOPIC(int const& fd);
 		void INVITE(int const& fd);
+		void OPER(int const& fd);
 
 		/* ----- Signals ----- */
 		static void signalHandler( int signal );

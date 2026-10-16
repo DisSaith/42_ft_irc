@@ -114,6 +114,8 @@ void	IrcServer::KICK(int const& operator_fd)
 			comment += " ";
 	}
 	int		kicked_fd = getFdfromNickname(nickName);
+	if (kicked_fd == -1)
+		throw IrcException(-1, "KICK", ":No such nickname", operator_fd);
 
 	//ERR_CHANOPRIVSNEEDED
 	if (!isAnyOperator(operator_fd, channelName))
@@ -599,4 +601,28 @@ void	IrcServer::INVITE(int const& fd)
 	send(fd, message.c_str(), message.length(), 0);
 	std::string inviteMsg = ":" + _clients[fd]->getNickname() + " INVITE " + targetNick + " " + chanTarget + "\r\n";
 	send(targetFd, inviteMsg.c_str(), inviteMsg.length(), 0);
+}
+
+void	IrcServer::OPER(int const& fd)
+{
+	if (_clients[fd]->setIsRegistered() == false)
+		throw IrcException(-1, "OPER", ":User not registered", fd);	
+	//ERR_NEEDMOREPARAMS
+	if (_recv.size() < 2)
+		throw IrcException(461, "OPER", ":Not enough parameters", fd);
+
+	std::list<std::string>::iterator l_it = _recv.begin();
+	std::string nickName = *(++l_it);
+	int targetFd = getFdfromNickname(nickName);
+
+	if (targetFd == -1)
+		throw IrcException(-1, "OPER", ":No such nickname", fd);
+
+	if (_clients[targetFd]->getIsServerOperator())
+		throw IrcException(-1, "OPER", ":User is already an operator", fd);
+
+	_clients[targetFd]->setIsOperator(true);
+	
+	std::string message = nickName + " is now a server operator.\n";
+	send(fd, message.c_str(), message.length(), 0);
 }

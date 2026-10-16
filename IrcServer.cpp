@@ -355,6 +355,7 @@ void	IrcServer::InitMapCommands()
 	_commands["KICK"] = &IrcServer::KICK;
 	_commands["TOPIC"] = &IrcServer::TOPIC;
 	_commands["INVITE"] = &IrcServer::INVITE;
+	_commands["OPER"] = &IrcServer::OPER;
 }
 
 //Setter
