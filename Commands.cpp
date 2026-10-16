@@ -46,7 +46,7 @@ void	IrcServer::JOIN(int const& fd)
 					throw IrcException(475, *it, ":Cannot join channel (+k)", fd);
 				if (chan_it->second->getMembers().size() >= chan_it->second->getUserLimit())
 					throw IrcException(471, *it, ":Cannot join channel (+l)", fd);
-				
+
 				if (_clients[fd]->getIsInvited(*it))
 					_clients[fd]->removeInvite(*it);
 				chan_it->second->addNewMember(_clients[fd]);
@@ -179,7 +179,7 @@ void	IrcServer::NAMES(int const& fd)
 		std::string name;
 
 		message = "* :";
-    	for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
+		for (std::map<int, Client*>::const_iterator it = _clients.begin(); it != _clients.end(); ++it)
 		{
 			if (it->second->getChannels().empty())
 			{
@@ -189,7 +189,7 @@ void	IrcServer::NAMES(int const& fd)
 				name = name + it->second->getNickname();
 				message = message + name;
 				if (++it != _clients.end())
-    	   		 	message = message + " ";
+					message = message + " ";
 				--it;
 			}
 		}
@@ -258,10 +258,9 @@ void	IrcServer::PRIVMSG(int const& fd)
 				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
 				return ;
 			}
-
 			std::list<std::string>::iterator it = _recv.begin();
 			it++;
-			std::string chanTarget = *it;
+			std::string targetsString = *it;
 			it++; 
 
 			std::string	message;
@@ -272,43 +271,45 @@ void	IrcServer::PRIVMSG(int const& fd)
 				if (it != _recv.end())
 					message += " ";
 			}
-
-			std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " " + message + "\r\n";
-
-			if (chanTarget[0] == '#' || chanTarget[0] == '&')
+			std::list<std::string> targetsList = split(targetsString, ',');
+			for (std::list<std::string>::iterator targetIt = targetsList.begin(); targetIt != targetsList.end(); ++targetIt)
 			{
-				std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
-
-				if (chanIt != _channels.end())
+				std::string chanTarget = *targetIt;
+				if (chanTarget.empty())
+					continue;
+				std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " " + message + "\r\n";
+				if (chanTarget[0] == '#' || chanTarget[0] == '&')
 				{
-					chanIt->second->sendMessageToMembers(fullMsg, fd);
+					std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+
+					if (chanIt != _channels.end())
+						chanIt->second->sendMessageToMembers(fullMsg, fd);
+					else
+					{
+						std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
+						send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+					}
+					continue ;
 				}
-				else
+				bool targetFound = false;
+				int targetFd = -1;
+				for (std::map<int, Client*>::iterator mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
+				{
+					if (mapIt->second->getNickname() == chanTarget)
+					{
+						targetFound = true;
+						targetFd = mapIt->first;
+						break ;
+					}
+				}
+				if (targetFound == false)
 				{
 					std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
 					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+					continue ;
 				}
-				return ;
+				send(targetFd, fullMsg.c_str(), fullMsg.length(), 0);
 			}
-
-			bool targetFound = false;
-			int targetFd = -1;
-			for (std::map<int, Client*>::iterator mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
-			{
-				if (mapIt->second->getNickname() == chanTarget)
-				{
-					targetFound = true;
-					targetFd = mapIt->first;
-					break ;
-				}
-			}
-			if (targetFound == false)
-			{
-				std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;
-			}
-			send(targetFd, fullMsg.c_str(), fullMsg.length(), 0);
 		}
 	}
 }
@@ -625,4 +626,19 @@ void	IrcServer::OPER(int const& fd)
 	
 	std::string message = nickName + " is now a server operator.\n";
 	send(fd, message.c_str(), message.length(), 0);
+}
+
+void	IrcServer::CAP(int const& fd)
+{
+	if (_recv.size() >= 2)
+	{
+		std::list<std::string>::iterator it = _recv.begin();
+		it++;
+
+		if (*it == "LS")
+		{
+			std::string capMsg = "CAP * LS :\r\n";
+			send(fd, capMsg.c_str(), capMsg.length(), 0);
+		}
+	}
 }

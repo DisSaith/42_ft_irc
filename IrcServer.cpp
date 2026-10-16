@@ -13,8 +13,7 @@ IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *t
 
 IrcServer::~IrcServer() 
 {
-	if (DEBUG)
-		std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
+	std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
 }
 
 IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false) {}
@@ -107,16 +106,11 @@ void	IrcServer::ConnectionWithClients()
 					memset(buffer, 0, sizeof(buffer)); // cancel pb with zombie memomy
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					/*if (_recv.front() == "CAP")
-					{
-						// 421 ERR_UNKNOWNCOMMAND
-						std::string errorMsg = ":localhost 421 * CAP :Unknown command\r\n";
-						send(_pollFds[i].fd, errorMsg.c_str(), errorMsg.length(), 0);
-						return ;
-					}
-					std::cout<< buffer <<std::endl;*/
 					if (DEBUG)
-						std::cout << "\nbytesRead = " << bytesRead << std::endl;
+					{
+						std::cout << "\nbytesRead = " << bytesRead << std::endl
+								<< "buffer -> " << buffer;
+					}
 					if (bytesRead <= 0)
 					{
 						RemoveClient(_pollFds[i].fd);
@@ -130,7 +124,8 @@ void	IrcServer::ConnectionWithClients()
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
-								std::cout << "[Client " << _pollFds[i].fd << "] send : " << cmd;
+								std::cout << YELLOW << "[Client " << _pollFds[i].fd << "]"
+											<< RESET << " send : " << cmd;
 							TokenizerRecv(cmd);
 							try
 							{
@@ -165,15 +160,39 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
+	size_t			j = 0;
+	bool			inWord = false;
+	bool			colon = false;
 
 	if (_recv.empty() == false)
-		_recv.clear();
-	_recv = split(buffer, ' ');
+		_recv.clear(); // clear list before every new recv from a client
+	for ( size_t i = 0 ; i < buffer.length() ; i++)
+	{
+		if ( buffer[i] == ':' && i != 0 )
+		{
+			colon = true;
+			inWord = true;
+			j = i + 1;
+		}
+		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
+		{
+			inWord = true;
+			j = i;
+		}
+		if ( ((buffer[i] == ' ' && !colon) || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
+		{
+			inWord = false;
+			token = buffer.substr(j, i - j);
+			_recv.push_back(token);
+			if (colon)
+				colon = false;
+		}
+	}
 
 	if (DEBUG) // display list tokens
 	{
 		int i = 0;
-		std::cout << "[List Tokens] " << std::endl;
+		std::cout << WHITE << "[List Tokens] " << RESET << std::endl;
 		for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
 		{
 			std::cout << i << ": " << *it << std::endl;
@@ -200,12 +219,6 @@ void IrcServer::ParsingRecv( int const& clientFd )
 	{
 		cmdFunction cmd = find->second;
 		(this->*cmd)(clientFd);
-	}
-	else if (_recv.front() == "CAP")
-	{
-		// On répond proprement à Irssi qu'on n'a aucune capacité (liste vide)
-		std::string capMsg = "CAP * LS :\r\n";
-		send(clientFd, capMsg.c_str(), capMsg.length(), 0);
 	}
 	else
 	{
@@ -356,6 +369,7 @@ void	IrcServer::InitMapCommands()
 	_commands["TOPIC"] = &IrcServer::TOPIC;
 	_commands["INVITE"] = &IrcServer::INVITE;
 	_commands["OPER"] = &IrcServer::OPER;
+	_commands["CAP"] = &IrcServer::CAP;
 }
 
 //Setter

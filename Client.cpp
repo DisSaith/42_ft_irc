@@ -12,9 +12,8 @@ Client&	Client::operator=(const Client& copy) { (void) copy; return *this; }
 //Destructor
 Client::~Client()
 {
-	if (DEBUG)
-		std::cout << YELLOW << "Client " << _fd << RESET
-					<< " left server." << std::endl;
+	std::cout << YELLOW << "Client " << _fd << RESET
+				<< " left server." << std::endl;
 }
 
 //Main Constructor
@@ -29,10 +28,8 @@ Client::Client(int fd) :
 	_bufferIn.reserve(1024);
 	_bufferOut.reserve(1024);
 
-	if (DEBUG)
-
-		std::cout << YELLOW << "Client " << fd << RESET
-					<< " joinded server." << std::endl;
+	std::cout << YELLOW << "Client " << fd << RESET
+				<< " joined server." << std::endl;
 }
 
 //Parametric constructor, mainly used for debug
