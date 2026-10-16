@@ -13,8 +13,7 @@ IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *t
 
 IrcServer::~IrcServer() 
 {
-	if (DEBUG)
-		std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
+	std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
 }
 
 IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false) {}
@@ -157,10 +156,25 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
+	size_t			j = 0;
+	bool			inWord = false;
 
 	if (_recv.empty() == false)
-		_recv.clear();
-	_recv = split(buffer, ' ');
+		_recv.clear(); // clear list before every new recv from a client
+	for ( size_t i = 0 ; i < buffer.length() ; i++)
+	{
+		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
+		{
+			inWord = true;
+			j = i;
+		}
+		if ( (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
+		{
+			inWord = false;
+			token = buffer.substr(j, i - j);
+			_recv.push_back(token);
+		}
+	}
 
 	if (DEBUG) // display list tokens
 	{

@@ -111,7 +111,7 @@ void	IrcServer::USER(int const& fd)
 		{
 			std::string welcome = ":localhost 001 " + _clients[fd]->getNickname() + " :Welcome to the ft_irc network!\r\n";
 			send(fd, welcome.c_str(), welcome.length(), 0);
-			std::cout << "Client " << fd << " is officially registered !" << std::endl;
+			std::cout << GREEN << "Client " << fd << " is officially registered !\n" << RESET;
 		} 
 	}
 }
