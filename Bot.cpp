@@ -3,6 +3,8 @@
 #include <fstream>
 #include <ctime>
 
+
+
 bool	sendData(int sock, const std::string& msg)
 {
 	int total_sent = 0;
@@ -52,10 +54,10 @@ bool checkMessage(std::list<std::string> message, std::list<std::string> diction
 }
 
 int main(int argc, char* argv[])
-{
-	if (argc != 5)
+{ 
+	if (argc != 6)
 	{
-		std::cerr << "Usage: " << argv[0] << " <IP> <PORT> <PASSWORD> <BOT NAME>" << std::endl;
+		std::cerr << "Usage: " << argv[0] << " <IP> <PORT> <PASSWORD> <BOT NAME> <MAX NB OF WARNINGS>" << std::endl;
 		return 1;
 	}
 	
@@ -64,7 +66,9 @@ int main(int argc, char* argv[])
 	int			port = Utils::stoi(argv[2]);
 	std::string	password = argv[3];
 	std::string	bot_name = argv[4];
+	int			maxNbWarnings = Utils::stoi(argv[2]);
 	int			sock = socket(AF_INET, SOCK_STREAM, 0);
+	std::map<std::string, int>		_usersWarnings;
 	
 	if (sock == -1)
 	{
@@ -111,11 +115,16 @@ int main(int argc, char* argv[])
 		std::list<std::string> data = Utils::split(buffer, ' ');
 		std::cout << buffer;
 
+
+
 		if (checkMessage(data, dictionnary, buffer))
 		{
 			std::string BadUserName = data.front();
 			BadUserName.erase(0, 1);
 			sendData(sock, "PRIVMSG " + BadUserName + " WARNING BAD LANGUAGE" + "\r\n");
+			_usersWarnings[BadUserName]++;
+			if (_usersWarnings[BadUserName] > maxNbWarnings)
+				sendData(sock, "KICK #chan " + BadUserName + " :Bad Language" + "\r\n");
 		}
 		if (std::find(data.begin(), data.end(), "464") != data.end())
 		{

@@ -6,6 +6,7 @@
 # include <sstream>
 # include <cctype>
 # include <list>
+# include <climits>
 
 namespace Utils 
 {

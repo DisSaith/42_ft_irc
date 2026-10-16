@@ -7,11 +7,11 @@ namespace Utils
 {
 	int	stoi( std::string const& s )
 	{
-		int i;
+		long value = stol(s);
+		if (value > INT_MAX || value < INT_MIN)
+			return 0;
 
-		std::istringstream(s) >> i;
-	
-		return i;
+		return static_cast<int>(value);
 	}
 
 	long	stol( std::string const& s )
