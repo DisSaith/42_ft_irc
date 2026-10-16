@@ -151,13 +151,31 @@ void	IrcServer::ConnectionWithClients()
 
 /* ======================== Handling Clients Messages ======================== */
 
+// Ceci est la propriété intelectuelle d'Antoine Cohaut
+// Merci de ne plus y toucher.
+// Cordialement
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
+	size_t			j = 0;
+	bool			inWord = false;
 
 	if (_recv.empty() == false)
 		_recv.clear(); // clear list before every new recv from a client
-	_recv = split(buffer, ' ');
+	for ( size_t i = 0 ; i < buffer.length() ; i++)
+	{
+		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
+		{
+			inWord = true;
+			j = i;
+		}
+		if ( (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
+		{
+			inWord = false;
+			token = buffer.substr(j, i - j);
+			_recv.push_back(token);
+		}
+	}
 
 	if (DEBUG) // display list tokens
 	{
