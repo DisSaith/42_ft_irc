@@ -1,43 +1,94 @@
+
 void	IrcServer::PASS(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "PASS")
 	{
+		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
+		//ERR_ALREADYREGISTRED
+		if (_clients[fd]->setIsRegistered())
+			throw IrcException(462, currentNick, ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 2)
 			throw IrcException(461, "PASS", ":Not enough parameters", fd);
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
+		//ERR_PASSWDMISMATCH
 		if (*it != _password)
-		{
-			std::string errorMsg = ":localhost 464 * :Password incorrect\r\n";
-			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-			return ;
-		}
+			throw IrcException(464, currentNick, ":Password incorrect", fd);
 		else if ( DEBUG )
 			std::cout << "PASS \"" << *it << "\" " << GREEN << "CORRECT\r\n" << RESET;
+			
 		_clients[fd]->setPass();
 	}
+}
+
+bool	isValidNickname(const std::string& nick)
+{
+	if (nick.empty() || nick.length() > 9)
+		return false;
+	std::string special = "[]\\`_^{}|";
+	if (!std::isalpha(nick[0]) && special.find(nick[0]) == std::string::npos)
+		return false;
+	for (size_t i = 1; i < nick.length(); ++i)
+	{
+		if (!std::isalnum(nick[i]) && special.find(nick[i]) == std::string::npos && nick[i] != '-')
+			return false;
+	}
+	return true;
 }
 
 void	IrcServer::NICK(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "NICK" && _clients[fd]->getHasSetPass() == true)
 	{
-		//ERR_NEEDMOREPARAMS
+		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
+		//ERR_NONICKNAMEGIVEN
 		if (_recv.size() < 2)
-			throw IrcException(461, "NICK", ":Not enough parameters", fd);
+			throw IrcException(431, currentNick, ":No nickname given", fd);
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
+		std::string newNick = *it;
+		// ERR_ERRONEUSNICKNAME (432)
+		if (!isValidNickname(newNick))
+		{
+			std::string target = currentNick + " " + newNick;
+			throw IrcException(432, target, ":Erroneus nickname", fd);
+		}
+		//ERR_NICKNAMEINUSE (433)
 		for (std::map<int, Client*>::iterator mapIt = _clients.begin(); mapIt != _clients.end(); ++mapIt)
 		{
-			if ( *it == mapIt->second->getNickname() )
+			if (mapIt->first != fd && newNick == mapIt->second->getNickname())
 			{
-				std::string errorMsg = ":localhost 433 * " + *it + " :Nickname is already in use\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;
+				std::string target = currentNick + " " + newNick;
+				throw IrcException(433, target, ":Nickname is already in use", fd);
 			}
 		}
-		_clients[fd]->setNickName(*it);
+		std::string oldNick = _clients[fd]->getNickname();
+		_clients[fd]->setNickName(newNick);
+		if (!oldNick.empty())
+		{
+			std::string nickMsg = ":" + oldNick + " NICK " + newNick + "\r\n";
+			send(fd, nickMsg.c_str(), nickMsg.length(), 0);
+			std::set<int> clientsToNotify;
+			for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+			{
+				if (chanIt->second->hasMember(fd))
+				{
+					std::map<int, Client*> members = chanIt->second->getMembers();
+					std::map<int, Client*>::iterator memIt;
+					for (memIt = members.begin(); memIt != members.end(); ++memIt)
+					{
+						if (memIt->first != fd)
+							clientsToNotify.insert(memIt->first);
+					}
+				}
+			}
+			std::set<int>::iterator setIt;
+			for (setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)
+			{
+				send(*setIt, nickMsg.c_str(), nickMsg.length(), 0);
+			}
+		}
 	}
 }
 
@@ -45,6 +96,9 @@ void	IrcServer::USER(int const& fd)
 {
 	if (_clients[fd]->getHasSetPass() && _recv.front() == "USER")
 	{
+		//ERR_ALREADYREGISTRED
+		if (_clients[fd]->setIsRegistered())
+			throw IrcException(462, "USER", ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 5)
 			throw IrcException(461, "USER", ":Not enough parameters", fd);

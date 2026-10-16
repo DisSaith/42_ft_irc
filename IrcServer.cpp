@@ -107,14 +107,6 @@ void	IrcServer::ConnectionWithClients()
 					memset(buffer, 0, sizeof(buffer)); // cancel pb with zombie memomy
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					/*if (_recv.front() == "CAP")
-					{
-						// 421 ERR_UNKNOWNCOMMAND
-						std::string errorMsg = ":localhost 421 * CAP :Unknown command\r\n";
-						send(_pollFds[i].fd, errorMsg.c_str(), errorMsg.length(), 0);
-						return ;
-					}
-					std::cout<< buffer <<std::endl;*/
 					if (DEBUG)
 						std::cout << "\nbytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
@@ -200,12 +192,6 @@ void IrcServer::ParsingRecv( int const& clientFd )
 	{
 		cmdFunction cmd = find->second;
 		(this->*cmd)(clientFd);
-	}
-	else if (_recv.front() == "CAP")
-	{
-		// On répond proprement à Irssi qu'on n'a aucune capacité (liste vide)
-		std::string capMsg = "CAP * LS :\r\n";
-		send(clientFd, capMsg.c_str(), capMsg.length(), 0);
 	}
 	else
 	{
@@ -355,6 +341,7 @@ void	IrcServer::InitMapCommands()
 	_commands["KICK"] = &IrcServer::KICK;
 	_commands["TOPIC"] = &IrcServer::TOPIC;
 	_commands["INVITE"] = &IrcServer::INVITE;
+	_commands["CAP"] = &IrcServer::CAP;
 }
 
 //Setter
