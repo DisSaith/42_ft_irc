@@ -194,6 +194,12 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		cmdFunction cmd = find->second;
 		(this->*cmd)(clientFd);
 	}
+	else if (_recv.front() == "CAP")
+	{
+		// On répond proprement à Irssi qu'on n'a aucune capacité (liste vide)
+		std::string capMsg = "CAP * LS :\r\n";
+		send(clientFd, capMsg.c_str(), capMsg.length(), 0);
+	}
 	else
 	{
 		if ( DEBUG )
