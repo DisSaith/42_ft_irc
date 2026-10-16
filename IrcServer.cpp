@@ -107,6 +107,14 @@ void	IrcServer::ConnectionWithClients()
 					memset(buffer, 0, sizeof(buffer)); // cancel pb with zombie memomy
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
+					if (_recv.front() == "CAP")
+					{
+						// 421 ERR_UNKNOWNCOMMAND
+						std::string errorMsg = ":localhost 421 * CAP :Unknown command\r\n";
+						send(_pollFds[i].fd, errorMsg.c_str(), errorMsg.length(), 0);
+						return ;
+					}
+					std::cout<< buffer <<std::endl;
 					if (DEBUG)
 						std::cout << "\nbytesRead = " << bytesRead << std::endl;
 					if (bytesRead <= 0)
@@ -157,25 +165,10 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
-	size_t			j = 0;
-	bool			inWord = false;
 
 	if (_recv.empty() == false)
-		_recv.clear(); // clear list before every new recv from a client
-	for ( size_t i = 0 ; i < buffer.length() ; i++)
-	{
-		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
-		{
-			inWord = true;
-			j = i;
-		}
-		if ( (buffer[i] == ' ' || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
-		{
-			inWord = false;
-			token = buffer.substr(j, i - j);
-			_recv.push_back(token);
-		}
-	}
+		_recv.clear();
+	_recv = split(buffer, ' ');
 
 	if (DEBUG) // display list tokens
 	{
@@ -246,7 +239,7 @@ void IrcServer::RemoveClient(int fd)
 void	IrcServer::signalHandler( int signal )
 {
 	IrcServer *serverptr = GetPtrServer(NULL);
-	
+
 	serverptr->SetSignalHandled(true);
 
 	if (DEBUG)
