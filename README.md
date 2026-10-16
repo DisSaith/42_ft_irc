@@ -52,6 +52,11 @@ Skills learning / improvement :
 valgrind --leak-check=full --show-leak-kinds=all ./ircserv "port" "password"     
 
 
+***Tips for adding \\r or \\n in commands***   
+- CTRL + V + M = \r
+- CTRL + V + J = \n
+
+
 ## Ressources  
 <ins>RFC 1459 - IRC Protocol</ins> : (https://datatracker.ietf.org/doc/html/rfc1459)   
 <ins>French ft_irc github project</ins> : (https://github.com/raveriss/ft_irc)   
