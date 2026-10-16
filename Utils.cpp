@@ -41,20 +41,18 @@ namespace Utils
 
 	std::list<std::string> split(std::string const& s, char const& c)
 	{
-		std::string				token;
 		std::list<std::string>	result;
-		size_t					i = s.find(c);
+    	size_t end = s.find_last_not_of("\r\n");
+		std::string const token = s.substr(0, end + 2);
+		size_t					i;
 		size_t					j = 0;
 
-		while (i != std::string::npos)
-		{
-			token = s.substr(j, i - j);
-			if (token.empty() == false)
-				result.push_back(token);
-			j = i + 1;
-			i = s.find(c, j);
-			free(token);
-		}
+		while ((i = token.find(c, j)) != std::string::npos)
+    	{
+       		if (i > j)
+            	result.push_back(token.substr(j, i - j));
+        	j = i + 1;
+    	}
 		i = s.find('\r');
 		if (i == std::string::npos)
 			i = s.find('\n');

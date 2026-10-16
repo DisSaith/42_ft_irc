@@ -154,8 +154,6 @@ void	IrcServer::ConnectionWithClients()
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
-	size_t			j = 0;
-	bool			inWord = false;
 
 	if (_recv.empty() == false)
 		_recv.clear(); // clear list before every new recv from a client
