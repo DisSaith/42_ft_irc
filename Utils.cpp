@@ -7,7 +7,7 @@ namespace Utils
 {
 	int	stoi( std::string const& s )
 	{
-		long value = stol(s);
+		long value = Utils::stol(s);
 		if (value > INT_MAX || value < INT_MIN)
 			return 0;
 

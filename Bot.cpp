@@ -3,8 +3,6 @@
 #include <fstream>
 #include <ctime>
 
-
-
 bool	sendData(int sock, const std::string& msg)
 {
 	int total_sent = 0;
@@ -115,8 +113,6 @@ int main(int argc, char* argv[])
 		std::list<std::string> data = Utils::split(buffer, ' ');
 		std::cout << buffer;
 
-
-
 		if (checkMessage(data, dictionnary, buffer))
 		{
 			std::string BadUserName = data.front();
@@ -126,6 +122,7 @@ int main(int argc, char* argv[])
 			if (_usersWarnings[BadUserName] > maxNbWarnings)
 				sendData(sock, "KICK #chan " + BadUserName + " :Bad Language" + "\r\n");
 		}
+		
 		if (std::find(data.begin(), data.end(), "464") != data.end())
 		{
 			std::cerr << "\n[FATAL ERROR] Incorrect password (464)." << std::endl;
@@ -139,6 +136,9 @@ int main(int argc, char* argv[])
 		}
 		if (std::find(data.begin(), data.end(), "001") != data.end())
 			std::cout << "Authentication successful! Name validated." << std::endl;
+		if (std::find(data.begin(), data.end(), " INVITE ") != data.end())
+
+		
 		if (ofs.is_open())
 		{
 			time(&now);

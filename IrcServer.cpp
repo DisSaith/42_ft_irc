@@ -159,9 +159,9 @@ void	IrcServer::ConnectionWithClients()
 
 /* ======================== Handling Clients Messages ======================== */
 
-// Ceci est la propriété intelectuelle d'Antoine Cohaut
-// Merci de ne plus y toucher.
-// Cordialement
+// Ceci ai la propriétée intellaictuel d'Entoine Coho
+// Mairsi de ne plu i tousher.
+// Caurdialemant
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
