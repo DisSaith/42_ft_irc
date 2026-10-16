@@ -107,7 +107,10 @@ void	IrcServer::ConnectionWithClients()
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
 					if (DEBUG)
-						std::cout << "\nbytesRead = " << bytesRead << std::endl;
+					{
+						std::cout << "\nbytesRead = " << bytesRead << std::endl
+								<< "buffer -> " << buffer;
+					}
 					if (bytesRead <= 0)
 					{
 						RemoveClient(_pollFds[i].fd);
@@ -121,7 +124,8 @@ void	IrcServer::ConnectionWithClients()
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
-								std::cout << "[Client " << _pollFds[i].fd << "] send : " << cmd;
+								std::cout << YELLOW << "[Client " << _pollFds[i].fd << "]"
+											<< RESET << " send : " << cmd;
 							TokenizerRecv(cmd);
 							try
 							{
@@ -188,7 +192,7 @@ void IrcServer::TokenizerRecv(std::string const& buffer)
 	if (DEBUG) // display list tokens
 	{
 		int i = 0;
-		std::cout << "[List Tokens] " << std::endl;
+		std::cout << WHITE << "[List Tokens] " << RESET << std::endl;
 		for ( std::list<std::string>::iterator it = _recv.begin() ; it != _recv.end() ; ++it )
 		{
 			std::cout << i << ": " << *it << std::endl;
