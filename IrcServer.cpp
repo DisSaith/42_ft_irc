@@ -107,13 +107,6 @@ void	IrcServer::ConnectionWithClients()
 					memset(buffer, 0, sizeof(buffer)); // cancel pb with zombie memomy
 
 					int bytesRead = recv(_pollFds[i].fd, buffer, sizeof(buffer) - 1, 0);
-					if (_recv.front() == "CAP")
-					{
-						// 421 ERR_UNKNOWNCOMMAND
-						std::string errorMsg = ":localhost 421 * CAP :Unknown command\r\n";
-						send(_pollFds[i].fd, errorMsg.c_str(), errorMsg.length(), 0);
-						return ;
-					}
 					std::cout<< buffer <<std::endl;
 					if (DEBUG)
 						std::cout << "\nbytesRead = " << bytesRead << std::endl;
@@ -201,8 +194,16 @@ void IrcServer::ParsingRecv( int const& clientFd )
 		cmdFunction cmd = find->second;
 		(this->*cmd)(clientFd);
 	}
-	else if ( DEBUG )
-		std::cerr << RED << "Command not found: " << RESET << _recv.front() << std::endl;
+	else
+	{
+		if ( DEBUG )
+			std::cerr << RED << "Command not found: " << RESET << _recv.front() << std::endl;
+
+		//ERR_UNKNOWNCOMMAND
+		std::string currentNick = _clients[clientFd]->getNickname().empty() ? "*" : _clients[clientFd]->getNickname();
+		std::string errorMsg = ":localhost 421 " + currentNick + " " + _recv.front() + " :Unknown command\r\n";
+		send(clientFd, errorMsg.c_str(), errorMsg.length(), 0);
+	}
 }
 
 void IrcServer::RemoveClient(int fd)
