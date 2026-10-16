@@ -49,9 +49,11 @@ namespace Utils
 		while (i != std::string::npos)
 		{
 			token = s.substr(j, i - j);
-			result.push_back(token);
+			if (token.empty() == false)
+				result.push_back(token);
 			j = i + 1;
 			i = s.find(c, j);
+			free(token);
 		}
 		i = s.find('\r');
 		if (i == std::string::npos)
