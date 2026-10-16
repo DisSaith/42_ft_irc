@@ -29,7 +29,7 @@ Client::Client(int fd) :
 	_bufferOut.reserve(1024);
 
 	std::cout << YELLOW << "Client " << fd << RESET
-				<< " joinded server." << std::endl;
+				<< " joined server." << std::endl;
 }
 
 //Parametric constructor, mainly used for debug
