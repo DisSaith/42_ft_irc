@@ -88,6 +88,16 @@ bool	Client::getToDisconnect() const
 	return this->_toDisconnect;
 }
 
+bool    Client::getIsInvited(std::string const& channelName) const
+{
+        return (std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName) != _invitedChannels.end());
+}
+
+bool	Client::setIsRegistered() const
+{
+	return (this->_hasSetPass && this->_hasSetNick && this->_hasSetUser);
+}
+
 void	Client::setPass()
 {
 	_hasSetPass = true;
@@ -128,11 +138,6 @@ void	Client::setRealName(std::string const& realName)
 	_realname = realName;
 }
 
-bool	Client::setIsRegistered() const
-{
-	return (this->_hasSetPass && this->_hasSetNick && this->_hasSetUser);
-}
-
 void	Client::setIsDisconnect(bool status)
 {
 	this->_toDisconnect = status;
@@ -143,7 +148,88 @@ void Client::setIsOperator(bool status)
 	this->_isOperator = status;
 }
 
+
 /* ======================== Methods ======================== */
+
+// Return the extracted command (without the \r and \n)
+std::string Client::extractCommand()
+{
+	size_t pos = 0;
+
+	if ( this->_bufferIn.find("\n") != std::string::npos 
+			|| this->_bufferIn.find("\r") != std::string::npos)
+	pos = FindEndFirstCommand();
+	else
+		return "";
+
+	std::string command = this->_bufferIn.substr(0, pos + 1);
+
+	// Erase the extract command and the '\n' in buffer
+	this->_bufferIn.erase(0, pos + 1);
+
+	return command;
+}
+
+size_t	Client::FindEndFirstCommand()
+{
+	size_t	pos1 = _bufferIn.find("\r");
+	size_t	pos2 = _bufferIn.find("\n");
+	size_t	pos = 0;
+
+	if ( pos2 == pos1 + 1 )
+		pos = pos2;
+	else if ( pos1 < pos2 )
+		pos = pos1;
+	else
+		pos = pos2;
+	
+	/*if (DEBUG)
+	{
+		std::cout << "pos = " << pos << std::endl
+					<< "pos \\r = " << _bufferIn.find("\r") << std::endl
+					<< "pos \\n = " << _bufferIn.find("\n") << std::endl;
+	}*/
+	return pos;
+}
+
+// Return true or false if there is a '\n' or '\r' not in the initial query by the user
+// Some Clients and Servers don't respect the protocol RFC 1459 for IRC so we
+// decided to accept the two cases (even if it doesn't respect the norm)
+bool Client::hasCompleteCommand() const
+{
+	if ( this->_bufferIn.find("\n") != std::string::npos 
+			|| this->_bufferIn.find("\r") != std::string::npos)
+		return true;
+	return false;
+}
+
+void Client::appendToIn(std::string const& data)
+{
+	this->_bufferIn += data;
+
+	if (_bufferIn.length() >= 510)
+	{
+		_bufferIn.erase(510, _bufferIn.length());
+		_bufferIn += "\r\n";
+	}
+
+	if (DEBUG)
+		std::cout << "_bufferIn.length() = " << _bufferIn.length() << std::endl;
+}
+
+void    Client::addInvite(std::string const& channelName)
+{
+        if (!getIsInvited(channelName))
+                _invitedChannels.push_back(channelName); // On ajoute le nom au vecteur de strings
+}
+
+void    Client::removeInvite(std::string const& channelName)
+{
+        std::vector<std::string>::iterator it = std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName);
+
+        if (it != _invitedChannels.end())
+                _invitedChannels.erase(it);
+}
 
 void Client::displayClient( void )
 {
@@ -161,63 +247,4 @@ void Client::displayClient( void )
 	for (std::vector<std::string>::iterator it = _invitedChannels.begin(); it != _invitedChannels.end(); it++)
 		message += *it + " ";	
 	std::cout << message << std::endl;
-
-
-}
-
-void Client::appendToIn(std::string const& data)
-{
-	this->_bufferIn += data;
-
-	if (_bufferIn.length() >= 510)
-	{
-		_bufferIn.erase(510, _bufferIn.length());
-		_bufferIn += "\r\n";
-	}
-
-	if (DEBUG)
-		std::cout << "_bufferIn.length() = " << _bufferIn.length() << std::endl;
-}
-
-// Return true or false if there is a '\n' or not in the initial query by the user
-// Some Clients and Servers don't respect the protocol RFC 1459 for IRC so we
-// decided to accept the two cases (even if it doesn't respect the norm)
-bool Client::hasCompleteCommand() const
-{
-	return (this->_bufferIn.find("\n") != std::string::npos);
-	//return (this->_bufferIn.find("\r\n") != std::string::npos);
-}
-
-// Return the extracted command (without the \r and \n)
-std::string Client::extractCommand()
-{
-	size_t pos = this->_bufferIn.find("\n");
-	if (pos == std::string::npos)
-		return "";
-
-	std::string command = this->_bufferIn.substr(0, pos + 1);
-
-	// Erase the extract command and the '\n' in buffer
-	this->_bufferIn.erase(0, pos + 1);
-
-	return command;
-}
-
-void    Client::addInvite(std::string const& channelName)
-{
-        if (!getIsInvited(channelName))
-                _invitedChannels.push_back(channelName); // On ajoute le nom au vecteur de strings
-}
-
-bool    Client::getIsInvited(std::string const& channelName) const
-{
-        return (std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName) != _invitedChannels.end());
-}
-
-void    Client::removeInvite(std::string const& channelName)
-{
-        std::vector<std::string>::iterator it = std::find(_invitedChannels.begin(), _invitedChannels.end(), channelName);
-
-        if (it != _invitedChannels.end())
-                _invitedChannels.erase(it);
 }

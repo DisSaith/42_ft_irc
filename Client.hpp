@@ -38,6 +38,7 @@ class Client
 
 		/* ----- Methods ----- */
 		std::string	extractCommand();
+		size_t		FindEndFirstCommand();
 		bool		hasCompleteCommand() const;
 		void		appendToIn(std::string const& data);
 		void		addInvite(std::string const& channelName);
