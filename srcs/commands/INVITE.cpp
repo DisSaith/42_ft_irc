@@ -6,10 +6,9 @@ void	IrcServer::INVITE( int const& fd )
 	std::string targetNick = *it;
 	it++;
 	std::string chanTarget = *it;
-	std::map<int, Client*>::iterator nickIt;
 	bool targetFound = false;
 	int targetFd = -1;
-	for (nickIt = _clients.begin(); nickIt != _clients.end(); ++nickIt)
+	for (std::map<int, Client*>::iterator nickIt = _clients.begin(); nickIt != _clients.end(); ++nickIt)
 	{
 		if (nickIt->second->getNickname() == targetNick)
 		{

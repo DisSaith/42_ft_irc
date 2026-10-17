@@ -23,4 +23,20 @@ class IrcException : public std::exception
         int         _fd;
 };
 
+//If needed
+class IrcServerException : public std::exception
+{
+	public:
+		IrcServerException( std::string const& text )
+			: _text(text) {}
+
+		const char * what( void ) const throw() { return _text.c_str(); }
+
+
+		virtual ~IrcServerException() throw() {}
+
+	private:
+		std::string	_text;
+};
+
 #endif

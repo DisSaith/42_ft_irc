@@ -77,10 +77,10 @@ class IrcServer
 
 		/* ----- Utils ----- */
 		static IrcServer*	GetPtrServer( IrcServer *server );
-		std::string			buildMessage( int code, std::string target, std::string text, int fd );
-		int					getFdfromNickname( std::string nickname );
+		std::string			buildMessage( int const& code, std::string const& target, std::string const& text, int const& fd );
+		int					getFdfromNickname( std::string const& nickname );
 		bool				isAnyOperator(int const& fd, std::string const& channelName);
-		bool				CheckServerPort( std::string const& port );
+		bool				CheckServerPort( std::string const& port ) const;
 		void				InitMapCommands();
 		void				SetSignalHandled( bool set ); //setter
 		void				CloseFds();

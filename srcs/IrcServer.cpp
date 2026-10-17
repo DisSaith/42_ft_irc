@@ -71,7 +71,7 @@ void	IrcServer::ConnectionWithClients()
 
 	std::cout << BLUE << "Server listening." << RESET << " Waiting for connections.." << std::endl;
 
-	while (1)
+	while (true)
 	{
 		if (poll(&_pollFds[0], _pollFds.size(), -1) == -1)
 		{
@@ -134,12 +134,12 @@ void	IrcServer::ConnectionWithClients()
 							{
 								std::cout << YELLOW << "[Client " << _pollFds[i].fd << "]"
 											<< RESET << " send : ";
-								for ( int i = 0 ; cmd[i] != '\0' ; i++ )
+								for ( int j = 0 ; cmd[j] != '\0' ; j++ )
 								{
-									if ((int)cmd[i] < 32 || (int)cmd[i] > 126)
-										std::cout << "[" << (int)cmd[i] << "] ";
+									if ((int)cmd[j] < 32 || (int)cmd[j] > 126)
+										std::cout << "[" << (int)cmd[j] << "] ";
 									else 
-									std::cout << cmd[i];
+										std::cout << cmd[i];
 								}
 								std::cout << std::endl;
 							}
@@ -251,8 +251,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 
 void IrcServer::RemoveClient(int fd)
 {
-	std::map<std::string, Channel*>::iterator chanIt;
-	for (chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+	for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
 	{
 		if (chanIt->second->hasMember(fd))
 			chanIt->second->removeMember(fd);
@@ -301,10 +300,10 @@ IrcServer* IrcServer::GetPtrServer( IrcServer *server )
 	if ( server != NULL )
 		serverPtr = server;
 
-	return ( serverPtr );
+	return serverPtr;
 }
 
-std::string		IrcServer::buildMessage( int code, std::string target, std::string text, int fd )
+std::string		IrcServer::buildMessage( int const& code, std::string const& target, std::string const& text, int const& fd )
 {
 	std::string message = ":localhost ";
 
@@ -322,15 +321,15 @@ std::string		IrcServer::buildMessage( int code, std::string target, std::string 
 }
 
 //Search for the fd corresponding to a Nickname
-int IrcServer::getFdfromNickname( std::string nickname )
+int IrcServer::getFdfromNickname( std::string const& nickname )
 {
 	std::map<int, Client*>::iterator clients_it;
 	for (clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
 	{
 		if (clients_it->second->getNickname() == nickname)
-			return (clients_it->first);
+			return clients_it->first;
 	}
-	return (-1);
+	return -1;
 }
 
 bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
@@ -342,7 +341,7 @@ bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
 
 // Ports between 0 and 1023 need root permission
 // only ports between 1024 and 65 535 are allowed
-bool IrcServer::CheckServerPort( std::string const& port )
+bool IrcServer::CheckServerPort( std::string const& port ) const
 {
 	int converted_port;
 
@@ -363,8 +362,8 @@ bool IrcServer::CheckServerPort( std::string const& port )
 	else if ( converted_port < 0 || converted_port > 65535 )
 		throw std::out_of_range( "This IRC Server port is out of range." );
 	else if ( converted_port >= 1024 && converted_port <= 65535 )
-		return (true);
-	return (false);
+		return true;
+	return false;
 }
 
 // Initialize map container of IRC Server commands
