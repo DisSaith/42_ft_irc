@@ -2,22 +2,22 @@ CC			= c++
 CFLAGS		= -Wall -Wextra -Werror -std=c++98 -g
 NAME		= ircserv
 NAME_BOT	= ircbot
-SRCS		= 	main.cpp \
-				IrcServer.cpp \
-				Utils.cpp \
+SRCS		= 	srcs/main.cpp \
+				srcs/IrcServer.cpp \
+				srcs/Utils.cpp \
 
-SRC_BOT	= 	Bot.cpp Utils.cpp
+SRC_BOT	= 	bonus/Bot.cpp srcs/Utils.cpp
 
-OBJS		= $(SRCS:%.cpp=objs/%.o)
+OBJS		= $(SRCS:srcs/%.cpp=objs/%.o)
 
-OBJ_BOT		= $(SRC_BOT:%.cpp=objs/%.o)
+OBJ_BOT		= $(SRC_BOT:srcs/%.cpp=objs/%.o)
 
 all:		$(NAME)
 
 objs:
 		mkdir -p objs
 
-objs/%.o: 	%.cpp  | objs
+objs/%.o: 	srcs/%.cpp  | objs
 		$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME):	$(OBJS)

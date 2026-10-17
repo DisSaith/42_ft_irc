@@ -1,4 +1,4 @@
-#include "IrcServer.hpp"
+#include "../includes/IrcServer.hpp"
 #include "Client.cpp"
 #include "Channel.cpp"
 #include "Commands.cpp"

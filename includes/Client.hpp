@@ -7,8 +7,8 @@
 
 # include <iostream>
 # include <string>
-# include "Channel.hpp"
 # include <algorithm>
+# include "Channel.hpp"
 
 class Client
 {

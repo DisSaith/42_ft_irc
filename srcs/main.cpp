@@ -1,4 +1,4 @@
-#include "IrcServer.hpp"
+#include "../includes/IrcServer.hpp"
 #include <cstdio>
 #include <cstring>
 

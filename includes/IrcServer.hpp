@@ -32,7 +32,7 @@
 # include "Utils.hpp" //-> namespace with utils functions
 # include "Client.hpp" //-> Client class
 # include "Channel.hpp" //-> Channel class
-# include "Exceptions.hpp"
+# include "Exceptions.hpp" //-> Our own exceptions
 
 using namespace Utils;
 
