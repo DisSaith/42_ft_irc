@@ -627,27 +627,24 @@ void	IrcServer::CAP( int const& fd )
 	std::list<std::string>::iterator it = _recv.begin();
 	if (_recv.size() >= 2)
 	{
-		it++; // On passe le token "CAP"
+		it++;
 		std::string subcommand = *it;
 
 		if (subcommand == "LS")
 		{
-			// On annonce qu'on n'a aucune capacité spéciale
 			std::string response = ":localhost CAP * LS :\r\n";
 			send(fd, response.c_str(), response.length(), 0);
 		}
 		else if (subcommand == "REQ")
 		{
-			it++; // On avance pour lire les capacités demandées
+			it++;
 			std::string requestedCaps = "";
 			if (it != _recv.end())
 				requestedCaps = *it;
 
-			// On rejette toutes les capacités demandées (NAK = Negative Acknowledgment)
 			std::string response = ":localhost CAP * NAK :" + requestedCaps + "\r\n";
 			send(fd, response.c_str(), response.length(), 0);
 		}
-		// Si c'est "END", on ne fait rien, la négociation est finie
 	}
 }
 
