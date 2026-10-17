@@ -26,7 +26,7 @@ class IrcException : public std::exception
 class BotException : public std::exception
 {
 	public:
-		BotException( std::string const& text ): _text(text) {}
+		explicit BotException( std::string const& text ): _text(text) {}
 
 		virtual ~BotException() throw() {}
 

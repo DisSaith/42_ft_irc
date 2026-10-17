@@ -24,10 +24,22 @@ std::list<std::string> readDictionnary()
 {
 	std::string current_line;
 	std::list<std::string> output;
-	std::ifstream inFile("./ressources/dictionnary");
+	std::ifstream inFile("./bonus/dictionary");
 
+	if (!inFile.is_open())
+	{
+		std::cerr << YELLOW << "Warning: " << RESET << "Unable to open dictionary" << std::endl;
+		return output;
+	}
 	while (getline (inFile, current_line)) 
-  		output.push_back(current_line);
+	{
+		if (!current_line.empty())
+		{
+			if (current_line[current_line.length() - 1] == '\r')
+				current_line.erase(current_line.length() - 1);
+  			output.push_back(current_line);
+		}
+	}
 	inFile.close();
 
 	if (output.empty())
@@ -36,7 +48,7 @@ std::list<std::string> readDictionnary()
 	return output;
 }
 
-bool checkMessage(std::list<std::string> message, std::list<std::string> dictionnary, char* buffer)
+bool checkMessage(std::list<std::string> message, std::list<std::string> dictionnary, char* const& buffer)
 {
 	bool found = false;
 
@@ -51,6 +63,32 @@ bool checkMessage(std::list<std::string> message, std::list<std::string> diction
 	return found;
 }
 
+bool	connectBot(std::string const& password, int const& port, std::string const& ip, std::string const& botName, int const& sock)
+{
+	struct sockaddr_in server;
+	server.sin_family = AF_INET;
+	server.sin_port = htons(port);
+	inet_pton(AF_INET, ip.c_str(), &server.sin_addr);
+	if (inet_pton(AF_INET, ip.c_str(), &server.sin_addr) <= 0)
+	{
+		std::cerr << "Invalid IP address format: " << ip << std::endl;
+		close(sock);
+		return false;
+	}
+	if (connect(sock, (struct sockaddr *)&server, sizeof(server)) == -1)
+	{
+		std::cerr << "Error: Unable to connect to " << ip << ":" << port << std::endl;
+		close(sock);
+		return false;
+	}
+	std::cout << "Connected to server. Authenticating..." << std::endl;
+	if (!password.empty())
+		sendData(sock, "PASS " + password + "\r\n");
+	sendData(sock, "NICK " + botName + "\r\n");
+	sendData(sock, "USER " + botName + " 0 * :" + botName + " C++\r\n");
+	return true;
+}
+
 int main(int argc, char* argv[])
 { 
 	if (argc != 6)
@@ -58,8 +96,7 @@ int main(int argc, char* argv[])
 		std::cerr << "Usage: " << argv[0] << " <IP> <PORT> <PASSWORD> <BOT NAME> <MAX NB OF WARNINGS>" << std::endl;
 		return 1;
 	}
-	
-	time_t now;
+
 	std::string	ip = argv[1];
 	int			port = Utils::stoi(argv[2]);
 	std::string	password = argv[3];
@@ -74,27 +111,8 @@ int main(int argc, char* argv[])
 		std::cerr << "Socket error" << std::endl;
 		return 1;
 	}
-	struct sockaddr_in server;
-	server.sin_family = AF_INET;
-	server.sin_port = htons(port);
-	inet_pton(AF_INET, ip.c_str(), &server.sin_addr);
-	if (inet_pton(AF_INET, ip.c_str(), &server.sin_addr) <= 0)
-	{
-		std::cerr << "Invalid IP address format: " << ip << std::endl;
-		close(sock);
-		return 1;
-	}
-	if (connect(sock, (struct sockaddr *)&server, sizeof(server)) == -1)
-	{
-		std::cerr << "Error: Unable to connect to " << ip << ":" << port << std::endl;
-		close(sock);
-		return 1;
-	}
-	std::cout << "Connected to server. Authenticating..." << std::endl;
-	if (!password.empty())
-		sendData(sock, "PASS " + password + "\r\n");
-	sendData(sock, "NICK " + botName + "\r\n");
-	sendData(sock, "USER " + botName + " 0 * :" + botName + " C++\r\n");
+
+	connectBot(password, port, ip, botName, sock);
 
 	char buffer[4096];
 	std::list<std::string> dictionnary = readDictionnary();
@@ -155,12 +173,16 @@ int main(int argc, char* argv[])
 			sendData(sock, "PRIVMSG " + lastInviteNickname + " Cannot join channel" + "\r\n");
 		if (ofs.is_open())
 		{
-			time(&now);
-			std::string timestamp = ctime(&now);
-			//ctime add a \n at the end that I remove
-			if (timestamp.empty() == false && timestamp[timestamp.length() - 1] == '\n')
-				timestamp.erase(timestamp.length() - 1);
-			ofs << "[" << timestamp << "]: "<< buffer;
+			char timeBuf[42];
+			time_t now = time(NULL);
+			if (ctime_r(&now, timeBuf) != NULL)
+			{
+				std::string timestamp(timeBuf);
+				//ctime add a \n at the end that I remove
+				if (timestamp.empty() == false && timestamp[timestamp.length() - 1] == '\n')
+					timestamp.erase(timestamp.length() - 1);
+				ofs << "[" << timestamp << "]: "<< buffer;
+			}
 			ofs.flush();
 		}
 	}
