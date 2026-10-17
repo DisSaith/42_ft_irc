@@ -9,12 +9,18 @@ void	IrcServer::PASS(int const& fd)
 			throw IrcException(462, currentNick, ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 2)
+		{
+			_clients[fd]->setIsDisconnect(true);
 			throw IrcException(461, "PASS", ":Not enough parameters", fd);
+		}
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
 		//ERR_PASSWDMISMATCH
 		if (*it != _password)
+		{
+			_clients[fd]->setIsDisconnect(true);
 			throw IrcException(464, currentNick, ":Password incorrect", fd);
+		}
 		else if ( DEBUG )
 			std::cout << "PASS \"" << *it << "\" " << GREEN << "CORRECT\r\n" << RESET;
 			
@@ -39,9 +45,11 @@ bool	isValidNickname(const std::string& nick)
 
 void	IrcServer::NICK(int const& fd)
 {
-	if (_recv.empty() == false && _recv.front() == "NICK" && _clients[fd]->getHasSetPass() == true)
+	if (_recv.empty() == false && _recv.front() == "NICK")
 	{
 		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
+		if (_clients[fd]->getHasSetPass() == false)
+			throw IrcException(451, currentNick, ":You have not registered", fd);
 		//ERR_NONICKNAMEGIVEN
 		if (_recv.size() < 2)
 			throw IrcException(431, currentNick, ":No nickname given", fd);
@@ -65,6 +73,14 @@ void	IrcServer::NICK(int const& fd)
 		}
 		std::string oldNick = _clients[fd]->getNickname();
 		_clients[fd]->setNickName(newNick);
+
+		if (_clients[fd]->getIsRegistered() && oldNick.empty())
+		{
+			std::string welcome = ":localhost 001 " + _clients[fd]->getNickname() + " :Welcome to the ft_irc network!\r\n";
+			send(fd, welcome.c_str(), welcome.length(), 0);
+			std::cout << GREEN << "Client " << fd << " is officially registered !\n" << RESET;
+		}
+
 		if (!oldNick.empty())
 		{
 			std::string nickMsg = ":" + oldNick + " NICK " + newNick + "\r\n";
@@ -94,8 +110,10 @@ void	IrcServer::NICK(int const& fd)
 
 void	IrcServer::USER(int const& fd)
 {
-	if (_clients[fd]->getHasSetPass() && _recv.front() == "USER")
+	if (_recv.front() == "USER")
 	{
+		if (_clients[fd]->getHasSetPass() == false)
+			throw IrcException(451, "*", ":You have not registered", fd);
 		//ERR_ALREADYREGISTRED
 		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, "USER", ":You may not reregister", fd);

@@ -388,6 +388,7 @@ void	IrcServer::InitMapCommands()
 	_commands["INVITE"] = &IrcServer::INVITE;
 	_commands["OPER"] = &IrcServer::OPER;
 	_commands["CAP"] = &IrcServer::CAP;
+	_commands["PING"] = &IrcServer::PING;
 }
 
 //Setter
