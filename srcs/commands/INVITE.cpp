@@ -25,7 +25,7 @@ void	IrcServer::INVITE( int const& fd )
 	//ERR_NOSUCHCHANNEL
 	if (chanIt == _channels.end())
 		throw IrcException(403, chanTarget, ":No such channel", fd);
-	Channel* channel = chanIt->second;
+	Channel const *channel = chanIt->second;
 	//ERR_NOTONCHANNEL
 	if (!channel->hasMember(fd))
 		throw IrcException(442, chanTarget, ":You're not on that channel", fd);

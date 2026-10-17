@@ -1,6 +1,6 @@
 void	IrcServer::checkChannelMode( int const& fd, std::string const& channelName, std::list<std::string> &channelPasswords, std::list<std::string>::iterator const& pass_it )
 {
-    Channel* channel = _channels[channelName];
+    Channel const *channel = _channels[channelName];
 
 	if (channel->hasMember(fd))	
         throw IrcException(-1, channelName, ":User already on channel", fd);

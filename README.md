@@ -7,7 +7,7 @@ _(piscine of september's 2025 - 42 PARIS)_
 
 
 <ins>starting date</ins> : 16/09/2026  
-<ins>last update</ins> : 12/10/2026  
+<ins>last update</ins> : 17/10/2026  
 
 [![Quality gate status](https://sonarcloud.io/api/project_badges/measure?project=DisSaith_42_ft_irc&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DisSaith_42_ft_irc)
 
@@ -24,13 +24,18 @@ Skills learning / improvement :
 - Implementing non-blocking I/O operations and multiplexing with poll().
 - Writing clean code that complies with the C++ 98 standard.
 - Strengthening computational thinking, problem-solving, and collaboration.
+- Coding a moderation bot from scratch
 
 ## Instructions  
 ***Usage***  
-1) Run make to compile the source files using the provided Makefile.
+1) Run "make" to compile the source files using the provided Makefile. You can run "make bonus" to compile the IRC server and its moderation bot.
 2) Execute the server by running :
 ```bash
    ./ircserv <port> <password>.
+```
+In another terminal, execute the bot by running :
+```bash
+   ./ircbot <ip> <port> <password> <bot name> <nb_of_warnings>
 ```
 3) Connect to the server using your reference IRC client. You can also test the connection manually using :
 ```bash
@@ -42,11 +47,16 @@ Skills learning / improvement :
   NICK <your nickname>
   USER <username> <hostname> <servername> <realname>
 ```
-5) Examples of possible commands :
+5) Examples of possible commands (channel name must begin by '&' or '#'):
 ```bash
   JOIN <channel name>
   PRIVMSG <user nickname> <message>
 ```
+6) After joining a channel invite the bot :
+```bash
+  INVITE <bot name> <channel name>
+```
+After this the bot will moderate the channel based on the dictionary given in bonus/resources. If a user has too many warnings for bad language, it will be kicked from the channel.
 
 ***Check leaks***   
 valgrind --leak-check=full --show-leak-kinds=all ./ircserv "port" "password"     

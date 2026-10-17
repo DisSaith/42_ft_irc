@@ -245,5 +245,6 @@ void Client::displayClient( void )
 	catch(std::exception const& e)
 	{
 		std::cerr << RED <<"Error while allocated client debug message" << RESET << std::endl;
+		std::cerr << e.what() << std::endl;
 	}
 }
