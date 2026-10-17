@@ -24,7 +24,7 @@ std::list<std::string> readDictionnary()
 {
 	std::string current_line;
 	std::list<std::string> output;
-	std::ifstream inFile("../ressources/dictionnary");
+	std::ifstream inFile("./ressources/dictionnary");
 
 	while (getline (inFile, current_line)) 
   		output.push_back(current_line);
