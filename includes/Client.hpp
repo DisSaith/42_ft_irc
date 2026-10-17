@@ -45,8 +45,6 @@ class Client
 		void		removeInvite( std::string const& channelName );
 		void		displayClient( void );
 
-// Dans les attributs privés :
-
 	private:
 		/* ----- Attributes ----- */
 		std::string							_ipAddr;

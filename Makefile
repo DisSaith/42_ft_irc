@@ -6,7 +6,7 @@ SRCS		= 	srcs/main.cpp \
 				srcs/IrcServer.cpp \
 				srcs/Utils.cpp \
 
-SRC_BOT	= 	bonus/Bot.cpp srcs/Utils.cpp
+SRC_BOT	= 	bonus/Bot_main.cpp srcs/Utils.cpp
 
 OBJS		= $(SRCS:srcs/%.cpp=objs/%.o)
 
