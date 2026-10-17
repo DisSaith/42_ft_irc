@@ -237,7 +237,7 @@ void Client::displayClient( void )
 	message += "USERNAME :" + _username + "\n";
 	message += "REALNAME :" + _realname + "\n";
 	message += "FD       :" + ::itos(_fd) + "\n";
-	message += "Registered  : " + ::itos(static_cast<int>(setIsRegistered())) + "\n";
+	message += "Registered  : " + ::itos(static_cast<int>(getIsRegistered())) + "\n";
 	message += "Server Operator  : " + ::itos(static_cast<int>(_isOperator)) + "\n";
 	message += "Channels : ";
 	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)

@@ -20,7 +20,7 @@ class Client
 
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
-		std::map<std::string, ChannegetIsl*> const&	getChannels();
+		std::map<std::string, Channel*> const&	getChannels();
 		int			getFd() const;
 		bool		getHasSetPass() const;
 		bool		getIsServerOperator() const;
