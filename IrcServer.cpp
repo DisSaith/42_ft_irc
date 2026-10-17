@@ -109,7 +109,15 @@ void	IrcServer::ConnectionWithClients()
 					if (DEBUG)
 					{
 						std::cout << "\nbytesRead = " << bytesRead << std::endl
-								<< "buffer -> " << buffer;
+								<< "buffer -> ";
+						for ( int i = 0 ; buffer[i] != '\0' ; i++ )
+						{
+							if ((int)buffer[i] < 32 || (int)buffer[i] > 126)
+								std::cout << "[" << (int)buffer[i] << "] ";
+							else 
+								std::cout << buffer[i];
+						}
+						std::cout << std::endl;
 					}
 					if (bytesRead <= 0)
 					{

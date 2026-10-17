@@ -130,8 +130,10 @@ void	IrcServer::KICK( int const& operator_fd )
 
 	std::string message = _clients[kicked_fd]->getNickname() + " has been kicked from " + channelName + " because of :" + comment +  ".\n";
 	_channels[channelName]->sendMessageToMembers( message, kicked_fd );
+
 	if (_clients[operator_fd]->getChannels().find(channelName) == _clients[operator_fd]->getChannels().end())
 		send(operator_fd, message.c_str(), message.length(), 0);
+
 	message = "You have been kicked from " + channelName + " because of :" + comment +  ".\n";
 	send(kicked_fd, message.c_str(), message.length(), 0);
 	if (_channels[channelName]->removeMember(kicked_fd))
@@ -346,7 +348,11 @@ void    IrcServer::QUIT( int const& fd )
 					if (memIt->first != fd)
 						clientsToNotify.insert(memIt->first);
 				}
-				chanIt->second->removeMember(fd);
+				if (chanIt->second->removeMember(fd))
+				{
+					delete chanIt->second;
+					_channels.erase(chanIt->first);
+				}
 			}
 		}
 		std::set<int>::iterator setIt;
