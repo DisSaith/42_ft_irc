@@ -164,15 +164,7 @@ void	IrcServer::NAMES( int const& fd )
 	}
 
 	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
-	{
-		if (it == channelNames.end())
-		{
-			std::string errorMsg = *it + " :End of /NAMES list\n";
-			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		}
-		else
-			_channels[*it]->displayMembers(fd, notAll);
-	}
+		_channels[*it]->displayMembers(fd, notAll);
 	if (notAll == false)
 	{
 		std::string message;
@@ -194,7 +186,9 @@ void	IrcServer::NAMES( int const& fd )
 			}
 		}
 		message = message + "\n";
-		std::string errorMsg = " :End of /NAMES list\n";
+		if (message.size() <= 4)
+			message = "";
+		message += ":End of /NAMES list\n";
 		send(fd, message.c_str(), message.length(), 0);
 	}
 }
