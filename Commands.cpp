@@ -233,56 +233,65 @@ void	IrcServer::TOPIC( int const& fd )
 		_channels[channelName]->setTopic(topic);
 	}
 }
-
-void	IrcServer::PRIVMSG( int const& fd )
+	=======
+void	IrcServer::PRIVMSG(int const& fd)
 {
-	if (_clients[fd]->getIsRegistered())
+	//ERR_NOTREGISTERE
+	if (_clients[fd]->setIsRegistered() == false)
+		throw IrcException(451, "PRIVMSG", ":You have not registered", fd);
+	if (_recv.front() == "PRIVMSG")
 	{
-		if (_recv.front() == "PRIVMSG")
+		//ERR_NORECIPIENT
+		if (_recv.size() == 1)
+			throw IrcException(411, "", ":No recipient given (PRIVMSG)", fd);
+		//ERR_NOTEXTTOSEND
+		if (_recv.size() == 2)
+			throw IrcException(412, "", ":No text to send", fd);
+		std::list<std::string>::iterator it = _recv.begin();
+		it++;
+		std::string targetsString = *it;
+		it++;
+		std::string	message;
+		while (it != _recv.end())
 		{
-			if (_recv.size() == 1)
-			{
-				std::string errorMsg = ":localhost 411 " + _clients[fd]->getNickname() + " :No recipient given (PRIVMSG)\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;
-			}
-			if (_recv.size() == 2)
-			{
-				std::string errorMsg = ":localhost 412 " + _clients[fd]->getNickname() + " :No text to send\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-				return ;
-			}
-			std::list<std::string>::iterator it = _recv.begin();
+			message += *it;
 			it++;
-			std::string targetsString = *it;
-			it++; 
-
-			std::string	message;
-			while (it != _recv.end())
-			{
-				message += *it;
-				it++;
-				if (it != _recv.end())
-					message += " ";
-			}
-			std::list<std::string> targetsList = split(targetsString, ',');
-			for (std::list<std::string>::iterator targetIt = targetsList.begin(); targetIt != targetsList.end(); ++targetIt)
+			if (it != _recv.end())
+				message += " ";
+		}
+		std::list<std::string> targetsList = split(targetsString, ',');
+		//ERR_TOOMANYTARGETS
+		if (targetsList.size() > 10)
+			throw IrcException(407, targetsString, ":Duplicate recipients. No message delivered", fd);
+		for (std::list<std::string>::iterator targetIt = targetsList.begin(); targetIt != targetsList.end(); ++targetIt)
+		{
+			try
 			{
 				std::string chanTarget = *targetIt;
 				if (chanTarget.empty())
 					continue;
+				//ERR_NOTOPLEVEL
+				if (chanTarget.find('*') != std::string::npos || chanTarget.find('?') != std::string::npos)
+				{
+					if (chanTarget.find('.') == std::string::npos)
+						throw IrcException(413, chanTarget, ":No toplevel domain specified", fd);
+					else
+						throw IrcException(414, chanTarget, ":Wildcard in toplevel domain", fd);
+				}
 				std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " :" + message + "\r\n";
 				if (chanTarget[0] == '#' || chanTarget[0] == '&')
 				{
 					std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
-
 					if (chanIt != _channels.end())
-						chanIt->second->sendMessageToMembers(fullMsg, fd);
-					else
 					{
-						std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
-						send(fd, errorMsg.c_str(), errorMsg.length(), 0);
+						//ERR_CANNOTSENDTOCHA
+						if (!chanIt->second->hasMember(fd))
+							throw IrcException(404, chanTarget, ":Cannot send to channel", fd);
+						chanIt->second->sendMessageToMembers(fullMsg, fd);
 					}
+					//ERR_NOSUCHNICK
+					else
+						throw IrcException(401, chanTarget, ":No such nick/channel", fd);
 					continue ;
 				}
 				bool targetFound = false;
@@ -296,13 +305,15 @@ void	IrcServer::PRIVMSG( int const& fd )
 						break ;
 					}
 				}
+				//ERR_NOSUCHNICK
 				if (targetFound == false)
-				{
-					std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such nick/channel\r\n";
-					send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-					continue ;
-				}
+					throw IrcException(401, chanTarget, ":No such nick/channel", fd);
 				send(targetFd, fullMsg.c_str(), fullMsg.length(), 0);
+			}
+			catch ( IrcException const& e )
+			{
+				std::string errorMsg = buildMessage(e.getCode(), e.getTarget(), e.getText(), e.getFd());
+				send(e.getFd(), errorMsg.c_str(), errorMsg.length(), 0);
 			}
 		}
 	}
@@ -360,63 +371,66 @@ void    IrcServer::QUIT( int const& fd )
 
 void	IrcServer::MODE( int const& fd )
 {
-	if (_clients[fd]->getIsRegistered() == false)
-		throw IrcException(-1, "MODE", ":User not registered", fd);
+	//ERR_NOTREGISTERED
+	if (_clients[fd]->setIsRegistered() == false)
+		throw IrcException(451, "MODE", ":You have not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
 		throw IrcException(461, "MODE", ":Not enough parameters", fd);
 	std::list<std::string>::iterator it = _recv.begin();
 	it++;
 	std::string chanTarget = *it;
-	if (chanTarget[0] == '#' || chanTarget[0] == '&')
+	if (chanTarget[0] != '#' && chanTarget[0] != '&')
 	{
-		std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
-		if (chanIt == _channels.end())
+		//ERR_USERSDONTMATCH
+		if (chanTarget != _clients[fd]->getNickname())
+			throw IrcException(502, "MODE", ":Cannot change mode for other users", fd);
+		return ;
+	}
+	std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+	//ERR_NOSUCHCHANNEL
+	if (chanIt == _channels.end())
+		throw IrcException(403, chanTarget, ":No such channel", fd);
+	Channel* channel = chanIt->second;
+	if (_recv.size() == 2)
+	{
+		std::string currentModes = "+";
+		std::string currentArgs = "";
+		if (channel->getIsInviteOnly())
+			currentModes += "i";
+		if (channel->getHasTopicRestrictions())
+			currentModes += "t";
+		if (channel->getHasChannelKey())
 		{
-			std::string errorMsg = ":localhost 403 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such channel\r\n";
-			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-			return ;
+			currentModes += "k";
+			currentArgs += " " + channel->getChannelKey();
 		}
-		Channel* channel = chanIt->second;
-		if (_recv.size() == 2)
+		if (channel->getUserLimit() != UINT_MAX)
 		{
-			std::string currentModes = "+";
-			std::string currentArgs = "";
-			if (channel->getIsInviteOnly())
-				currentModes += "i";
-			if (channel->getHasTopicRestrictions())
-				currentModes += "t";
-			if (channel->getHasChannelKey())
-			{
-				currentModes += "k";
-				currentArgs += " " + channel->getChannelKey();
-			}
-			if (channel->getUserLimit() != UINT_MAX)
-			{
-				currentModes += "l";
-				std::stringstream ss;
-				ss << channel->getUserLimit();
-				currentArgs += " " + ss.str();
-			}
-			if (currentModes == "+") currentModes = "";
-
-			std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + currentArgs + "\r\n";
-			send(fd, modeMsg.c_str(), modeMsg.length(), 0);
-			return ;
+			currentModes += "l";
+			std::stringstream ss;
+			ss << channel->getUserLimit();
+			currentArgs += " " + ss.str();
 		}
-		if (!isAnyOperator(fd, chanTarget))
-		{
-			std::string errorMsg = ":localhost 482 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not channel operator\r\n";
-			send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-			return ;
-		}
-		it++;
-		std::string flags = *it;
-		it++;
-		bool adding = true;
-		std::string messageMode;
-		std::string messageArgs;
-		for (size_t i = 0; i < flags.length(); ++i)
+		if (currentModes == "+")
+			currentModes = "";
+		//RPL_CHANNELMODEIS
+		std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + currentArgs + "\r\n";
+		send(fd, modeMsg.c_str(), modeMsg.length(), 0);
+		return ;
+	}
+	//ERR_CHANOPRIVSNEEDED
+	if (!isAnyOperator(fd, chanTarget))
+		throw IrcException(482, chanTarget, ":You're not channel operator", fd);
+	it++;
+	std::string flags = *it;
+	it++;
+	bool adding = true;
+	std::string messageMode;
+	std::string messageArgs;
+	for (size_t i = 0; i < flags.length(); ++i)
+	{
+		try
 		{
 			char c = flags[i];
 			if (c == '+')
@@ -431,59 +445,55 @@ void	IrcServer::MODE( int const& fd )
 			}
 			else if (c == 'o')
 			{
-				if (it != _recv.end())
-				{
-					std::string targetNick = *it;
-					it++;	
-					int targetFd = -1;
-					std::map<int, Client*>::iterator clientIt;
-					for (clientIt = _clients.begin(); clientIt != _clients.end(); ++clientIt)
-					{
-						if (clientIt->second->getNickname() == targetNick)
-						{
-							targetFd = clientIt->first;
-							break ;
-						}
-					}
-					if (targetFd != -1 && channel->hasMember(targetFd))
-					{
-						if (adding)
-							channel->addNewOperator(_clients[targetFd]);
-						else
-							channel->removeOperator(targetFd);
-						messageMode += "o";
-						messageArgs += " " + targetNick;
-					}
-				}
+				//ERR_NEEDMOREPARAMS
+				if (it == _recv.end())
+					throw IrcException(461, "MODE", ":Not enough parameters", fd);
+				std::string targetNick = *it;
+				it++;
+				int targetFd = getFdfromNickname(targetNick);
+				//ERR_NOSUCHNICK
+				if (targetFd == -1)
+					throw IrcException(401, targetNick, ":No such nick/channel", fd);
+				//ERR_USERNOTINCHANNEL
+				if (!channel->hasMember(targetFd))
+					throw IrcException(441, targetNick, chanTarget + " :They aren't on that channel", fd);
+				if (adding)
+					channel->addNewOperator(_clients[targetFd]);
+				else
+					channel->removeOperator(targetFd);
+				messageMode += "o";
+				messageArgs += " " + targetNick;
 			}
 			else if (c == 'k')
 			{
 				if (adding)
 				{
-					if (it != _recv.end())
-					{
-						std::string newKey = *it;
-						it++;
-						channel->setHasChannelKey(true);
-						channel->setChannelKey(newKey);
-						messageMode += "k";
-						messageArgs += " " + newKey;
-					}
+					//ERR_NEEDMOREPARAMS
+					if (it == _recv.end())
+						throw IrcException(461, "MODE", ":Not enough parameters", fd);
+					std::string newKey = *it;
+					it++;
+					//ERR_KEYSET
+					if (channel->getHasChannelKey())
+						throw IrcException(467, chanTarget, ":Channel key already set", fd);
+					channel->setHasChannelKey(true);
+					channel->setChannelKey(newKey);
+					messageMode += "k";
+					messageArgs += " " + newKey;
 				}
 				else
 				{
-					if (it != _recv.end())
+					//ERR_NEEDMOREPARAMS
+					if (it == _recv.end())
+						throw IrcException(461, "MODE", ":Not enough parameters", fd);
+					std::string providedKey = *it;
+					it++;
+					if (providedKey == channel->getChannelKey())
 					{
-						std::string providedKey = *it;
-						it++;
-						if (providedKey == channel->getChannelKey())
-						{
-							channel->setHasChannelKey(false);
-							channel->setChannelKey("");
-
-							messageMode += "k";
-							messageArgs += " " + providedKey;
-						}
+						channel->setHasChannelKey(false);
+						channel->setChannelKey("");
+						messageMode += "k";
+						messageArgs += " " + providedKey;
 					}
 				}
 			}
@@ -491,59 +501,59 @@ void	IrcServer::MODE( int const& fd )
 			{
 				if (adding)
 				{
-					if (it != _recv.end())
+					//ERR_NEEDMOREPARAMS
+					if (it == _recv.end())
+						throw IrcException(461, "MODE", ":Not enough parameters", fd);
+					long limit;
+					std::stringstream ss(*it);
+					ss >> limit;
+					if (!ss.fail() && limit > 0 && limit <= UINT_MAX)
 					{
-						long limit;
-						std::stringstream ss(*it);
-						ss >> limit;
-
-						if (!ss.fail() && limit > 0 && limit <= UINT_MAX)
-						{
-							channel->setUserLimit(static_cast<unsigned int>(limit));
-							messageMode += "l";
-							messageArgs += " " + *it;
-						}
-						it++;
+						channel->setUserLimit(static_cast<unsigned int>(limit));
+						messageMode += "l";
+						messageArgs += " " + *it;
 					}
+					it++;
 				}
 				else
+				{
 					channel->setUserLimit(UINT_MAX);
-				messageMode += "l";
+					messageMode += "l";
+				}
 			}
 			else if (c == 'i')
 			{
-				if (adding)
-					channel->setIsInviteOnly(true);
-				else
-					channel->setIsInviteOnly(false);
+				channel->setIsInviteOnly(adding);
 				messageMode += "i";
 			}
 			else if (c == 't')
 			{
-				if (adding)
-					channel->setHasTopicRestrictions(true);
-				else
-					channel->setHasTopicRestrictions(false);
+				channel->setHasTopicRestrictions(adding);
 				messageMode += "t";
 			}
+			//ERR_UNKNOWNMODE
 			else
-			{
-				std::string errorMsg = ":localhost 472 " + _clients[fd]->getNickname() + " " + c + " :is unknown mode char to me\r\n";
-				send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-			}
+				throw IrcException(472, std::string(1, c), ":is unknown mode char to me", fd);
 		}
-		if (messageMode.empty() == false && messageMode != "+" && messageMode != "-")
+		catch ( IrcException const& e )
 		{
-			std::string fullMsg = ":" + _clients[fd]->getNickname() + " MODE " + chanTarget + " " + messageMode + messageArgs + "\r\n";
-			channel->sendMessageToMembers(fullMsg, -1);
+			std::string errorMsg = buildMessage(e.getCode(), e.getTarget(), e.getText(), e.getFd());
+			send(e.getFd(), errorMsg.c_str(), errorMsg.length(), 0);
 		}
+	}
+	if (messageMode.empty() == false && messageMode != "+" && messageMode != "-")
+	{
+		std::string fullMsg = ":" + _clients[fd]->getNickname() + " MODE " + chanTarget + " " + messageMode + messageArgs + "\r\n";
+		channel->sendMessageToMembers(fullMsg, -1);
 	}
 }
 
 void	IrcServer::INVITE( int const& fd )
 {
-	if (_clients[fd]->getIsRegistered() == false)
+	//ERR_NOTREGISTERED
+	if (_clients[fd]->setIsRegistered() == false)
 		throw IrcException(-1, "INVITE", ":User not registered", fd);
+	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 3)
 		throw IrcException(461, "INVITE", ":Not enough parameters", fd);
 	std::list<std::string>::iterator it = _recv.begin();
@@ -563,39 +573,25 @@ void	IrcServer::INVITE( int const& fd )
 			break ;
 		}
 	}
+	//ERR_NOSUCHNICK
 	if (targetFound == false)
-	{
-		std::string errorMsg = ":localhost 401 " + _clients[fd]->getNickname() + " " + targetNick + " :No such nick\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(401, targetNick, ":No such nick/channel", fd);
 	std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
+	//ERR_NOSUCHCHANNEL
 	if (chanIt == _channels.end())
-	{
-		std::string errorMsg = ":localhost 403 " + _clients[fd]->getNickname() + " " + chanTarget + " :No such channel\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(403, chanTarget, ":No such channel", fd);
 	Channel* channel = chanIt->second;
+	//ERR_NOTONCHANNEL
 	if (!channel->hasMember(fd))
-	{
-		std::string errorMsg = ":localhost 442 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not on that channel\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(442, chanTarget, ":You're not on that channel", fd);
+	//ERR_USERONCHANNEL
 	if (channel->hasMember(targetFd))
-	{
-		std::string errorMsg = ":localhost 443 " + _clients[fd]->getNickname() + " " + targetNick + " " + chanTarget + " :is already on channel\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(443, targetNick + " " + chanTarget, ":is already on channel", fd);
+	//ERR_CHANOPRIVSNEEDED
 	if (channel->getIsInviteOnly() && !isAnyOperator(fd, chanTarget))
-	{
-		std::string errorMsg = ":localhost 482 " + _clients[fd]->getNickname() + " " + chanTarget + " :You're not channel operator\r\n";
-		send(fd, errorMsg.c_str(), errorMsg.length(), 0);
-		return ;
-	}
+		throw IrcException(482, chanTarget, ":You're not channel operator", fd);
 	_clients[targetFd]->addInvite(chanTarget);
+	//RPL_INVITING (341)
 	std::string message = ":localhost 341 " + _clients[fd]->getNickname() + " " + targetNick + " " + chanTarget + "\r\n";
 	send(fd, message.c_str(), message.length(), 0);
 	std::string inviteMsg = ":" + _clients[fd]->getNickname() + " INVITE " + targetNick + " " + chanTarget + "\r\n";
@@ -621,7 +617,7 @@ void	IrcServer::OPER( int const& fd )
 		throw IrcException(-1, "OPER", ":User is already an operator", fd);
 
 	_clients[targetFd]->setIsOperator(true);
-	
+
 	std::string message = nickName + " is now a server operator.\n";
 	send(fd, message.c_str(), message.length(), 0);
 }
