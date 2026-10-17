@@ -27,7 +27,7 @@ class IrcException : public std::exception
 class IrcServerException : public std::exception
 {
 	public:
-		IrcServerException( std::string const& text )
+		explicit IrcServerException( std::string const& text )
 			: _text(text) {}
 
 		const char * what( void ) const throw() { return _text.c_str(); }
