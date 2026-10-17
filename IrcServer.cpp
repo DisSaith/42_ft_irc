@@ -132,8 +132,18 @@ void	IrcServer::ConnectionWithClients()
 						{
 							std::string cmd = _clients[_pollFds[i].fd]->extractCommand();
 							if (DEBUG)
+							{
 								std::cout << YELLOW << "[Client " << _pollFds[i].fd << "]"
-											<< RESET << " send : " << cmd;
+											<< RESET << " send : ";
+								for ( int i = 0 ; cmd[i] != '\0' ; i++ )
+								{
+									if ((int)cmd[i] < 32 || (int)cmd[i] > 126)
+										std::cout << "[" << (int)cmd[i] << "] ";
+									else 
+									std::cout << cmd[i];
+								}
+								std::cout << std::endl;
+							}
 							TokenizerRecv(cmd);
 							try
 							{

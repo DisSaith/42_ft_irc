@@ -271,7 +271,7 @@ void	IrcServer::PRIVMSG( int const& fd )
 				std::string chanTarget = *targetIt;
 				if (chanTarget.empty())
 					continue;
-				std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " " + message + "\r\n";
+				std::string fullMsg = ":" + _clients[fd]->getNickname() + " PRIVMSG " + chanTarget + " :" + message + "\r\n";
 				if (chanTarget[0] == '#' || chanTarget[0] == '&')
 				{
 					std::map<std::string, Channel*>::iterator chanIt = _channels.find(chanTarget);
