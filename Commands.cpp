@@ -233,11 +233,11 @@ void	IrcServer::TOPIC( int const& fd )
 		_channels[channelName]->setTopic(topic);
 	}
 }
-	=======
+
 void	IrcServer::PRIVMSG(int const& fd)
 {
 	//ERR_NOTREGISTERE
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(451, "PRIVMSG", ":You have not registered", fd);
 	if (_recv.front() == "PRIVMSG")
 	{
@@ -372,7 +372,7 @@ void    IrcServer::QUIT( int const& fd )
 void	IrcServer::MODE( int const& fd )
 {
 	//ERR_NOTREGISTERED
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(451, "MODE", ":You have not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -551,7 +551,7 @@ void	IrcServer::MODE( int const& fd )
 void	IrcServer::INVITE( int const& fd )
 {
 	//ERR_NOTREGISTERED
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "INVITE", ":User not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 3)
