@@ -232,18 +232,23 @@ void    Client::removeInvite( std::string const& channelName )
 
 void Client::displayClient( void )
 {
-	std::string	message = "\n---CLIENT " + _nickname + "---\n";
+	try
+	{
+		std::string	message = "\n---CLIENT " + _nickname + "---\n";
 
-	message += "USERNAME :" + _username + "\n";
-	message += "REALNAME :" + _realname + "\n";
-	message += "FD       :" + ::itos(_fd) + "\n";
-	message += "Registered  : " + ::itos(static_cast<int>(getIsRegistered())) + "\n";
-	message += "Server Operator  : " + ::itos(static_cast<int>(_isOperator)) + "\n";
-	message += "Channels : ";
-	for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
-		message += it->first + " ";
-	message += "\nInvites : ";
-	for (std::vector<std::string>::iterator it = _invitedChannels.begin(); it != _invitedChannels.end(); it++)
-		message += *it + " ";	
-	std::cout << message << std::endl;
+		message += "USERNAME :" + _username + "\n";
+		message += "REALNAME :" + _realname + "\n";
+		message += "FD       :" + ::itos(_fd) + "\n";
+		message += "Registered  : " + ::itos(static_cast<int>(getIsRegistered())) + "\n";
+		message += "Server Operator  : " + ::itos(static_cast<int>(_isOperator)) + "\n";
+		message += "Channels : ";
+		for (std::map<std::string, Channel*>::iterator it = _channels.begin(); it != _channels.end(); it++)
+			message += it->first + " ";
+		message += "\nInvites : ";
+		for (std::vector<std::string>::iterator it = _invitedChannels.begin(); it != _invitedChannels.end(); it++)
+			message += *it + " ";	
+		std::cout << message << std::endl;
+	}
+	catch(...)
+	{}
 }
