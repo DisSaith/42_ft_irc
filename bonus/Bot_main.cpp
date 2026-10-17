@@ -97,6 +97,11 @@ bool	checkErrorMessage(std::list<std::string> const& data, Bot const& bot)
 		std::cerr << "\n[FATAL ERROR] Incorrect password (464)." << std::endl;
 		return true ;
 	}
+	if (std::find(data.begin(), data.end(), "432") != data.end())
+	{
+		std::cerr << "\n[FATAL ERROR] Bot Name is too long." << std::endl;
+		return true ;
+	}
 	if (std::find(data.begin(), data.end(), "433") != data.end())
 	{
 		std::cerr << "\n[FATAL ERROR] Bot name '" << bot.getBotname() << "' is already in use on this server." << std::endl;
@@ -126,7 +131,7 @@ void	checkCommandMessage(std::list<std::string> const& data, Bot &bot, std::list
 			std::cout << BadUserName << " is at warning number "; 
                std::cout << bot.getUsersWarnings()[BadUserName] << "/" << bot.getMaxNbWarnings() << "." << std::endl;
 			if (bot.getUsersWarnings()[BadUserName] > bot.getMaxNbWarnings())
-				sendData(bot.getSocket(), "KICK " + *(data_it) + " " + BadUserName + " :Bad Language" + "\r\n");
+				sendData(bot.getSocket(), "KICK " + *data_it + " " + BadUserName + " :Bad Language" + "\r\n");
 		}
 	}
     if (std::find(data.begin(), data.end(), "INVITE") != data.end())

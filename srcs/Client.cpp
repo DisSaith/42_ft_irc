@@ -32,7 +32,7 @@ Client::Client( int fd ) :
 }
 
 //Parametric constructor, mainly used for debug
-Client::Client( int fd, std::string nickname, std::string username, std::string realname ) : 
+Client::Client( int fd, std::string const& nickname, std::string const& username, std::string const& realname ) : 
 	_nickname(nickname),
 	_username(username),
 	_realname(realname),
@@ -59,7 +59,7 @@ std::string Client::getNickname() const
 	return _nickname;
 }
 
-std::map<std::string, Channel*> const& Client::getChannels()
+std::map<std::string, Channel*> Client::getChannels() const
 {
 	return _channels;
 }
@@ -181,13 +181,6 @@ size_t	Client::FindEndFirstCommand()
 		pos = pos1;
 	else
 		pos = pos2;
-	
-	/*if (DEBUG)
-	{
-		std::cout << "pos = " << pos << std::endl
-					<< "pos \\r = " << _bufferIn.find("\r") << std::endl
-					<< "pos \\n = " << _bufferIn.find("\n") << std::endl;
-	}*/
 	return pos;
 }
 
@@ -249,6 +242,8 @@ void Client::displayClient( void )
 			message += *it + " ";	
 		std::cout << message << std::endl;
 	}
-	catch(...)
-	{}
+	catch(std::exception const& e)
+	{
+		std::cerr << RED <<"Error while allocated client debug message" << RESET << std::endl;
+	}
 }

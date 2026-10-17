@@ -1,8 +1,7 @@
 #include "../includes/IrcServer.hpp"
 #include "Client.cpp"
 #include "Channel.cpp"
-#include "Commands.cpp"
-#include "Registration.cpp"
+#include "commands/Commands.cpp"
 
 /* ======================== Orthodox Canonical Form (PRIVATES) ======================== */
 

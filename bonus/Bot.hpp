@@ -15,7 +15,7 @@ class Bot
 	public:
 		/* ----- Main Constructor & Destructor ----- */
 		~Bot();
-		Bot( char **argv );
+		explicit Bot( char **argv );
 
 		/* ----- Getters / Setters ----- */
         std::string                 getIp() const;
