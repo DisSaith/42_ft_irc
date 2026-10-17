@@ -130,11 +130,7 @@ int main(int argc, char* argv[])
 					sendData(sock, "KICK " + *(data_it) + " " + BadUserName + "Bad Language" + "\r\n");
 			}
 		}
-
-
-
-
-
+		
 		if (std::find(data.begin(), data.end(), "464") != data.end())
 		{
 			std::cerr << "\n[FATAL ERROR] Incorrect password (464)." << std::endl;

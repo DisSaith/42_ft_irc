@@ -5,7 +5,7 @@ void	IrcServer::PASS(int const& fd)
 	{
 		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
 		//ERR_ALREADYREGISTRED
-		if (_clients[fd]->setIsRegistered())
+		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, currentNick, ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 2)
@@ -97,7 +97,7 @@ void	IrcServer::USER(int const& fd)
 	if (_clients[fd]->getHasSetPass() && _recv.front() == "USER")
 	{
 		//ERR_ALREADYREGISTRED
-		if (_clients[fd]->setIsRegistered())
+		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, "USER", ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 5)
@@ -107,7 +107,7 @@ void	IrcServer::USER(int const& fd)
 		_clients[fd]->setUserName(*it);
 		std::advance(it, 3);
 		_clients[fd]->setRealName(*it);
-		if (_clients[fd]->setIsRegistered())
+		if (_clients[fd]->getIsRegistered())
 		{
 			std::string welcome = ":localhost 001 " + _clients[fd]->getNickname() + " :Welcome to the ft_irc network!\r\n";
 			send(fd, welcome.c_str(), welcome.length(), 0);

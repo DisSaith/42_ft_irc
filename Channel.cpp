@@ -1,9 +1,11 @@
 #include "Channel.hpp"
 
+/* ======================== Constructors & Destructors ======================== */
+
 Channel::Channel( void )
 {
 	if (DEBUG)
-		std::cout << "\033[0;31mDefault Channel constructor called\033[0m" << std::endl;
+		std::cout << GREEN << "Default Channel constructor called" << RESET << std::endl;
 }
 
 Channel::Channel( std::string const& name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false), _userLimit(UINT_MAX)
@@ -12,7 +14,7 @@ Channel::Channel( std::string const& name, Client *owner ): _name(name), _channe
 	addNewOperator(owner);
 	if (DEBUG)
 	{
-		std::cout << "\033[0;32mChannel parametric constructor called\033[0m" << std::endl;
+		std::cout << GREEN << "Channel parametric constructor called" << RESET << std::endl;
 		std::cout << "Channel user limit: " << _userLimit << std::endl;
 	}
 }
@@ -21,26 +23,24 @@ Channel::Channel( Channel const& copy )
 {
     *this = copy;
 	if (DEBUG)
-		std::cout << "\033[0;32mChannel copy constructor called\033[0m" << std::endl;
+		std::cout << GREEN << "Channel copy constructor called" << RESET << std::endl;
 }
 
 Channel::~Channel( void )
 {
-	
-	
 	for (std::map<int, Client*>::iterator it = _members.begin(); it != _members.end(); ++it)
 	{
 		it->second->removeChannel(_name);
 	}
 	if (DEBUG)
-		std::cout << "\033[0;31mDefault Channel destructor called\033[0m" << std::endl;
+		std::cout << RED << "Default Channel destructor called" << RESET << std::endl;
 }
 
 //Overload operator=
 Channel&	Channel::operator=( Channel const& copy )
 {
 	if (DEBUG)
-		std::cout << "\033[0;32mChannel copy assignment operator called\033[0m" << std::endl;
+		std::cout << GREEN << "Channel copy assignment operator called" << RESET << std::endl;
 	if (this != &copy)
 	{
         _channelKey = copy._channelKey;
@@ -97,12 +97,7 @@ void	Channel::removeOperator( int const& fd )
 		this->displayOperators();
 }
 
-bool	Channel::getIsChannelOperator( int const& fd )
-{
-	if (_operators.find(fd) != _operators.end())
-		return true;
-	return false;
-}
+/* ======================== Display member functions ======================== */
 
 void	Channel::displayChannel( void )
 {
@@ -185,6 +180,8 @@ void	Channel::displayMode ( void ) const
 	std::cout << message;
 }
 
+/* ======================== Default Constructor & Destructor ======================== */
+
 bool Channel::hasMember( int fd ) const
 {
 	return (_members.find(fd) != _members.end());
@@ -193,6 +190,13 @@ bool Channel::hasMember( int fd ) const
 std::map<int, Client*> Channel::getMembers() const
 {
 	return this->_members;
+}
+
+bool	Channel::getIsChannelOperator( int const& fd )
+{
+	if (_operators.find(fd) != _operators.end())
+		return true;
+	return false;
 }
 
 bool	Channel::getIsInviteOnly() const

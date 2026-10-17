@@ -1,8 +1,6 @@
-
-//Wrong error messages
-void	IrcServer::JOIN(int const& fd)
+void	IrcServer::JOIN( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "JOIN", ":User not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -68,9 +66,9 @@ void	IrcServer::JOIN(int const& fd)
 	}
 }
 
-void	IrcServer::PART(int const& fd)
+void	IrcServer::PART( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "PART", ":User not registered", fd);	
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -94,9 +92,9 @@ void	IrcServer::PART(int const& fd)
 	}
 }
 
-void	IrcServer::KICK(int const& operator_fd)
+void	IrcServer::KICK( int const& operator_fd )
 {
-	if (_clients[operator_fd]->setIsRegistered() == false)
+	if (_clients[operator_fd]->getIsRegistered() == false)
 		throw IrcException(-1, "KICK", ":User not registered", operator_fd);	
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 3)
@@ -143,11 +141,11 @@ void	IrcServer::KICK(int const& operator_fd)
 	}
 }
 
-void	IrcServer::NAMES(int const& fd)
+void	IrcServer::NAMES( int const& fd )
 {
 	bool notAll;
 
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "NAMES", ":User not registered", fd);	
 	std::list<std::string> channelNames;
 	if (_recv.size() == 1)
@@ -199,9 +197,9 @@ void	IrcServer::NAMES(int const& fd)
 	}
 }
 
-void	IrcServer::TOPIC(int const& fd)
+void	IrcServer::TOPIC( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "TOPIC", ":User not registered", fd);	
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -240,9 +238,9 @@ void	IrcServer::TOPIC(int const& fd)
 	}
 }
 
-void	IrcServer::PRIVMSG(int const& fd)
+void	IrcServer::PRIVMSG( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered())
+	if (_clients[fd]->getIsRegistered())
 	{
 		if (_recv.front() == "PRIVMSG")
 		{
@@ -314,7 +312,7 @@ void	IrcServer::PRIVMSG(int const& fd)
 	}
 }
 
-void    IrcServer::QUIT(int const& fd)
+void    IrcServer::QUIT( int const& fd )
 {
 	if (_recv.front() == "QUIT")
 	{
@@ -362,7 +360,7 @@ void    IrcServer::QUIT(int const& fd)
 
 void	IrcServer::MODE( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "MODE", ":User not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -542,9 +540,9 @@ void	IrcServer::MODE( int const& fd )
 	}
 }
 
-void	IrcServer::INVITE(int const& fd)
+void	IrcServer::INVITE( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "INVITE", ":User not registered", fd);
 	if (_recv.size() < 3)
 		throw IrcException(461, "INVITE", ":Not enough parameters", fd);
@@ -604,9 +602,9 @@ void	IrcServer::INVITE(int const& fd)
 	send(targetFd, inviteMsg.c_str(), inviteMsg.length(), 0);
 }
 
-void	IrcServer::OPER(int const& fd)
+void	IrcServer::OPER( int const& fd )
 {
-	if (_clients[fd]->setIsRegistered() == false)
+	if (_clients[fd]->getIsRegistered() == false)
 		throw IrcException(-1, "OPER", ":User not registered", fd);	
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < 2)
@@ -628,7 +626,7 @@ void	IrcServer::OPER(int const& fd)
 	send(fd, message.c_str(), message.length(), 0);
 }
 
-void	IrcServer::CAP(int const& fd)
+void	IrcServer::CAP( int const& fd )
 {
 	if (_recv.size() >= 2)
 	{

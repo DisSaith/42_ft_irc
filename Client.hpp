@@ -15,34 +15,34 @@ class Client
 	public:
 		/* ----- Main Constructor & Destructor ----- */
 		~Client();
-		explicit Client(int fd);
-		Client(int fd, std::string nickname, std::string username, std::string realname);
+		explicit Client( int fd );
+		Client( int fd, std::string nickname, std::string username, std::string realname );
 
 		/* ----- Getters / Setters ----- */
 		std::string	getNickname() const;
-		std::map<std::string, Channel*> const&	getChannels();
+		std::map<std::string, ChannegetIsl*> const&	getChannels();
 		int			getFd() const;
 		bool		getHasSetPass() const;
 		bool		getIsServerOperator() const;
 		bool		getToDisconnect() const;
-		bool		getIsInvited(std::string const& channelName) const;
-		bool		setIsRegistered() const;
+		bool		getIsInvited( std::string const& channelName ) const;
+		bool		getIsRegistered() const;
 		void		setPass();
-		void		setNickName(std::string const& nickName);
-		void		setUserName(std::string const& userName);
-		void		setRealName(std::string const& realName);
-		void		setNewChannel(std::string const& channelName, Channel *channel);
-		void		removeChannel(std::string const& channelName);
-		void		setIsOperator(bool status);
-		void		setIsDisconnect(bool status);
+		void		setNickName( std::string const& nickName );
+		void		setUserName( std::string const& userName );
+		void		setRealName( std::string const& realName );
+		void		setNewChannel( std::string const& channelName, Channel *channel );
+		void		removeChannel( std::string const& channelName );
+		void		setIsOperator( bool status );
+		void		setIsDisconnect( bool status );
 
 		/* ----- Methods ----- */
 		std::string	extractCommand();
 		size_t		FindEndFirstCommand();
 		bool		hasCompleteCommand() const;
-		void		appendToIn(std::string const& data);
-		void		addInvite(std::string const& channelName);
-		void		removeInvite(std::string const& channelName);
+		void		appendToIn( std::string const& data );
+		void		addInvite( std::string const& channelName );
+		void		removeInvite( std::string const& channelName );
 		void		displayClient( void );
 
 // Dans les attributs privés :
@@ -68,8 +68,8 @@ class Client
 
 		/* ----- Orthodox Canonical Form ----- */
 		Client();
-		Client(const Client& copy);
-		Client& operator=(const Client& copy);
+		Client( const Client& copy );
+		Client& operator=( const Client& copy );
 };
 
 #endif

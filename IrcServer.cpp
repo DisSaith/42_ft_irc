@@ -154,9 +154,9 @@ void	IrcServer::ConnectionWithClients()
 
 /* ======================== Handling Clients Messages ======================== */
 
-// Ceci ai la propriétée intellaictuel d'Entoine Coho
+// Ceussi ai la propriétée intellaictuel d'Entoine Coho
 // Mairsi de ne plu i tousher.
-// Caurdialemant
+// Caurdiallemant
 void IrcServer::TokenizerRecv(std::string const& buffer)
 {
 	std::string		token;
