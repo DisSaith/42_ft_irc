@@ -16,8 +16,7 @@ IrcServer::~IrcServer()
 		std::cout << std::endl << BLUE << "IRC Server closed !" << RESET << std::endl;
 }
 
-IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false), _serverStarted(false) {}
-
+IrcServer::IrcServer() : _password(""), _socketServer(-1), _port(0), _signalHandled(false), _serverStarted(false) {}
 
 /* ======================== IRC Server ======================== */
 
@@ -400,6 +399,7 @@ void	IrcServer::SetSignalHandled( bool set )
 // Close all fds and delete for no leaks at the end of the program
 void IrcServer::CloseFds()
 {
+
 	close(_socketServer);
 
 	for ( size_t i = 0 ; i < _pollFds.size() ; i++ )

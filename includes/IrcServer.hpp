@@ -38,7 +38,7 @@ class IrcServer
 		IrcServer();
 
 		/* ----- IRC Server ----- */
-		void InitServer( char* const& port, char* const& password );
+		void InitServer( char* const& port, char* const& password);
 		void CreateServer();
 		void ConnectionWithClients();
 		
