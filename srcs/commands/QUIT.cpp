@@ -25,9 +25,8 @@ void    IrcServer::QUIT( int const& fd )
 			if (chanIt->second->hasMember(fd))
 			{
 				std::map<int, Client*> members = chanIt->second->getMembers();
-				std::map<int, Client*>::iterator memIt;
-
-				for (memIt = members.begin(); memIt != members.end(); ++memIt)
+				
+				for (std::map<int, Client*>::iterator memIt = members.begin(); memIt != members.end(); ++memIt)
 				{
 					if (memIt->first != fd)
 						clientsToNotify.insert(memIt->first);
@@ -39,8 +38,7 @@ void    IrcServer::QUIT( int const& fd )
 				}
 			}
 		}
-		std::set<int>::iterator setIt;
-		for (setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)
+		for (std::set<int>::iterator setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)
 		{
 			send(*setIt, fullMsg.c_str(), fullMsg.length(), 0);
 		}

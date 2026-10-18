@@ -36,6 +36,8 @@ void	IrcServer::JOIN( int const& fd )
 
 			if ((*it).empty() == false && isMaskChar((*it)[0]) == false)
 				throw IrcException(476, *it, ":Bad Channel Mask", fd);
+			if ((*it).size() == 1)
+				throw IrcException(-1, *it, ":Bad Channel Name", fd);
 			if (chan_it == _channels.end())
 			{
 				_channels[*it] = new Channel(*it, _clients[fd]);
