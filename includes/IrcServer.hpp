@@ -49,7 +49,7 @@ class IrcServer
 		/* ----- IRC Commands ----- */
 		void basicChecks(std::string const& functionName, int const& fd, size_t const& size);
 		void checkChannelMode( int const& fd, std::string const& channelName, std::list<std::string> &channelPasswords, std::list<std::string>::iterator const& pass_it );
-		void checkUserAndChannelKick( int const& operator_fd, int const& kicked_fd, std::string const& channelName);
+		void checkUserAndChannelKick( int const& operator_fd, int const& kicked_fd, std::string const& channelName, std::string const& kickedName);
 		void PASS(int const& fd);
 		void NICK(int const& fd);
 		void JOIN(int const& fd);

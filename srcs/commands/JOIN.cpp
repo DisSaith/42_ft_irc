@@ -2,19 +2,20 @@ void	IrcServer::checkChannelMode( int const& fd, std::string const& channelName,
 {
     Channel const *channel = _channels[channelName];
 
+	std::string target = "JOIN " + channelName;
 	if (channel->hasMember(fd))	
-        throw IrcException(-1, channelName, ":User already on channel", fd);
+        throw IrcException(-1, target, ":User already on channel", fd);
 	//ERR_INVITEONLYCHAN
 	if (channel->getIsInviteOnly() && _clients[fd]->getIsInvited(channelName) == false)
-		throw IrcException(473, channelName, ":Cannot join channel (+i)", fd);
+		throw IrcException(473, target, ":Cannot join channel (+i)", fd);
 	//ERR_BADCHANNELKEY: missing key
 	if (pass_it == channelPasswords.end() && channel->getHasChannelKey())
-		throw IrcException(475, channelName, ":Cannot join channel (+k)", fd);
+		throw IrcException(475, target, ":Cannot join channel (+k)", fd);
 	//ERR_BADCHANNELKEY
 	if (pass_it != channelPasswords.end() && channel->getHasChannelKey() && (*pass_it).compare(channel->getChannelKey()) != 0)
-		throw IrcException(475, channelName, ":Cannot join channel (+k)", fd);
+		throw IrcException(475, target, ":Cannot join channel (+k)", fd);
 	if (channel->getMembers().size() >= channel->getUserLimit())
-		throw IrcException(471, channelName, ":Cannot join channel (+l)", fd);
+		throw IrcException(471, target, ":Cannot join channel (+l)", fd);
 }
 
 void	IrcServer::JOIN( int const& fd )
@@ -34,10 +35,11 @@ void	IrcServer::JOIN( int const& fd )
 		{
 			std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
 
+			std::string target = "JOIN " + *it;
 			if ((*it).empty() == false && isMaskChar((*it)[0]) == false)
-				throw IrcException(476, *it, ":Bad Channel Mask", fd);
+				throw IrcException(476, target, ":Bad Channel Mask", fd);
 			if ((*it).size() == 1)
-				throw IrcException(-1, *it, ":Bad Channel Name", fd);
+				throw IrcException(-1, target, ":Bad Channel Name", fd);
 			if (chan_it == _channels.end())
 			{
 				_channels[*it] = new Channel(*it, _clients[fd]);
