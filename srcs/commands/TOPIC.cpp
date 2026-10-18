@@ -29,7 +29,8 @@ void	IrcServer::TOPIC( int const& fd )
 		else
 			topic = _channels[channelName]->getTopic();
 		message = channelName + " :" + topic + ".\n";
-		send(fd, message.c_str(), message.length(), 0);
+		std::string modeMsg = ":localhost 332 " + _clients[fd]->getNickname() + message + "\r\n";
+		send(fd, modeMsg.c_str(), modeMsg.length(), 0);
 	}
 	else
 	{
