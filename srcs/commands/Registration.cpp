@@ -124,7 +124,9 @@ void	IrcServer::USER(int const& fd)
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
 		_clients[fd]->setUserName(*it);
-		std::advance(it, 3);
+		it++;
+		_clients[fd]->setHostName("localhost");
+		std::advance(it, 2);
 		_clients[fd]->setRealName(*it);
 		if (_clients[fd]->getIsRegistered())
 		{

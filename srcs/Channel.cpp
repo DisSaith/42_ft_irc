@@ -127,10 +127,10 @@ void	Channel::displayOperators( void )
         std::cout << "\tFD: " << it->first << "\tNickname: " << it->second->getNickname() << std::endl;
 }
 
-void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames )
+void	Channel::displayMembers( Client *client , bool const& displayEndOfNames )
 {
 	std::string message;
-	std::string name;
+	std::string names;
 	std::map<int, Client*>::const_iterator last = _members.end();
 
 	if ( !_members.empty() )
@@ -139,21 +139,21 @@ void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames )
 	message = _name + " :";
     for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it)
 	{
-		name = "";
+		if (!names.empty())
+			names += " ";
 		if (_operators.find(it->first) != _operators.end())
-			name += "@";
-		name += it->second->getNickname();
-		message += name;
+			names += "@";
+		names += it->second->getNickname();
 
 		if (it != last )
         	message += " ";
 	}
-	message = message + "\n";
-	send(fd, message.c_str(), message.length(), 0);
+	message = ":localhost 353 " + client->getNickname() + " = " + _name + " :" + names + "\r\n";
+	send(client->getFd(), message.c_str(), message.length(), 0);
 	if (displayEndOfNames)
 	{
-		message = _name + " :End of /NAMES list\n";
-		send(fd, message.c_str(), message.length(), 0);
+		message = ":localhost 366 " + client->getNickname() + " " + _name + " :End of /NAMES list\r\n";
+		send(client->getFd(), message.c_str(), message.length(), 0);
 	}
 }
 

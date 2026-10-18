@@ -70,7 +70,7 @@ class Channel
 		void					displayOperators( void );
 		void					displayMode( void ) const;
 		void					displayMembers( void );
-		void					displayMembers( int const& fd, bool const& displayEndOfNames );
+		void					displayMembers( Client *client, bool const& displayEndOfNames );
 		void					displayTopic( void ) const;
 		void					displayTopic( int const& fd ) const;
 

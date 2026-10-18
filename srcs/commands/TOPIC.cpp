@@ -28,14 +28,15 @@ void	IrcServer::TOPIC( int const& fd )
 			topic = "No topic is set";
 		else
 			topic = _channels[channelName]->getTopic();
-		message = channelName + " :" + topic + ".\n";
-		std::string modeMsg = ":localhost 332 " + _clients[fd]->getNickname() + message + "\r\n";
-		send(fd, modeMsg.c_str(), modeMsg.length(), 0);
+		message = ":localhost 332 " + _clients[fd]->getNickname() + " " + channelName + " :" + topic +"\r\n";
+		send(fd, message.c_str(), message.length(), 0);
 	}
 	else
 	{
 		if (_channels[channelName]->getHasTopicRestrictions() == true)
 			throw IrcException(-1, "TOPIC", ":channel has topic restrictions", fd);
 		_channels[channelName]->setTopic(topic);
+		message = ":" + _clients[fd]->getAllNames() + " TOPIC " + channelName + " :" + _channels[channelName]->getTopic() +"\r\n";
+		_channels[channelName]->sendMessageToMembers(message, -1);
 	}
 }

@@ -20,7 +20,7 @@ void    IrcServer::QUIT( int const& fd )
 		}
 		std::string fullMsg = ":" + _clients[fd]->getNickname() + " QUIT :" + quitMsg + "\r\n";
 		std::set<int> clientsToNotify;
-		for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
+		for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); )
 		{
 			if (chanIt->second->hasMember(fd))
 			{
@@ -34,8 +34,10 @@ void    IrcServer::QUIT( int const& fd )
 				if (chanIt->second->removeMember(fd))
 				{
 					delete chanIt->second;
-					_channels.erase(chanIt->first);
+					_channels.erase(chanIt++);
+					continue ;
 				}
+				++chanIt;
 			}
 		}
 		for (std::set<int>::iterator setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)

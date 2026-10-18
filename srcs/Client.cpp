@@ -94,6 +94,11 @@ bool	Client::getIsRegistered() const
 	return (this->_hasSetPass && this->_hasSetNick && this->_hasSetUser);
 }
 
+std::string	Client::getAllNames() const
+{
+	return _nickname + "!" + _username + "@" + _hostname;
+}
+
 void	Client::setPass()
 {
 	_hasSetPass = true;
@@ -129,10 +134,14 @@ void	Client::setUserName( std::string const& userName )
 	_hasSetUser = true;
 }
 
+void	Client::setHostName( std::string const& hostName )
+{
+	_hostname = hostName;
+}
+
 void	Client::setRealName( std::string const& realName )
 {
 	_realname = realName;
-	
 }
 
 void	Client::setIsDisconnect( bool status )
@@ -231,6 +240,8 @@ void Client::displayClient( void )
 
 		message += "USERNAME :" + _username + "\n";
 		message += "REALNAME :" + _realname + "\n";
+		message += "HOSTNAME :" + _hostname + "\n";
+		message += "FULLNAME :" + this->getAllNames() + "\n";
 		message += "FD       :" + ::itos(_fd) + "\n";
 		message += "Registered  : " + ::itos(static_cast<int>(getIsRegistered())) + "\n";
 		message += "Server Operator  : " + ::itos(static_cast<int>(_isOperator)) + "\n";

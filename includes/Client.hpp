@@ -27,10 +27,12 @@ class Client
 		bool		getToDisconnect() const;
 		bool		getIsInvited( std::string const& channelName ) const;
 		bool		getIsRegistered() const;
+		std::string	getAllNames() const;
 		void		setPass();
 		void		setNickName( std::string const& nickName );
 		void		setUserName( std::string const& userName );
 		void		setRealName( std::string const& realName );
+		void		setHostName( std::string const& hostName );
 		void		setNewChannel( std::string const& channelName, Channel *channel );
 		void		removeChannel( std::string const& channelName );
 		void		setIsOperator( bool status );
@@ -53,6 +55,7 @@ class Client
 		std::string							_nickname;
 		std::string							_username;
 		std::string							_realname;
+		std::string							_hostname;
 		std::map<std::string, Channel*>		_channels;
 		std::vector<std::string>			_invitedChannels;
 
