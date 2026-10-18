@@ -52,10 +52,15 @@ void	IrcServer::JOIN( int const& fd )
 				checkChannelMode(fd, *it, channelPasswords, pass_it);
 				if (_clients[fd]->getIsInvited(*it))
 					_clients[fd]->removeInvite(*it);
+				
+				_clients[fd]->setNewChannel(*it, _channels[*it]);
+
 				chan_it->second->addNewMember(_clients[fd]);
+				
 				message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
 				chan_it->second->sendMessageToMembers(message, fd);
 				message = "You joined the channel " + *it + ".\n";
+				
 				send(fd, message.c_str(), message.length(), 0);
 				_channels[*it]->displayTopic(fd);
 				_channels[*it]->displayMembers(fd, false);

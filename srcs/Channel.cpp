@@ -57,6 +57,8 @@ Channel&	Channel::operator=( Channel const& copy )
 	return *this;
 }
 
+/* ======================== Methods ======================== */
+
 void	Channel::sendMessageToMembers( std::string const& message, int const& sender_fd )
 {
 	
@@ -79,6 +81,7 @@ bool	Channel::removeMember( int const& fd )
 {
 	_members[fd]->removeChannel(_name);
 	_members.erase(fd);
+	_operators.erase(fd);
 	if (DEBUG)
 		this->displayMembers();
 	if (_members.empty())
@@ -128,18 +131,22 @@ void	Channel::displayMembers( int const& fd , bool const& displayEndOfNames )
 {
 	std::string message;
 	std::string name;
+	std::map<int, Client*>::const_iterator last = _members.end();
+
+	if ( !_members.empty() )
+		--last;
 
 	message = _name + " :";
     for (std::map<int, Client*>::const_iterator it = _members.begin(); it != _members.end(); ++it)
 	{
 		name = "";
 		if (_operators.find(it->first) != _operators.end())
-			name = name + "@";
-		name = name + it->second->getNickname();
-		message = message + name;
-		if (++it != _members.end())
-        	message = message + " ";
-		--it;
+			name += "@";
+		name += it->second->getNickname();
+		message += name;
+
+		if (it != last )
+        	message += " ";
 	}
 	message = message + "\n";
 	send(fd, message.c_str(), message.length(), 0);
@@ -184,7 +191,7 @@ void	Channel::displayMode ( void ) const
 	std::cout << message << std::endl;
 }
 
-/* ======================== Default Constructor & Destructor ======================== */
+/* ======================== Getters / Setters ======================== */
 
 bool Channel::hasMember( int fd ) const
 {
