@@ -146,9 +146,9 @@ void	IrcServer::ConnectionWithClients()
 								}
 								std::cout << std::endl;
 							}
-							TokenizerRecv(cmd);
 							try
 							{
+								TokenizerRecv(cmd);
 								ParsingRecv(_pollFds[i].fd);
 							}
 							catch ( IrcException const& e )
@@ -202,7 +202,14 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		if ( ((buffer[i] == ' ' && !colon) || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
 		{
 			inWord = false;
-			token = buffer.substr(j, i - j);
+			if (token.empty() == false)
+				token.clear();
+			while ( j < i )
+			{
+				if (std::isprint(buffer[j]))
+					token += buffer[j];
+				j++;
+			}
 			_recv.push_back(token);
 			if (colon)
 				colon = false;
