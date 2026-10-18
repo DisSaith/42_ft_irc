@@ -3,7 +3,7 @@ void	IrcServer::PASS(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "PASS")
 	{
-		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
+		std::string currentNick = _clients[fd]->getNickname().empty() ? "" : _clients[fd]->getNickname();
 		//ERR_ALREADYREGISTRED
 		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, currentNick, ":You may not reregister", fd);
@@ -47,7 +47,7 @@ void	IrcServer::NICK(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "NICK")
 	{
-		std::string currentNick = _clients[fd]->getNickname().empty() ? "*" : _clients[fd]->getNickname();
+		std::string currentNick = _clients[fd]->getNickname().empty() ? "" : _clients[fd]->getNickname();
 		if (_clients[fd]->getHasSetPass() == false)
 			throw IrcException(451, currentNick, ":You have not registered", fd);
 		//ERR_NONICKNAMEGIVEN
@@ -113,7 +113,7 @@ void	IrcServer::USER(int const& fd)
 	if (_recv.front() == "USER")
 	{
 		if (_clients[fd]->getHasSetPass() == false)
-			throw IrcException(451, "*", ":You have not registered", fd);
+			throw IrcException(451, "", ":You have not registered", fd);
 		//ERR_ALREADYREGISTRED
 		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, "USER", ":You may not reregister", fd);

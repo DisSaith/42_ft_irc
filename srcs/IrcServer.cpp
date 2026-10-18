@@ -142,6 +142,7 @@ void	IrcServer::ConnectionWithClients()
 										std::cout << cmd[i];
 								}
 								std::cout << std::endl;
+								std::cout << "cmd -> " << cmd;
 							}
 							TokenizerRecv(cmd);
 							try
