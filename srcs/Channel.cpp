@@ -5,7 +5,8 @@
 Channel::Channel( void )
 {
 	if (DEBUG)
-		std::cout << GREEN << "Default Channel constructor called" << RESET << std::endl;
+		std::cout << YELLOW << "[Channel " << _name << "]" << GREEN
+				<< " default constructor called" << RESET << std::endl;
 }
 
 Channel::Channel( std::string const& name, Client *owner ): _name(name), _channelKey(""), _isInviteOnly(false), _hasTopicRestrictions(false), _hasChannelKey(false), _userLimit(UINT_MAX)
@@ -14,8 +15,9 @@ Channel::Channel( std::string const& name, Client *owner ): _name(name), _channe
 	addNewOperator(owner);
 	if (DEBUG)
 	{
-		std::cout << GREEN << "Channel parametric constructor called" << RESET << std::endl;
-		std::cout << "Channel user limit: " << _userLimit << std::endl;
+		std::cout << YELLOW << "[Channel " << _name << "]" << GREEN
+					<< " parametric constructor called" << RESET << std::endl
+					<< "Channel user limit: " << _userLimit << std::endl << std::endl;
 	}
 }
 
@@ -23,7 +25,8 @@ Channel::Channel( Channel const& copy )
 {
     *this = copy;
 	if (DEBUG)
-		std::cout << GREEN << "Channel copy constructor called" << RESET << std::endl;
+		std::cout << YELLOW << "[Channel " << _name << "]" << GREEN
+					<< " copy constructor called" << RESET << std::endl;
 }
 
 Channel::~Channel( void )
@@ -33,7 +36,8 @@ Channel::~Channel( void )
 		it->second->removeChannel(_name);
 	}
 	if (DEBUG)
-		std::cout << RED << "Default Channel destructor called" << RESET << std::endl;
+		std::cout << YELLOW << "[Channel " << _name << "]" << BLUE
+			<< " destructor called" << RESET << std::endl;
 }
 
 //Overload operator=
@@ -168,7 +172,7 @@ void	Channel::displayTopic( int const& fd ) const
 
 void	Channel::displayMode ( void ) const
 {
-	std::string	message = "\n---CHANNEL " + _name + "---\n";
+	std::string	message = "---CHANNEL " + _name + "---\n";
 
 	message += "TOPIC      :" + _topic + "\n";
 	message += "USER LIMIT :" + ::itos(_userLimit) + "\n";
@@ -177,7 +181,7 @@ void	Channel::displayMode ( void ) const
 	message += "Mode (+t)  : " + ::itos(static_cast<int>(_hasTopicRestrictions)) + "\n";
 	message += "Mode (+i)  : " + ::itos(static_cast<int>(_isInviteOnly)) + "\n";
 
-	std::cout << message;
+	std::cout << message << std::endl;
 }
 
 /* ======================== Default Constructor & Destructor ======================== */

@@ -22,7 +22,8 @@ void	IrcServer::PASS(int const& fd)
 			throw IrcException(464, currentNick, ":Password incorrect", fd);
 		}
 		else if ( DEBUG )
-			std::cout << "PASS \"" << *it << "\" " << GREEN << "CORRECT\r\n" << RESET;
+			std::cout << GREEN <<"Correct Password: "<< RESET << *it
+					<< YELLOW << " [client " << fd << "]\n" << RESET;
 			
 		_clients[fd]->setPass();
 	}

@@ -12,10 +12,11 @@ IrcServer& IrcServer::operator=( IrcServer const& copy ) { (void)copy; return *t
 
 IrcServer::~IrcServer() 
 {
-	std::cout << BLUE << "IRC Server closed !" << RESET << std::endl;
+	if (_serverStarted)
+		std::cout << std::endl << BLUE << "IRC Server closed !" << RESET << std::endl;
 }
 
-IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false) {}
+IrcServer::IrcServer() : _password(""), _port(0), _signalHandled(false), _serverStarted(false) {}
 
 
 /* ======================== IRC Server ======================== */
@@ -57,8 +58,10 @@ void IrcServer::CreateServer()
 	InitMapCommands();
 
 	std::cout << GREEN << "IRC Server created !\n" << RESET
-		<< "port: " << this->_port << std::endl
-		<< "password: " << this->_password << std::endl;
+		<< WHITE << "port: " << RESET << this->_port << std::endl
+		<< WHITE << "password: " << RESET << this->_password << std::endl;
+
+	this->_serverStarted = true;
 }
 
 void	IrcServer::ConnectionWithClients()
@@ -69,7 +72,7 @@ void	IrcServer::ConnectionWithClients()
 	serverFd.revents = 0;
 	_pollFds.push_back(serverFd);
 
-	std::cout << BLUE << "Server listening." << RESET << " Waiting for connections.." << std::endl;
+	std::cout << BLUE << "Server listening." << RESET << " Waiting for connections..\n\n";
 
 	while (true)
 	{
@@ -139,10 +142,9 @@ void	IrcServer::ConnectionWithClients()
 									if ((int)cmd[j] < 32 || (int)cmd[j] > 126)
 										std::cout << "[" << (int)cmd[j] << "] ";
 									else 
-										std::cout << cmd[i];
+										std::cout << cmd[j];
 								}
 								std::cout << std::endl;
-								std::cout << "cmd -> " << cmd;
 							}
 							TokenizerRecv(cmd);
 							try
@@ -287,7 +289,7 @@ void	IrcServer::signalHandler( int signal )
 	serverptr->SetSignalHandled(true);
 
 	if (DEBUG)
-		std::cout << WHITE << "\nSignal " << RED << signal << WHITE << " intercepted\n" << RESET;
+		std::cout << WHITE << "\nSignal " << RED << signal << WHITE << " intercepted\n\n" << RESET;
 }
 
 

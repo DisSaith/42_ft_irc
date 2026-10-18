@@ -240,7 +240,7 @@ void Client::displayClient( void )
 		message += "\nInvites : ";
 		for (std::vector<std::string>::iterator it = _invitedChannels.begin(); it != _invitedChannels.end(); it++)
 			message += *it + " ";	
-		std::cout << message << std::endl;
+		std::cout << message << std::endl << std::endl;
 	}
 	catch(std::exception const& e)
 	{

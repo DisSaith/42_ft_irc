@@ -107,6 +107,7 @@ class IrcServer
 		// listening port (for initialing communications)
 		short								_port;
 		bool								_signalHandled;
+		bool								_serverStarted;
 		
 		/* ----- Orthodox Canonical Form ----- */
 		IrcServer( IrcServer const& copy ); //Copy Constructor
