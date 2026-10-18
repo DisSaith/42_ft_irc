@@ -80,7 +80,10 @@ class IrcServer
 		void				CloseFds();
 		void				DeleteChannels();
 		void				RemoveClient(int fd);
-
+		void				channelModes(Channel* channel, std::string chanTarget, int const& fd);
+		void				modeKey(Channel* channel, std::string const& chanTarget, int fd, bool adding, std::list<std::string>::iterator& it, std::string& messageMode, std::string& messageArgs);
+		void				modeLimit(Channel* channel, int fd, bool adding, std::list<std::string>::iterator& it, std::string& messageMode, std::string& messageArgs);
+		void				modeOperator(Channel* channel, std::string const& chanTarget, int fd, bool adding, std::list<std::string>::iterator& it, std::string& messageMode, std::string& messageArgs);
 		// typedef for commands map container
 		typedef void (IrcServer::*cmdFunction)(int const& fd);
 
