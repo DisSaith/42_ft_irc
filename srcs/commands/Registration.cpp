@@ -3,10 +3,11 @@ void	IrcServer::PASS(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "PASS")
 	{
-		std::string currentNick = _clients[fd]->getNickname().empty() ? "" : _clients[fd]->getNickname();
+		if (_clients[fd]->getHasSetPass())
+			throw IrcException(-1, "PASS", ":Password already set", fd);
 		//ERR_ALREADYREGISTRED
 		if (_clients[fd]->getIsRegistered())
-			throw IrcException(462, currentNick, ":You may not reregister", fd);
+			throw IrcException(462, "PASS", ":You may not reregister", fd);
 		//ERR_NEEDMOREPARAMS
 		if (_recv.size() < 2)
 		{
@@ -19,7 +20,7 @@ void	IrcServer::PASS(int const& fd)
 		if (*it != _password)
 		{
 			_clients[fd]->setIsDisconnect(true);
-			throw IrcException(464, currentNick, ":Password incorrect", fd);
+			throw IrcException(464, "PASS", ":Password incorrect", fd);
 		}
 		else if ( DEBUG )
 			std::cout << GREEN <<"Correct Password: "<< RESET << *it
@@ -48,19 +49,18 @@ void	IrcServer::NICK(int const& fd)
 {
 	if (_recv.empty() == false && _recv.front() == "NICK")
 	{
-		std::string currentNick = _clients[fd]->getNickname().empty() ? "" : _clients[fd]->getNickname();
 		if (_clients[fd]->getHasSetPass() == false)
-			throw IrcException(451, currentNick, ":You have not registered", fd);
+			throw IrcException(451, "NICK", ":You have not registered", fd);
 		//ERR_NONICKNAMEGIVEN
 		if (_recv.size() < 2)
-			throw IrcException(431, currentNick, ":No nickname given", fd);
+			throw IrcException(431, "NICK", ":No nickname given", fd);
 		std::list<std::string>::iterator it = _recv.begin();
 		it++;
 		std::string newNick = *it;
 		// ERR_ERRONEUSNICKNAME (432)
 		if (!isValidNickname(newNick))
 		{
-			std::string target = currentNick + " " + newNick;
+			std::string target = "NICK " + newNick;
 			throw IrcException(432, target, ":Erroneus nickname", fd);
 		}
 		//ERR_NICKNAMEINUSE (433)
@@ -68,7 +68,7 @@ void	IrcServer::NICK(int const& fd)
 		{
 			if (mapIt->first != fd && newNick == mapIt->second->getNickname())
 			{
-				std::string target = currentNick + " " + newNick;
+				std::string target = "NICK " + newNick;
 				throw IrcException(433, target, ":Nickname is already in use", fd);
 			}
 		}
@@ -114,7 +114,7 @@ void	IrcServer::USER(int const& fd)
 	if (_recv.front() == "USER")
 	{
 		if (_clients[fd]->getHasSetPass() == false)
-			throw IrcException(451, "", ":You have not registered", fd);
+			throw IrcException(451, "USER", ":You have not registered", fd);
 		//ERR_ALREADYREGISTRED
 		if (_clients[fd]->getIsRegistered())
 			throw IrcException(462, "USER", ":You may not reregister", fd);
