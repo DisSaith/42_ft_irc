@@ -175,7 +175,7 @@ void	IrcServer::ConnectionWithClients()
 // Ceussi ai la propriétée intellaictuel d'Entoine Coho
 // Mairsi de ne plu i tousher.
 // Caurdiallemant
-void IrcServer::TokenizerRecv(std::string const& buffer)
+void IrcServer::TokenizerRecv( std::string const& buffer )
 {
 	std::string		token;
 	size_t			j = 0;
@@ -250,7 +250,7 @@ void IrcServer::ParsingRecv( int const& clientFd )
 	}
 }
 
-void IrcServer::RemoveClient(int fd)
+void IrcServer::RemoveClient( int fd )
 {
 	for (std::map<std::string, Channel*>::iterator chanIt = _channels.begin(); chanIt != _channels.end(); ++chanIt)
 	{
@@ -324,8 +324,7 @@ std::string		IrcServer::buildMessage( int const& code, std::string const& target
 //Search for the fd corresponding to a Nickname
 int IrcServer::getFdfromNickname( std::string const& nickname )
 {
-	std::map<int, Client*>::iterator clients_it;
-	for (clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
+	for (std::map<int, Client*>::iterator clients_it = _clients.begin(); clients_it != _clients.end(); clients_it++)
 	{
 		if (clients_it->second->getNickname() == nickname)
 			return clients_it->first;
@@ -333,7 +332,7 @@ int IrcServer::getFdfromNickname( std::string const& nickname )
 	return -1;
 }
 
-bool IrcServer::isAnyOperator(int const& fd, std::string const& channelName)
+bool IrcServer::isAnyOperator( int const& fd, std::string const& channelName )
 {
 	if (_clients[fd]->getIsServerOperator() || _channels[channelName]->getIsChannelOperator(fd))
 		return true;
