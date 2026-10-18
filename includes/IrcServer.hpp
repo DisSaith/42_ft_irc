@@ -75,6 +75,7 @@ class IrcServer
 		int					getFdfromNickname( std::string const& nickname );
 		bool				isAnyOperator(int const& fd, std::string const& channelName);
 		bool				CheckServerPort( std::string const& port ) const;
+		bool				CheckServerPassword( std::string const& password ) const;
 		void				InitMapCommands();
 		void				SetSignalHandled( bool set ); //setter
 		void				CloseFds();

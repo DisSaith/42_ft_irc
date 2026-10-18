@@ -23,11 +23,12 @@ IrcServer::IrcServer() : _password(""), _socketServer(-1), _port(0), _signalHand
 void	IrcServer::InitServer( char* const& port, char* const& password )
 {
 	std::string string_port = std::string(port);
+	std::string string_password = std::string(password);
 
-	if ( CheckServerPort(string_port) == true )
+	if ( CheckServerPort(string_port) == true && CheckServerPassword(string_password) == true)
 	{
+		this->_password = string_password;
 		this->_port = ::stoi(string_port);
-		this->_password = std::string(password);
 	}
 	else
 	{
@@ -342,7 +343,7 @@ bool IrcServer::isAnyOperator( int const& fd, std::string const& channelName )
 
 // Ports between 0 and 1023 need root permission
 // only ports between 1024 and 65 535 are allowed
-bool IrcServer::CheckServerPort( std::string const& port ) const
+bool	IrcServer::CheckServerPort( std::string const& port ) const
 {
 	int converted_port;
 
@@ -365,6 +366,19 @@ bool IrcServer::CheckServerPort( std::string const& port ) const
 	else if ( converted_port >= 1024 && converted_port <= 65535 )
 		return true;
 	return false;
+}
+
+bool	IrcServer::CheckServerPassword( std::string const& password ) const
+{
+	if (password.empty())
+		throw std::invalid_argument("Password must not be empty.");
+
+	for ( size_t i = 0 ; i < password.length() ; i++ )
+	{
+		if ( !std::isprint(password[i]) || password[i] == ' ' )
+			throw std::invalid_argument("Password needs printable characters and no spaces.");
+	}
+	return true;
 }
 
 // Initialize map container of IRC Server commands
@@ -400,11 +414,12 @@ void	IrcServer::SetSignalHandled( bool set )
 void IrcServer::CloseFds()
 {
 
-	close(_socketServer);
+	if (_socketServer != -1)
+		close(_socketServer);
 
 	for ( size_t i = 0 ; i < _pollFds.size() ; i++ )
 	{
-		if (_pollFds[i].fd != _socketServer)
+		if (_pollFds[i].fd != _socketServer && _pollFds[i].fd != -1)
 			close(_pollFds[i].fd);
 		delete(_clients[_pollFds[i].fd]);
 		_clients.erase(_pollFds[i].fd);
