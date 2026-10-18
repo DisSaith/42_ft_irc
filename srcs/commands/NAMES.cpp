@@ -18,7 +18,16 @@ void	IrcServer::NAMES( int const& fd )
 	}
 
 	for (std::list<std::string>::iterator it = channelNames.begin(); it != channelNames.end(); it++)
+	{
+		if ((*it).empty() == false && isMaskChar((*it)[0]) == false)
+			throw IrcException(476, "NAMES " + *it, ":Bad Channel Mask", fd);
+		if ((*it).size() == 1)
+			throw IrcException(-1, "NAMES " + *it, ":Bad Channel Name", fd);
+		std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
+		if (chan_it == _channels.end())
+			throw IrcException(403, "NAMES" + *it, ":No such channel", fd);
 		_channels[*it]->displayMembers(fd, notAll);
+	}
 	if (notAll == false)
 	{
 		std::string message;

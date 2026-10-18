@@ -14,6 +14,10 @@ void	IrcServer::TOPIC( int const& fd )
 			topic += " ";
 	}
 
+	if (channelName.empty() == false && isMaskChar(channelName[0]) == false)
+		throw IrcException(476, "TOPIC " + channelName, ":Bad Channel Mask", fd);
+	if (channelName.size() == 1)
+		throw IrcException(-1, "TOPIC " + channelName, ":Bad Channel Name", fd);
 	//ERR_NOSUCHCHANNEL
 	if (_channels.find(channelName) == _channels.end())
 		throw IrcException(403, "TOPIC", ":No such channel", fd);

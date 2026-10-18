@@ -173,7 +173,7 @@ void	Channel::displayTopic( int const& fd ) const
 	if (_topic.empty())
 		message = message + "No topic is set\n";
 	else
-		message = message + _topic;
+		message = message + _topic + "\n";
 	send(fd, message.c_str(), message.length(), 0);
 }
 
