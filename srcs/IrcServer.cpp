@@ -201,8 +201,6 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		}
 		if ( ((buffer[i] == ' ' && !colon) || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
 		{
-			if (colon)
-				colon = false;
 			inWord = false;
 			if (token.empty() == false)
 				token.clear();
