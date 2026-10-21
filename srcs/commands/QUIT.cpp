@@ -37,8 +37,8 @@ void    IrcServer::QUIT( int const& fd )
 					_channels.erase(chanIt++);
 					continue ;
 				}
-				++chanIt;
 			}
+			++chanIt;
 		}
 		for (std::set<int>::iterator setIt = clientsToNotify.begin(); setIt != clientsToNotify.end(); ++setIt)
 		{
