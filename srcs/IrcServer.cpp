@@ -188,7 +188,7 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		_recv.clear(); // clear list before every new recv from a client
 	for ( size_t i = 0 ; i < buffer.length() ; i++)
 	{
-		if ( buffer[i] == ':' && i != 0 )
+		if ( buffer[i] == ':' && i != 0 && colon != true)
 		{
 			colon = true;
 			inWord = true;
