@@ -39,6 +39,7 @@ void	IrcServer::JOIN( int const& fd )
 				throw IrcException(476, *it, ":Bad Channel Mask", fd);
 			if ((*it).size() == 1)
 				throw IrcException(-1, *it, ":Bad Channel Name", fd);
+			//create a channel
 			if (chan_it == _channels.end())
 			{
 				_channels[*it] = new Channel(*it, _clients[fd]);
@@ -46,6 +47,7 @@ void	IrcServer::JOIN( int const& fd )
 				message = ":" + _clients[fd]->getAllNames() + " JOIN " + *it + "\r\n";
 				send(fd, message.c_str(), message.length(), 0);
 			}
+			//join a channel
 			else
 			{
 				checkChannelMode(fd, *it, channelPasswords, pass_it);

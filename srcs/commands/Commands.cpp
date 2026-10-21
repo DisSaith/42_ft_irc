@@ -1,7 +1,8 @@
 void	IrcServer::basicChecks(std::string const& functionName, int const& fd, size_t const& size)
 {
+	//ERR_NOTREGISTERED
 	if (_clients[fd]->getIsRegistered() == false)
-		throw IrcException(-1, functionName, ":User not registered", fd);
+		throw IrcException(451, functionName, ":You have not registered", fd);
 	//ERR_NEEDMOREPARAMS
 	if (_recv.size() < size)
 		throw IrcException(461, functionName, ":Not enough parameters", fd);

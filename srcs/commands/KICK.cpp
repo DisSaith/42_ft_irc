@@ -35,7 +35,7 @@ void	IrcServer::KICK( int const& operator_fd )
 	std::string message = ":" + _clients[operator_fd]->getAllNames() + " KICK " + channelName + " " + _clients[kicked_fd]->getNickname();
 	if (!comment.empty() && comment != " ")
 		message += " :" + comment;
-	message +=  "\n";
+	message +=  "\r\n";
 
 	_channels[channelName]->sendMessageToMembers( message, -1 );
 	if (_channels[channelName]->removeMember(kicked_fd))
