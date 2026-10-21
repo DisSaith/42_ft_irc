@@ -21,20 +21,20 @@ void	IrcServer::TOPIC( int const& fd )
 	//ERR_NOSUCHCHANNEL
 	if (_channels.find(channelName) == _channels.end())
 		throw IrcException(403, "TOPIC", ":No such channel", fd);
-
+	if (!_channels[channelName]->hasMember(fd))
+		throw IrcException(442, channelName, ":You're not on that channel", fd);
 	if (_recv.size() == 2)
 	{
 		if (_channels[channelName]->getTopic().empty())
-			topic = "No topic is set";
+			message = ":localhost 331 " + _clients[fd]->getNickname() + " " + channelName + " :No topic is set\r\n";
 		else
-			topic = _channels[channelName]->getTopic();
-		message = ":localhost 332 " + _clients[fd]->getNickname() + " " + channelName + " :" + topic +"\r\n";
+			message = ":localhost 332 " + _clients[fd]->getNickname() + " " + channelName + " :" + _channels[channelName]->getTopic() + "\r\n";
 		send(fd, message.c_str(), message.length(), 0);
 	}
 	else
 	{
-		if (_channels[channelName]->getHasTopicRestrictions() == true)
-			throw IrcException(-1, "TOPIC", ":channel has topic restrictions", fd);
+		if (_channels[channelName]->getHasTopicRestrictions() && !isAnyOperator(fd, channelName))
+			throw IrcException(482, channelName, ":You're not channel operator", fd);
 		_channels[channelName]->setTopic(topic);
 		message = ":" + _clients[fd]->getAllNames() + " TOPIC " + channelName + " :" + _channels[channelName]->getTopic() +"\r\n";
 		_channels[channelName]->sendMessageToMembers(message, -1);

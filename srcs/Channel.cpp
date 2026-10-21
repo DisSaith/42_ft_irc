@@ -79,8 +79,12 @@ void	Channel::addNewMember( Client *newMember )
 //return true if the owner is removed, false otherwise
 bool	Channel::removeMember( int const& fd )
 {
-	_members[fd]->removeChannel(_name);
-	_members.erase(fd);
+	std::map<int, Client*>::iterator it = _members.find(fd);
+	if (it != _members.end())
+	{
+		_members[fd]->removeChannel(_name);
+		_members.erase(fd);
+	}
 	_operators.erase(fd);
 	if (DEBUG)
 		this->displayMembers();

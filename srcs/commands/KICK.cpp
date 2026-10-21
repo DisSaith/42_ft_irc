@@ -10,8 +10,8 @@ void	IrcServer::checkUserAndChannelKick( int const& operator_fd, int const& kick
 	if (!isAnyOperator(operator_fd, channelName))
 		throw IrcException(482, "KICK " + channelName, ":You're not channel operator", operator_fd);
 	//ERR_NOTONCHANNEL
-	if (_clients[kicked_fd]->getChannels().find(channelName) == _clients[kicked_fd]->getChannels().end())
-		throw IrcException(441, "KICK", ":User not on that channel", operator_fd);
+	if (!_channels[channelName]->hasMember(kicked_fd))
+		throw IrcException(441, channelName + " " + kickedName, ":They aren't on that channel", operator_fd);
 }
 
 void	IrcServer::KICK( int const& operator_fd )
