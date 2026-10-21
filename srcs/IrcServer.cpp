@@ -192,7 +192,7 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		{
 			colon = true;
 			inWord = true;
-			j = i + 1;
+			j = i;
 		}
 		if ( buffer[i] != ' ' && buffer[i] != '\n' && buffer[i] != '\r' && inWord == false )
 		{
@@ -201,6 +201,8 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		}
 		if ( ((buffer[i] == ' ' && !colon) || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
 		{
+			if (colon)
+				colon = false;
 			inWord = false;
 			if (token.empty() == false)
 				token.clear();
@@ -211,8 +213,6 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 				j++;
 			}
 			_recv.push_back(token);
-			if (colon)
-				colon = false;
 		}
 	}
 

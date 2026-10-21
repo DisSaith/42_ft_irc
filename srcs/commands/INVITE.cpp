@@ -38,6 +38,6 @@ void	IrcServer::INVITE( int const& fd )
 	//RPL_INVITING (341)
 	std::string message = ":localhost 341 " + _clients[fd]->getNickname() + " " + targetNick + " " + chanTarget + "\r\n";
 	send(fd, message.c_str(), message.length(), 0);
-	std::string inviteMsg = ":" + _clients[fd]->getNickname() + " INVITE " + targetNick + " " + chanTarget + "\r\n";
+	std::string inviteMsg = ":" + _clients[fd]->getAllNames() + " INVITE " + targetNick + " " + chanTarget + "\r\n";
 	send(targetFd, inviteMsg.c_str(), inviteMsg.length(), 0);
 }

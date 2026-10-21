@@ -75,7 +75,7 @@ void	IrcServer::MODE( int const& fd )
 	}
 	if (messageMode.find_first_of("itklo") != std::string::npos)
 	{
-		std::string fullMsg = ":" + _clients[fd]->getNickname() + " MODE " + chanTarget + " " + messageMode + messageArgs + "\r\n";
+		std::string fullMsg = ":" + _clients[fd]->getAllNames() + " MODE " + chanTarget + " " + messageMode + messageArgs + "\r\n";
 		channel->sendMessageToMembers(fullMsg, -1);
 	}
 }
@@ -100,8 +100,6 @@ void	IrcServer::channelModes(Channel* channel, std::string chanTarget, int const
 		ss << channel->getUserLimit();
 		currentArgs += " " + ss.str();
 	}
-	if (currentModes == "+")
-		currentModes = "";
 	//RPL_CHANNELMODEIS
 	std::string modeMsg = ":localhost 324 " + _clients[fd]->getNickname() + " " + chanTarget + " " + currentModes + currentArgs + "\r\n";
 	send(fd, modeMsg.c_str(), modeMsg.length(), 0);
