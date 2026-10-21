@@ -9,12 +9,9 @@ void	IrcServer::TOPIC( int const& fd )
 	std::string topic;
 	for (; recv_it != _recv.end(); recv_it++)
 	{
-		topic += *recv_it;
-		if (++recv_it != _recv.end())
-		{
+		if (++recv_it != _recv.begin())
 			topic += " ";
-			recv_it--;
-		}
+		topic += *recv_it;
 	}
 
 	if (channelName.empty() == false && isMaskChar(channelName[0]) == false)
