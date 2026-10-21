@@ -9,7 +9,7 @@ void	IrcServer::TOPIC( int const& fd )
 	std::string topic;
 	for (; recv_it != _recv.end(); recv_it++)
 	{
-		if (++recv_it != _recv.begin())
+		if (recv_it != _recv.begin())
 			topic += " ";
 		topic += *recv_it;
 	}
