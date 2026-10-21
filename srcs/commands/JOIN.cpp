@@ -61,7 +61,7 @@ void	IrcServer::JOIN( int const& fd )
 
 				//:localhost 332 name #chan :Welcome to the channel
 				message = ":" + _clients[fd]->getAllNames() + " JOIN " + *it + "\r\n";
-				chan_it->second->sendMessageToMembers(message, fd);
+				chan_it->second->sendMessageToMembers(message, -1);
 				message = ":localhost 332 " + _clients[fd]->getNickname() + " " + *it + " :" + _channels[*it]->getTopic() +"\r\n";
 				send(fd, message.c_str(), message.length(), 0);
 				_channels[*it]->displayMembers(_clients[fd], true);
