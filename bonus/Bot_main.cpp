@@ -53,7 +53,7 @@ bool checkMessage(std::list<std::string> message, std::list<std::string> const& 
 	for (std::list<std::string>::iterator message_it = message.begin(); message_it != message.end(); message_it++)
 	{
         word = *message_it;
-        if (word[0] == ':')
+        if (!word.empty() && word[0] == ':')
             word.erase(0, 1);
 		if (std::find(dictionary.begin(), dictionary.end(), word) != dictionary.end())
 		{
@@ -124,14 +124,18 @@ void	checkCommandMessage(std::list<std::string> const& data, Bot &bot, std::list
 		data_it++;
 		if (((*(data_it))[0] == '&' || (*(data_it))[0] == '#') && checkMessage(data, dictionary, buffer))
 		{
-			std::string BadUserName = data.front();		
-			BadUserName.erase(0, 1);
-			sendData(bot.getSocket(), "PRIVMSG " + BadUserName + " :WARNING BAD LANGUAGE" + "\r\n");
+
+			std::string BadUserName = data.front();
+			size_t exclam_index = BadUserName.find('!');
+			if (exclam_index != std::string::npos)
+				BadUserName = BadUserName.substr(1, exclam_index);
 			bot.incrementUserWarnings(BadUserName);
 			std::cout << BadUserName << " is at warning number "; 
                std::cout << bot.getUsersWarnings()[BadUserName] << "/" << bot.getMaxNbWarnings() << "." << std::endl;
 			if (bot.getUsersWarnings()[BadUserName] > bot.getMaxNbWarnings())
 				sendData(bot.getSocket(), "KICK " + *data_it + " " + BadUserName + " :Bad Language" + "\r\n");
+			else
+				sendData(bot.getSocket(), "PRIVMSG " + BadUserName + " :WARNING BAD LANGUAGE" + "\r\n");
 		}
 	}
     if (std::find(data.begin(), data.end(), "INVITE") != data.end())
