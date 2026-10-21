@@ -126,7 +126,7 @@ void	checkCommandMessage(std::list<std::string> const& data, Bot &bot, std::list
 		{
 			std::string BadUserName = data.front();		
 			BadUserName.erase(0, 1);
-			sendData(bot.getSocket(), "PRIVMSG " + BadUserName + " WARNING BAD LANGUAGE" + "\r\n");
+			sendData(bot.getSocket(), "PRIVMSG " + BadUserName + " :WARNING BAD LANGUAGE" + "\r\n");
 			bot.incrementUserWarnings(BadUserName);
 			std::cout << BadUserName << " is at warning number "; 
                std::cout << bot.getUsersWarnings()[BadUserName] << "/" << bot.getMaxNbWarnings() << "." << std::endl;
