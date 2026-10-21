@@ -46,6 +46,7 @@ void	IrcServer::JOIN( int const& fd )
 				_clients[fd]->setNewChannel(*it, _channels[*it]);
 				message = ":" + _clients[fd]->getAllNames() + " JOIN " + *it + "\r\n";
 				send(fd, message.c_str(), message.length(), 0);
+				_channels[*it]->displayMembers(_clients[fd], false);
 			}
 			//join a channel
 			else
@@ -57,13 +58,11 @@ void	IrcServer::JOIN( int const& fd )
 				_clients[fd]->setNewChannel(*it, _channels[*it]);
 
 				chan_it->second->addNewMember(_clients[fd]);
-				
-				message = _clients[fd]->getNickname() + " has joined the channel " + *it + ".\n";
-				chan_it->second->sendMessageToMembers(message, fd);
+
 				//:localhost 332 name #chan :Welcome to the channel
 				message = ":localhost 332 " + _clients[fd]->getNickname() + " " + *it + " :" + _channels[*it]->getTopic() +".\n";
-				send(fd, message.c_str(), message.length(), 0);
-				_channels[*it]->displayMembers(_clients[fd], false);
+				chan_it->second->sendMessageToMembers(message, -1);
+				_channels[*it]->displayMembers(_clients[fd], true);
 			}
 		}
 		catch ( IrcException const& e )

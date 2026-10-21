@@ -148,11 +148,11 @@ void	Channel::displayMembers( Client *client , bool const& displayEndOfNames )
 		if (it != last )
         	message += " ";
 	}
-	message = ":localhost 353 " + client->getAllNames() + " = " + _name + " :" + names + "\r\n";
+	message = ":localhost 353 " + client->getNickname() + " = " + _name + " :" + names + "\r\n";
 	send(client->getFd(), message.c_str(), message.length(), 0);
 	if (displayEndOfNames)
 	{
-		message = ":localhost 366 " + client->getAllNames() + " " + _name + " :End of /NAMES list\r\n";
+		message = ":localhost 366 " + client->getNickname() + " " + _name + " :End of /NAMES list\r\n";
 		send(client->getFd(), message.c_str(), message.length(), 0);
 	}
 }
