@@ -127,8 +127,8 @@ void	checkCommandMessage(std::list<std::string> const& data, Bot &bot, std::list
 
 			std::string BadUserName = data.front();
 			size_t exclam_index = BadUserName.find('!');
-			if (exclam_index != std::string::npos)
-				BadUserName = BadUserName.substr(1, exclam_index);
+			if (exclam_index != std::string::npos && exclam_index > 1)
+				BadUserName = BadUserName.substr(1, exclam_index - 1);
 			bot.incrementUserWarnings(BadUserName);
 			std::cout << BadUserName << " is at warning number "; 
                std::cout << bot.getUsersWarnings()[BadUserName] << "/" << bot.getMaxNbWarnings() << "." << std::endl;
