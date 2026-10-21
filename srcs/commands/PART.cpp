@@ -25,7 +25,7 @@ void	IrcServer::PART( int const& fd )
 			if (_clients[fd]->getChannels().find(channelName) == _clients[fd]->getChannels().end())
 				throw IrcException(461, target, ":You're not on that channel", fd);
 
-			std::string message = ":" + _clients[fd]->getAllNames() + " PART " + channelName + ".\n";
+			std::string message = ":" + _clients[fd]->getAllNames() + " PART " + channelName + "\r\n";
 			_channels[channelName]->sendMessageToMembers( message, -1 );
 			if (_channels[channelName]->removeMember(fd))
 			{

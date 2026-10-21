@@ -56,7 +56,7 @@ class Channel
 		void					setUserLimit( unsigned int const& limit );
 		void					setIsInviteOnly( bool status );
 		void					setHasTopicRestrictions( bool status );
-		void					setTopic( std::string const& newTopic );
+		void					setTopic( std::string & newTopic );
 
 		/* ----- Methods ----- */
 

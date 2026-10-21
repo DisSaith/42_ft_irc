@@ -277,8 +277,10 @@ void Channel::setHasTopicRestrictions( bool status )
 		displayMode();
 }
 
-void Channel::setTopic( std::string const& newTopic )
+void Channel::setTopic( std::string & newTopic )
 {
+	if (newTopic[0] == ':')
+		newTopic.erase(0, 1);
 	_topic = newTopic;
 	if (DEBUG)
 		displayMode();
