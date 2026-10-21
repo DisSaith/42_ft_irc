@@ -44,7 +44,7 @@ void	IrcServer::JOIN( int const& fd )
 			{
 				_channels[*it] = new Channel(*it, _clients[fd]);
 				_clients[fd]->setNewChannel(*it, _channels[*it]);
-				message = ":" + _clients[fd]->getAllNames() + " JOIN " + *it + ".\n";
+				message = ":" + _clients[fd]->getAllNames() + " JOIN " + *it + "\r\n";
 				send(fd, message.c_str(), message.length(), 0);
 			}
 			else

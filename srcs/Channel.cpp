@@ -232,6 +232,8 @@ unsigned int	Channel::getUserLimit() const
 
 std::string		Channel::getTopic() const
 {
+	if (_topic.empty())
+		return ("no topic is set");
 	return this->_topic;
 }
 
