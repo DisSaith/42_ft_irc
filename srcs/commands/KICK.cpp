@@ -2,13 +2,13 @@ void	IrcServer::checkUserAndChannelKick( int const& operator_fd, int const& kick
 {
 	//ERR_NOSUCHCHANNEL
 	if (_channels.find(channelName) == _channels.end())
-		throw IrcException(403, "KICK " + channelName, ":No such channel", operator_fd);
+		throw IrcException(403, channelName, ":No such channel", operator_fd);
 	//ERR_NOSUCHNICK
 	if (_clients.find(kicked_fd) == _clients.end())
-		throw IrcException(401, "KICK " + kickedName, ":No such nick/channel", operator_fd);
+		throw IrcException(401, kickedName, ":No such nick/channel", operator_fd);
 	//ERR_CHANOPRIVSNEEDED
 	if (!isAnyOperator(operator_fd, channelName))
-		throw IrcException(482, "KICK " + channelName, ":You're not channel operator", operator_fd);
+		throw IrcException(482, channelName, ":You're not channel operator", operator_fd);
 	//ERR_NOTONCHANNEL
 	if (!_channels[channelName]->hasMember(kicked_fd))
 		throw IrcException(441, channelName + " " + kickedName, ":They aren't on that channel", operator_fd);

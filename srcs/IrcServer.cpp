@@ -179,6 +179,7 @@ void	IrcServer::ConnectionWithClients()
 // Caurdiallemant
 void IrcServer::TokenizerRecv( std::string const& buffer )
 {
+	std::string		token = "";
 	size_t			j = 0;
 	bool			inWord = false;
 	bool			colon = false;
@@ -201,7 +202,15 @@ void IrcServer::TokenizerRecv( std::string const& buffer )
 		if ( ((buffer[i] == ' ' && !colon) || buffer[i] == '\n' || buffer[i] == '\r') && inWord == true )
 		{
 			inWord = false;
-			_recv.push_back(buffer.substr(j, i - j));
+			if ( token.empty() == false )
+				token.clear();
+			while ( j < i )
+			{
+				if ( std::isprint(buffer[j]) || (int)buffer[j] == 1 )
+					token += buffer[j];
+				j++;
+			}
+			_recv.push_back(token);
 		}
 	}
 

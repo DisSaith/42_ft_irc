@@ -25,7 +25,7 @@ void	IrcServer::NAMES( int const& fd )
 			throw IrcException(-1, "NAMES " + *it, ":Bad Channel Name", fd);
 		std::map<std::string, Channel*>::iterator chan_it = _channels.find(*it);
 		if (chan_it == _channels.end())
-			throw IrcException(403, "NAMES" + *it, ":No such channel", fd);
+			throw IrcException(403, *it, ":No such channel", fd);
 		_channels[*it]->displayMembers(_clients[fd], notAll);
 	}
 	if (notAll == false)

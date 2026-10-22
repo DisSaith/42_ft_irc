@@ -2,20 +2,19 @@ void	IrcServer::checkChannelMode( int const& fd, std::string const& channelName,
 {
     Channel const *channel = _channels[channelName];
 
-	std::string target = "JOIN " + channelName;
 	if (channel->hasMember(fd))	
-        throw IrcException(-1, target, ":User already on channel", fd);
+        throw IrcException(443, "JOIN " + channelName, ":User already on channel", fd);
 	//ERR_INVITEONLYCHAN
 	if (channel->getIsInviteOnly() && _clients[fd]->getIsInvited(channelName) == false)
-		throw IrcException(473, target, ":Cannot join channel (+i)", fd);
+		throw IrcException(473, channelName, ":Cannot join channel (+i)", fd);
 	//ERR_BADCHANNELKEY: missing key
 	if (pass_it == channelPasswords.end() && channel->getHasChannelKey())
-		throw IrcException(475, target, ":Cannot join channel (+k)", fd);
+		throw IrcException(475, channelName, ":Cannot join channel (+k)", fd);
 	//ERR_BADCHANNELKEY
 	if (pass_it != channelPasswords.end() && channel->getHasChannelKey() && (*pass_it).compare(channel->getChannelKey()) != 0)
-		throw IrcException(475, target, ":Cannot join channel (+k)", fd);
+		throw IrcException(475, channelName, ":Cannot join channel (+k)", fd);
 	if (channel->getMembers().size() >= channel->getUserLimit())
-		throw IrcException(471, target, ":Cannot join channel (+l)", fd);
+		throw IrcException(471, channelName, ":Cannot join channel (+l)", fd);
 }
 
 void	IrcServer::JOIN( int const& fd )

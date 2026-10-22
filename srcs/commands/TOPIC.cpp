@@ -20,7 +20,7 @@ void	IrcServer::TOPIC( int const& fd )
 		throw IrcException(-1, "TOPIC " + channelName, ":Bad Channel Name", fd);
 	//ERR_NOSUCHCHANNEL
 	if (_channels.find(channelName) == _channels.end())
-		throw IrcException(403, "TOPIC", ":No such channel", fd);
+		throw IrcException(403, channelName, ":No such channel", fd);
 	if (!_channels[channelName]->hasMember(fd))
 		throw IrcException(442, channelName, ":You're not on that channel", fd);
 	if (_recv.size() == 2)

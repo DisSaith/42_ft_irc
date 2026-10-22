@@ -23,7 +23,7 @@ void	IrcServer::PART( int const& fd )
 				throw IrcException(403, channelName, ":No such channel", fd);
 			//ERR_NOTONCHANNEL
 			if (!chan_it->second->hasMember(fd))
-				throw IrcException(461, channelName, ":You're not on that channel", fd);
+				throw IrcException(442, channelName, ":You're not on that channel", fd);
 			std::string message = ":" + _clients[fd]->getAllNames() + " PART " + channelName + "\r\n";
 			_channels[channelName]->sendMessageToMembers( message, -1 );
 			if (_channels[channelName]->removeMember(fd))
